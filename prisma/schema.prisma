@@ -4,7 +4,7 @@ generator client {
 }
 
 datasource db {
-  provider = "mongodb"
+  provider = "postgresql"
   url      = env("DATABASE_URL")
 }
 
@@ -13,64 +13,52 @@ generator erd {
   output   = "../prisma/ERD.pdf"
 }
 
+enum Role {
+  USER
+  BUSINESS_OWNER
+  PRACTITIONER
+  ADMIN
+}
+
 model User {
-  id                String   @id @default(auto()) @map("_id") @db.ObjectId
-  email             String   @unique
-  password          String
-  name              String?
-  profileImage      String?
-  bio               String?
+  id           String  @id @default(uuid())
+  email        String  @unique
+  password     String
+  name         String?
+  profileImage String?
+  bio          String?
+
+  roles Role[] @default([USER])
+
   interestsCategory String[]
   interestsType     String[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  // Refresh token
-  refreshToken RefreshToken[]
-
-  // Studio
-  studio Studio[]
-
-  // Images
-  avatars MediaFile[] @relation("userAvatar")
-  // avatars   MediaFile[] @relation("UserMediaFiles")
-
-  // Practice
-  practicingIn Practitioner[]
-
-  // Bookings
-  // Memberships
-  // Purchase history
-  // Waitlist
-  purchases Purchase[]
+  refreshTokens RefreshToken[]
+  studios       Studio[]
+  practicingIn  StudioPractitioner[]
+  purchases     Purchase[]
+  reviews       Review[]
+  donations     Donation[]
+  tips          Tip[]                @relation("Sender")
+  receivedTips  Tip[]                @relation("Receiver")
+  memberships   UserMembership[]
+  mediaFiles    MediaFile[]          @relation("UserMedia")
 }
 
 model RefreshToken {
-  id    String @id @default(auto()) @map("_id") @db.ObjectId
-  token String @unique
-
+  id        String   @id @default(uuid())
+  token     String   @unique
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
-
-  user   User   @relation(fields: [userId], references: [id])
-  userId String @db.ObjectId
-}
-
-model Practitioner {
-  id         String    @id @default(auto()) @map("_id") @db.ObjectId
-  userId     String    @db.ObjectId
-  studioId   String?   @db.ObjectId
-  offeringId String?   @db.ObjectId
-  user       User      @relation(fields: [userId], references: [id])
-  studio     Studio?   @relation(fields: [studioId], references: [id])
-  offering   Offering? @relation(fields: [offeringId], references: [id])
-
-  @@unique([userId, studioId, offeringId])
 }
 
 model Studio {
-  id         String   @id @default(auto()) @map("_id") @db.ObjectId
+  id         String   @id @default(uuid())
   slug       String   @unique
   name       String
   location   String
@@ -78,146 +66,264 @@ model Studio {
   currency   String
   categories String[]
   types      String[]
+  bio        String
+  mission    String
+  isArchived Boolean  @default(false)
 
-  // logoId   String    @unique @db.ObjectId
-  // logo     MediaFile @relation(name: "LogoMediaFile", fields: [logoId], references: [id])
-  // bannerId String    @unique @db.ObjectId
-  // banner   MediaFile @relation(name: "BannerMediaFile", fields: [bannerId], references: [id])
-
-  // Mediafiles
-  logo   MediaFile[] @relation("studioLogo")
-  banner MediaFile[] @relation("studioBanner")
-
-  tags    Tag[]
-  bio     String
-  mission String
-
-  // Owner
+  ownerId String
   owner   User   @relation(fields: [ownerId], references: [id])
-  ownerId String @db.ObjectId
-
-  // Offerings
-  offerings Offering[]
-
-  // Practitioners
-  practitioners Practitioner[]
-
-  // ownerId String @db.ObjectId
-  // owner User @relation(fields: [ownerId], references: [id])
-
-  //
-  // policy_waiver      String
-  // policy_conditions  String
-  // contacts           any
-  // locations          Location[]
-  // offerings          Offering[]
-  // practitioners      Practitioner[]
-  // causes             Cause[]
-  // memberships        any[]
-  // tickets            Ticket3[]
-  // options            any[]
-  // can_accept_payment Number
-
-  // Media files
-  // mediaFiles MediaFile[]
-
-  isArchived Boolean?
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+
+  offerings     Offering[]
+  practitioners StudioPractitioner[]
+  causes        Cause[]
+  memberships   Membership[]
+  promocodes    Promocode[]
+  reviews       Review[]             @relation("StudioReviews")
+  tags          Tag[]
+  logoFiles     MediaFile[]          @relation("StudioLogo")
+  bannerFiles   MediaFile[]          @relation("StudioBanner")
+}
+
+model StudioPractitioner {
+  id       String @id @default(uuid())
+  studioId String
+  userId   String
+  studio   Studio @relation(fields: [studioId], references: [id], onDelete: Cascade)
+  user     User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  salaryActive Boolean  @default(true)
+  createdAt    DateTime @default(now())
+
+  offerings OfferingPractitioner[]
+  reviews   Review[]               @relation("PractitionerReviews")
+  tips      Tip[]                  @relation("PractitionerTips")
+
+  @@unique([studioId, userId])
 }
 
 model Offering {
-  id          String      @id @default(auto()) @map("_id") @db.ObjectId
-  slug        String      @unique
+  id          String   @id @default(uuid())
+  slug        String   @unique
   activity    String
   name        String
-  start       DateTime
-  end         DateTime
-  duration    Int
   description String
-  spots       Int
-  is_private  Boolean
+  isPrivate   Boolean  @default(false)
+  isActive    Boolean  @default(true)
   types       String[]
   categories  String[]
-  banners     MediaFile[] @relation("offeringBanners")
-  location    String
-  timezone    String
 
-  isActive Boolean?
-
-  // studio
-  studio   Studio @relation(fields: [studioId], references: [id])
-  studioId String @db.ObjectId
-
-  // Practitioners
-  practitioners Practitioner[]
+  studioId String
+  studio   Studio @relation(fields: [studioId], references: [id], onDelete: Cascade)
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
-  tickets   Ticket[]
+
+  slots         BookingSlot[]
+  tickets       Ticket[]
+  practitioners OfferingPractitioner[]
+  reviews       Review[]               @relation("OfferingReviews")
+  banners       MediaFile[]            @relation("OfferingBanners")
 }
 
-model MediaFile {
-  id               String @id @default(auto()) @map("_id") @db.ObjectId
-  url              String
-  providerPublicId String
+model OfferingPractitioner {
+  offeringId           String
+  studioPractitionerId String
+  offering             Offering           @relation(fields: [offeringId], references: [id], onDelete: Cascade)
+  studioPractitioner   StudioPractitioner @relation(fields: [studioPractitionerId], references: [id], onDelete: Cascade)
 
-  order Int?
+  @@id([offeringId, studioPractitionerId])
+}
 
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+model BookingSlot {
+  id         String   @id @default(uuid())
+  start      DateTime
+  end        DateTime
+  duration   Int
+  totalSpots Int
+  isRoomFull Boolean  @default(false)
 
-  // Studio
-  // Logo
-  logoStudioId   String? @db.ObjectId
-  logoStudio     Studio? @relation(name: "studioLogo", fields: [logoStudioId], references: [id])
-  // Banner
-  bannerStudioId String? @db.ObjectId
-  bannerStudio   Studio? @relation(name: "studioBanner", fields: [bannerStudioId], references: [id])
+  offeringId String
+  offering   Offering @relation(fields: [offeringId], references: [id], onDelete: Cascade)
 
-  // User
-  userId     String? @db.ObjectId
-  avatarUser User?   @relation(name: "userAvatar", fields: [userId], references: [id])
-
-  // Offering
-  bannerOfferingId String?   @db.ObjectId
-  offeringBanner   Offering? @relation(name: "offeringBanners", fields: [bannerOfferingId], references: [id])
+  purchases Purchase[]
 }
 
 model Ticket {
-  id          String @id @default(auto()) @map("_id") @db.ObjectId
+  id          String @id @default(uuid())
   name        String
   description String
   price       Int
   currency    String
 
-  offeringId String   @db.ObjectId
-  offering   Offering @relation(fields: [offeringId], references: [id])
+  offeringId String
+  offering   Offering @relation(fields: [offeringId], references: [id], onDelete: Cascade)
 
-  status String
+  purchases Purchase[]
+}
 
-  purchase Purchase[]
+enum PurchaseStatus {
+  PENDING
+  PAID
+  CANCELLED
+  REFUNDED
 }
 
 model Purchase {
-  id String @id @default(auto()) @map("_id") @db.ObjectId
-
-  userId String? @db.ObjectId
-  user   User?   @relation(fields: [userId], references: [id])
-
-  ticketId String @db.ObjectId
-  ticket   Ticket @relation(fields: [ticketId], references: [id])
-
-  paymentId    String  @unique
+  id           String         @id @default(uuid())
+  status       PurchaseStatus @default(PENDING)
+  amount       Int
+  currency     String
+  paymentId    String?        @unique
   receiptEmail String
   userName     String?
+
+  userId String?
+  user   User?   @relation(fields: [userId], references: [id])
+
+  ticketId String
+  ticket   Ticket @relation(fields: [ticketId], references: [id])
+
+  slotId String
+  slot   BookingSlot @relation(fields: [slotId], references: [id])
+
+  promocodeId String?
+  promocode   Promocode? @relation(fields: [promocodeId], references: [id])
+
+  donation  Donation?
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+}
+
+model Promocode {
+  id        String    @id @default(uuid())
+  code      String    @unique
+  discount  Int
+  isPercent Boolean   @default(true)
+  isActive  Boolean   @default(true)
+  expiresAt DateTime?
+
+  studioId  String
+  studio    Studio     @relation(fields: [studioId], references: [id], onDelete: Cascade)
+  purchases Purchase[]
+}
+
+model Membership {
+  id           String @id @default(uuid())
+  name         String
+  description  String
+  price        Int
+  durationDays Int
+  slotsLimit   Int
+
+  studioId String
+  studio   Studio @relation(fields: [studioId], references: [id], onDelete: Cascade)
+
+  userMemberships UserMembership[]
+}
+
+model UserMembership {
+  id           String     @id @default(uuid())
+  userId       String
+  membershipId String
+  user         User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  membership   Membership @relation(fields: [membershipId], references: [id], onDelete: Cascade)
+
+  remainingSlots Int
+  expiresAt      DateTime
+  isActive       Boolean  @default(true)
+  createdAt      DateTime @default(now())
+}
+
+model Cause {
+  id            String  @id @default(uuid())
+  slug          String  @unique
+  name          String
+  description   String
+  targetAmount  Int
+  currentAmount Int     @default(0)
+  isActive      Boolean @default(true)
+
+  studioId  String
+  studio    Studio     @relation(fields: [studioId], references: [id], onDelete: Cascade)
+  donations Donation[]
+}
+
+model Donation {
+  id        String   @id @default(uuid())
+  amount    Int
+  createdAt DateTime @default(now())
+
+  causeId String
+  cause   Cause  @relation(fields: [causeId], references: [id], onDelete: Cascade)
+
+  userId String?
+  user   User?   @relation(fields: [userId], references: [id])
+
+  purchaseId String?   @unique
+  purchase   Purchase? @relation(fields: [purchaseId], references: [id])
+}
+
+model Tip {
+  id        String   @id @default(uuid())
+  amount    Int
+  currency  String
+  createdAt DateTime @default(now())
+
+  senderId String?
+  sender   User?   @relation("Sender", fields: [senderId], references: [id])
+
+  receiverId String
+  receiver   User   @relation("Receiver", fields: [receiverId], references: [id])
+
+  studioPractitionerId String
+  studioPractitioner   StudioPractitioner @relation("PractitionerTips", fields: [studioPractitionerId], references: [id])
+}
+
+model Review {
+  id        String   @id @default(uuid())
+  rating    Int
+  text      String
+  createdAt DateTime @default(now())
+
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  studioId String?
+  studio   Studio? @relation("StudioReviews", fields: [studioId], references: [id])
+
+  offeringId String?
+  offering   Offering? @relation("OfferingReviews", fields: [offeringId], references: [id])
+
+  studioPractitionerId String?
+  studioPractitioner   StudioPractitioner? @relation("PractitionerReviews", fields: [studioPractitionerId], references: [id])
+}
+
+model MediaFile {
+  id               String   @id @default(uuid())
+  url              String
+  providerPublicId String
+  order            Int?     @default(0)
+  createdAt        DateTime @default(now())
+
+  logoStudioId String?
+  logoStudio   Studio? @relation(name: "StudioLogo", fields: [logoStudioId], references: [id])
+
+  bannerStudioId String?
+  bannerStudio   Studio? @relation(name: "StudioBanner", fields: [bannerStudioId], references: [id])
+
+  userId     String?
+  avatarUser User?   @relation(name: "UserMedia", fields: [userId], references: [id])
+
+  bannerOfferingId String?
+  offeringBanner   Offering? @relation(name: "OfferingBanners", fields: [bannerOfferingId], references: [id])
 }
 
 model Tag {
-  id   String @id @default(auto()) @map("_id") @db.ObjectId
-  name String
-
-  studio   Studio? @relation(fields: [studioId], references: [id])
-  studioId String? @db.ObjectId
+  id       String  @id @default(uuid())
+  name     String
+  studioId String?
+  studio   Studio? @relation(fields: [studioId], references: [id], onDelete: Cascade)
 }
