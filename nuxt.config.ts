@@ -51,4 +51,8 @@ export default defineNuxtConfig({
 		prefix: '',
 		componentDir: './app/shared/ui',
 	},
+
+	routeRules: {
+		'/business/**': { appLayout: 'business' },
+	},
 })
