@@ -1,4 +1,6 @@
-<script lang="ts" setup></script>
+<script lang="ts" setup>
+import 'vue-sonner/style.css'
+</script>
 
 <template>
 	<div role="main">
@@ -6,5 +8,6 @@
 			<div>layouts/default.vue</div>
 		</div>
 		<slot />
+		<Toaster />
 	</div>
 </template>
