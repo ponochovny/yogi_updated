@@ -78,7 +78,7 @@ const onSubmit = (event: Event) => {
 					<div class="grow">
 						<h2 class="font-bold text-h2 mb-6">Organizator</h2>
 						<div class="flex gap-[20px] items-center mb-[48px]">
-							<img
+							<NuxtImg
 								:src="cause.organizator_logo"
 								alt="logo"
 								class="w-[92px] h-[92px] rounded-full border border-solid border-[#E5EAEA]"

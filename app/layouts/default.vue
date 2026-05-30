@@ -1,7 +1,7 @@
 <script lang="ts" setup></script>
 
 <template>
-	<div>
+	<div role="main">
 		<div class="border border-gray-500">
 			<div>layouts/default.vue</div>
 		</div>

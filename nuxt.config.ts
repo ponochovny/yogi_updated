@@ -27,6 +27,9 @@ export default defineNuxtConfig({
 		plugins: [tailwindcss()],
 		optimizeDeps: {
 			include: [
+				'@vue/core',
+				'@vueuse/core',
+				'@lucide/vue',
 				'@vue/devtools-core',
 				'@vue/devtools-kit',
 				'@vue/devtools-core',
@@ -54,5 +57,9 @@ export default defineNuxtConfig({
 
 	routeRules: {
 		'/business/**': { appLayout: 'business' },
+	},
+
+	runtimeConfig: {
+		databaseUrl: process.env.DATABASE_URL,
 	},
 })
