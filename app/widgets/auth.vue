@@ -8,13 +8,16 @@ import { Button } from '@/shared/ui/button'
 import { Input } from '@/shared/ui/input'
 import {
 	FormControl,
-	FormDescription,
 	FormField,
 	FormItem,
 	FormLabel,
 	FormMessage,
 } from '@/shared/ui/form'
 import { signIn, signOut, signUp, useSession } from '@/utils/auth-client'
+
+const props = defineProps<{
+	mode?: 'sign-up' | 'login'
+}>()
 
 const router = useRouter()
 const session = useSession()
@@ -124,26 +127,28 @@ const handleSignOut = async () => {
 		</div>
 
 		<div v-else class="rounded-xl border bg-white/5 p-6 shadow-sm">
-			<h2 class="mb-4 text-2xl font-semibold">Registration / Login</h2>
+			<h2 class="mb-4 text-2xl font-semibold text-center">
+				{{ props.mode === 'sign-up' ? 'Sign Up' : 'Log In' }}
+			</h2>
 
 			<form @submit.prevent>
-				<div class="space-y-4">
-					<FormField v-slot="{ componentField }" name="name">
-						<FormItem>
-							<FormLabel>Name</FormLabel>
-							<FormControl>
-								<Input
-									placeholder="Enter your name"
-									type="text"
-									v-bind="componentField"
-								/>
-							</FormControl>
-							<FormDescription
-								>This name will be displayed in your profile.</FormDescription
-							>
-							<FormMessage />
-						</FormItem>
-					</FormField>
+				<div class="space-y-6">
+					<template v-if="props.mode === 'sign-up'">
+						<FormField v-slot="{ componentField }" name="name">
+							<FormItem>
+								<FormLabel>Name</FormLabel>
+								<FormControl>
+									<Input
+										placeholder="Enter your name"
+										type="text"
+										v-bind="componentField"
+										autocomplete="off"
+									/>
+								</FormControl>
+								<FormMessage />
+							</FormItem>
+						</FormField>
+					</template>
 
 					<FormField v-slot="{ componentField }" name="email">
 						<FormItem>
@@ -153,6 +158,7 @@ const handleSignOut = async () => {
 									placeholder="Enter your email"
 									type="email"
 									v-bind="componentField"
+									:autocomplete="props.mode === 'sign-up' ? 'off' : 'email'"
 								/>
 							</FormControl>
 							<FormMessage />
@@ -167,6 +173,11 @@ const handleSignOut = async () => {
 									placeholder="Enter your password"
 									type="password"
 									v-bind="componentField"
+									:autocomplete="
+										props.mode === 'sign-up'
+											? 'new-password'
+											: 'current-password'
+									"
 								/>
 							</FormControl>
 							<FormMessage />
@@ -174,20 +185,20 @@ const handleSignOut = async () => {
 					</FormField>
 				</div>
 
-				<div class="mt-6 flex flex-col gap-3 sm:flex-row">
+				<div class="mt-6">
 					<Button
+						v-if="props.mode === 'sign-up'"
 						type="button"
-						variant="default"
-						class="w-full sm:w-auto"
+						class="w-full"
 						:disabled="isProcessing"
 						@click="handleRegister"
 					>
 						Register
 					</Button>
 					<Button
+						v-else
 						type="button"
-						variant="secondary"
-						class="w-full sm:w-auto"
+						class="w-full"
 						:disabled="isProcessing"
 						@click="handleLogin"
 					>

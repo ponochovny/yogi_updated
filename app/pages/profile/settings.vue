@@ -1,5 +1,5 @@
 <template>
-	<div class="max-w-xl mx-auto p-6 bg-gray-900 rounded-lg shadow-sm">
+	<div class="max-w-xl mx-auto p-6 bg-white/5 rounded-lg shadow-sm">
 		<h1 class="text-2xl font-bold mb-6">Profile Settings</h1>
 
 		<div class="mb-6 flex items-center space-x-4">
@@ -45,7 +45,7 @@
 			<Button
 				type="submit"
 				:disabled="isSaving"
-				class="w-full py-2 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-md transition disabled:opacity-50"
+				class="w-full py-2 bg-amber-600 hover:bg-amber-700 text-white font-medium rounded-md transition disabled:opacity-50"
 			>
 				{{ isSaving ? 'Updating...' : 'Update Profile' }}
 			</Button>
@@ -68,6 +68,9 @@ useHead({
 			defer: true,
 		},
 	],
+})
+definePageMeta({
+	middleware: ['auth'],
 })
 
 const profileData = ref({
@@ -94,21 +97,26 @@ const openCloudinaryWidget = () => {
 				if (!error && result && result.event === 'success') {
 					const croppedUrl = result.info.secure_url.replace(
 						'/upload/',
-						'/upload/w_400,h_400,c_thumb,g_custom/',
+						'/upload/w_100,h_100,c_thumb,g_custom/',
 					)
 
 					profileData.value.profileImage = croppedUrl
 				}
 			},
 		)
-		widget.open(null, {
-			files: [
-				profileData.value.profileImage.replace(
-					'/upload/w_400,h_400,c_thumb,g_custom/',
-					'/upload/',
-				),
-			],
-		})
+		widget.open(
+			null,
+			profileData.value.profileImage
+				? {
+						files: [
+							profileData.value.profileImage.replace(
+								'/upload/w_100,h_100,c_thumb,g_custom/',
+								'/upload/',
+							),
+						],
+					}
+				: undefined,
+		)
 	}
 }
 
@@ -126,7 +134,10 @@ const saveProfile = async () => {
 		toast.success('Profile updated successfully!')
 		console.log(response)
 	} catch (error) {
-		toast.error('Failed to update profile')
+		toast.error(
+			'Failed to update profile: ' +
+				(error instanceof Error ? error.message : 'Unknown error'),
+		)
 		console.error('Error:', error)
 	} finally {
 		isSaving.value = false

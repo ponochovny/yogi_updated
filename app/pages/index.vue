@@ -12,26 +12,10 @@
 			</div>
 			<h1 class="text-3xl font-bold">{{ $t('welcome') }}</h1>
 		</div>
-		<div>
-			<ClientOnly>
-				<h1>Color mode: {{ $colorMode.value }}</h1>
-			</ClientOnly>
-			<Select v-model="$colorMode.preference">
-				<SelectTrigger>
-					<SelectValue placeholder="Select a color mode" />
-				</SelectTrigger>
-				<SelectContent>
-					<SelectItem value="system"> System </SelectItem>
-					<SelectItem value="light"> Light </SelectItem>
-					<SelectItem value="dark"> Dark </SelectItem>
-					<SelectItem value="sepia"> Sepia </SelectItem>
-				</SelectContent>
-			</Select>
-		</div>
 		<div class="flex gap-1 flex-wrap">
-			<NuxtLink :to="PagesConfig.CAUSES + '/1'" as-child>
+			<NuxtLinkLocale :to="PagesConfig.CAUSES + '/1'" as-child>
 				<Button>Go to single cause page</Button>
-			</NuxtLink>
+			</NuxtLinkLocale>
 		</div>
 		<div class="grid grid-cols-4 gap-4 px-4 py-8">
 			<Card
@@ -48,22 +32,18 @@
 				No active offerings available.
 			</div>
 		</div>
-		<Auth />
 		<Button @click="createStudio">Create studio</Button>
 	</div>
 </template>
 
 <script setup lang="ts">
 import { useI18n } from 'vue-i18n'
-import Auth from '~/widgets/auth.vue'
 import Card from '~/entities/product/Card.vue'
 import { PagesConfig } from '~/config/pages.config'
 const { locales, setLocale } = useI18n()
 
 const res = await $fetch('/api/offerings')
 // console.log(res)
-
-// const colorMode = useColorMode()
 
 const createStudio = async () => {
 	try {
