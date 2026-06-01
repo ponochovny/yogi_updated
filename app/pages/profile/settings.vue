@@ -1,5 +1,5 @@
 <template>
-	<div class="max-w-xl mx-auto p-6 bg-white/5 rounded-lg shadow-sm">
+	<div class="max-w-xl p-6 bg-white/5 rounded-lg shadow-sm">
 		<h1 class="text-2xl font-bold mb-6">Profile Settings</h1>
 
 		<div class="mb-6 flex items-center space-x-4">
@@ -19,9 +19,32 @@
 
 		<form class="space-y-4" @submit.prevent="saveProfile">
 			<div>
-				<Label for="profile-name" class="block text-sm font-medium mb-1"
-					>Name</Label
+				<Label
+					v-if="profileData.role.filter((r) => r !== 'user').length"
+					class="block text-sm font-medium mb-1"
 				>
+					Role:
+					<Badge
+						v-for="role in Array.isArray(profileData.role)
+							? profileData.role.filter((r) => r !== 'user')
+							: [profileData.role]"
+						:key="role"
+						class="ml-2 px-2 py-1 text-xs text-white rounded-full"
+						:class="
+							{
+								user: 'bg-blue-500',
+								practitioner: 'bg-blue-500',
+								business: 'bg-yellow-600',
+								'super-admin': 'bg-amber-600',
+							}[role] || 'bg-gray-500'
+						"
+					>
+						{{ role.charAt(0).toUpperCase() + role.slice(1) }}
+					</Badge>
+				</Label>
+				<Label for="profile-name" class="block text-sm font-medium mb-1">
+					Name
+				</Label>
 				<Input
 					id="profile-name"
 					v-model="profileData.name"
@@ -31,9 +54,9 @@
 			</div>
 
 			<div>
-				<Label for="profile-bio" class="block text-sm font-medium mb-1"
-					>About (Bio)</Label
-				>
+				<Label for="profile-bio" class="block text-sm font-medium mb-1">
+					About (Bio)
+				</Label>
 				<Textarea
 					id="profile-bio"
 					v-model="profileData.bio"
@@ -77,6 +100,7 @@ const profileData = ref({
 	name: sessionData.value?.user.name || '',
 	bio: sessionData.value?.user.bio || '',
 	profileImage: sessionData.value?.user.image || '',
+	role: sessionData.value?.user.role || [],
 })
 const isSaving = ref(false)
 

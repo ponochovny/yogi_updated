@@ -60,6 +60,7 @@ export default defineNuxtConfig({
 
 	routeRules: {
 		'/business/**': { appLayout: 'business' },
+		'/profile/**': { appLayout: 'dashboard-user' },
 	},
 
 	runtimeConfig: {
