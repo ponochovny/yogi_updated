@@ -1,10 +1,6 @@
 <script setup lang="ts">
-import { PagesConfig } from '~/config/pages.config'
 import type { SidebarProps } from '@/shared/ui/sidebar'
 import { useSession } from '@/utils/auth-client'
-import type { user as DrizzleUser } from '@/../server/utils/db/auth-schema'
-
-import { InfoIcon, MapPinIcon, ShoppingCartIcon } from '@lucide/vue'
 
 import NavProjects from './NavProjects.vue'
 import NavUser from './NavUser.vue'
@@ -24,43 +20,19 @@ const props = withDefaults(defineProps<SidebarProps>(), {
 
 const session = useSession()
 
-const user = session.value?.data
-	?.user as unknown as typeof DrizzleUser.$inferSelect
-
 const userData = computed(() => ({
 	name: session.value?.data?.user?.name || 'John Doe',
 	email: session.value?.data?.user?.email || 'john@example.com',
 	avatar:
 		session.value?.data?.user?.image || 'https://placehold.net/default.png',
+	// @ts-expect-error: role is an array in the session, but we want to display a single role in the NavUser component. We can take the first role from the array for display purposes.
 	role: session.value?.data?.user?.role || ['user'],
 }))
 
-const data = {
-	user: {
-		name: user?.name || 'John Doe',
-		email: user?.email || 'john@example.com',
-		avatar: user?.image || 'https://placehold.net/default.png',
-		role: user?.role || ['user'],
-	},
-	projects: [
-		{
-			name: 'General',
-			url: PagesConfig.PROFILE_SETTINGS,
-			icon: InfoIcon,
-		},
-
-		{
-			name: 'Location & Categories',
-			url: PagesConfig.PROFILE_ADDITIONAL, //
-			icon: MapPinIcon,
-		},
-		{
-			name: 'Purchase History',
-			url: PagesConfig.PROFILE_VENUES,
-			icon: ShoppingCartIcon,
-		},
-	],
-}
+const sidebarProps = inject('sidebarProps', {
+	group: '',
+	menuLinks: [],
+})
 </script>
 
 <template>
@@ -71,13 +43,13 @@ const data = {
 					<SidebarMenuButton size="lg" as-child>
 						<NuxtLink to="/">
 							<div
-								class="flex aspect-square size-8 items-center justify-center rounded-full bg-sidebar-primary text-sidebar-primary-foreground"
+								class="flex aspect-square size-8 items-center justify-center rounded-full bg-white/10 text-sidebar-primary-foreground"
 							>
 								<NuxtImg
-									src="https://placehold.net/default.png"
+									src="/img/logoBg.svg"
+									alt="Yogi app"
 									width="40"
 									height="40"
-									alt="Yogi Logo"
 									class="rounded-full object-contain"
 								/>
 							</div>
@@ -91,7 +63,10 @@ const data = {
 			</SidebarMenu>
 		</SidebarHeader>
 		<SidebarContent>
-			<NavProjects :projects="data.projects" />
+			<NavProjects
+				:group="sidebarProps?.group || ''"
+				:menu-items="sidebarProps?.menuLinks || []"
+			/>
 		</SidebarContent>
 		<SidebarFooter>
 			<NavUser :user="userData" />

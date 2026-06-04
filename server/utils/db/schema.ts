@@ -10,29 +10,26 @@ import {
 import { user } from './auth-schema'
 
 // ==========================================
-// СТУДИИ И ПРАКТИКИ (БИЗНЕС)
+// STUDIOS AND PRACTITIONERS (BUSINESS)
 // ==========================================
 
 export const studios = pgTable('studios', {
 	id: uuid('id').defaultRandom().primaryKey(),
 	slug: text('slug').notNull().unique(),
 	name: text('name').notNull(),
-	location: text('location').notNull(),
-	timezone: text('timezone').notNull(),
 	currency: text('currency').notNull(),
-	categories: text('categories').array(),
-	types: text('types').array(),
 	bio: text('bio').notNull(),
 	mission: text('mission').notNull(),
 	isArchived: boolean('is_archived').default(false).notNull(),
 	ownerId: text('owner_id')
 		.notNull()
 		.references(() => user.id, { onDelete: 'cascade' }),
+	categories: text('categories').array(),
+	types: text('types').array(),
 	createdAt: timestamp('created_at').defaultNow().notNull(),
 	updatedAt: timestamp('updated_at').defaultNow().notNull(),
 })
 
-// Промежуточная таблица связи Студия <-> Практик (Many-to-Many)
 export const studioPractitioners = pgTable('studio_practitioners', {
 	id: uuid('id').defaultRandom().primaryKey(),
 	studioId: uuid('studio_id')
@@ -45,10 +42,22 @@ export const studioPractitioners = pgTable('studio_practitioners', {
 	createdAt: timestamp('created_at').defaultNow().notNull(),
 })
 
-// ==========================================
-// ОФФЕРИНГИ И РАСПИСАНИЕ
-// ==========================================
+export const studioLocations = pgTable('studio_locations', {
+	id: uuid('id').defaultRandom().primaryKey(),
+	studioId: uuid('studio_id')
+		.notNull()
+		.references(() => studios.id, { onDelete: 'cascade' }),
+	name: text('name').notNull(),
+	country: text('country').notNull(),
+	city: text('city').notNull(),
+	address: text('address').notNull(),
+	timezone: text('timezone').notNull(),
+	createdAt: timestamp('created_at').defaultNow().notNull(),
+})
 
+// ==========================================
+// OFFERINGS AND SCHEDULES
+// ==========================================
 export const offerings = pgTable('offerings', {
 	id: uuid('id').defaultRandom().primaryKey(),
 	slug: text('slug').notNull().unique(),
@@ -62,11 +71,16 @@ export const offerings = pgTable('offerings', {
 	studioId: uuid('studio_id')
 		.notNull()
 		.references(() => studios.id, { onDelete: 'cascade' }),
+
+	locationId: uuid('location_id').references(() => studioLocations.id, {
+		onDelete: 'set null',
+	}),
+
 	createdAt: timestamp('created_at').defaultNow().notNull(),
 	updatedAt: timestamp('updated_at').defaultNow().notNull(),
 })
 
-// Связь Офферинг <-> Конкретный Практик студии (Many-to-Many)
+// Offering <-> Practitioner (Many-to-Many)
 export const offeringPractitioners = pgTable(
 	'offering_practitioners',
 	{
@@ -86,7 +100,7 @@ export const offeringPractitioners = pgTable(
 	],
 )
 
-// Таблица конкретных временных слотов для записи (Защита от овербукинга)
+// Table of specific time slots for recording (Overbooking protection)
 export const bookingSlots = pgTable('booking_slots', {
 	id: uuid('id').defaultRandom().primaryKey(),
 	start: timestamp('start').notNull(),
@@ -103,7 +117,7 @@ export const tickets = pgTable('tickets', {
 	id: uuid('id').defaultRandom().primaryKey(),
 	name: text('name').notNull(),
 	description: text('description').notNull(),
-	price: integer('price').notNull(), // Храним в копейках/центах (например, 1500 вместо 15.00)
+	price: integer('price').notNull(),
 	currency: text('currency').notNull(),
 	offeringId: uuid('offering_id')
 		.notNull()
@@ -111,7 +125,7 @@ export const tickets = pgTable('tickets', {
 })
 
 // ==========================================
-// ЧЕКАУТ, ПРОМОКОДЫ И АБОНЕМЕНТЫ
+// CHECKOUT, PROMO CODES AND SUBSCRIPTIONS
 // ==========================================
 
 export const purchases = pgTable('purchases', {
@@ -172,7 +186,7 @@ export const userMemberships = pgTable('user_memberships', {
 })
 
 // ==========================================
-// БЛАГОТВОРИТЕЛЬНОСТЬ, ЧАЕВЫЕ, ОТЗЫВЫ И МЕДИА
+// CHARITY, TIPS, REVIEWS AND MEDIA
 // ==========================================
 
 export const causes = pgTable('causes', {
@@ -210,7 +224,7 @@ export const tips = pgTable('tips', {
 	}),
 	receiverId: text('receiver_id')
 		.notNull()
-		.references(() => user.id, { onDelete: 'cascade' }), // ID Практика
+		.references(() => user.id, { onDelete: 'cascade' }), // Practitioner's ID
 	studioPractitionerId: uuid('studio_practitioner_id')
 		.notNull()
 		.references(() => studioPractitioners.id),
@@ -241,17 +255,13 @@ export const mediaFiles = pgTable('media_files', {
 	id: uuid('id').defaultRandom().primaryKey(),
 	url: text('url').notNull(),
 	providerPublicId: text('provider_public_id').notNull(),
-	order: integer('order').default(0),
-	userId: text('user_id').references(() => user.id, { onDelete: 'cascade' }),
-	logoStudioId: uuid('logo_studio_id').references(() => studios.id, {
-		onDelete: 'cascade',
-	}),
-	bannerStudioId: uuid('banner_studio_id').references(() => studios.id, {
-		onDelete: 'cascade',
-	}),
-	bannerOfferingId: uuid('banner_offering_id').references(() => offerings.id, {
-		onDelete: 'cascade',
-	}),
+
+	entityId: uuid('entity_id').notNull(), // Studio ID, Offering ID or User ID
+	entityType: text('entity_type').notNull(), // 'STUDIO', 'OFFERING', 'USER'
+
+	type: text('type').notNull(), // 'LOGO', 'GALLERY', 'AVATAR'
+
+	order: integer('order').default(0), // To sort media files in a specific order (e.g., for gallery images)
 	createdAt: timestamp('created_at').defaultNow().notNull(),
 })
 

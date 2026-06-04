@@ -13,7 +13,7 @@ export default defineNuxtConfig({
 		'@nuxt/image',
 		'@nuxt/fonts',
 		'@nuxt/eslint',
-		'@nuxt/a11y',
+		// '@nuxt/a11y',
 		'@nuxt/test-utils',
 		'@pinia/nuxt',
 		'nuxt-vitalizer',

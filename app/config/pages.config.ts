@@ -9,7 +9,6 @@ export const PagesConfig = {
 	PRACTITIONERS: '/practitioners',
 	CAUSES: '/causes',
 
-	DASHBOARD: '/dashboard',
 	BUSINESS: '/business',
 
 	PROFILE_SETTINGS: '/profile/settings',

@@ -55,14 +55,12 @@ server/util/db/auth-schema.ts
 
 ### - Add Neon Auth URL
 
-```
-app/utils/auth-client.ts
-```
-
 ```TS
+// app/utils/auth-client.ts
+
 export const authClient = createAuthClient({
-	// baseURL: 'http://localhost:3000/api/auth,
-	baseURL: process.env.NEON_AUTH_URL,
+	// baseURL: 'http://localhost:3000/api/auth, <-- Replace this line
+	baseURL: process.env.NEON_AUTH_URL, // with this
 })
 ```
 
@@ -126,4 +124,12 @@ console.log(
 )
 console.log('Session data:', session)
 
+```
+
+## 📝Better Auth - User types
+
+```TS
+import type { user as DrizzleUser } from '@/../server/utils/db/auth-schema'
+
+const user = session.value?.data?.user as unknown as typeof DrizzleUser.$inferSelect
 ```

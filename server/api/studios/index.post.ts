@@ -1,7 +1,10 @@
 import { auth } from '../../utils/auth'
-import { studio } from '../../utils/db/schema'
+import { studios, studioLocations } from '../../utils/db/schema'
+import slugify from 'slugify'
+import { createStudioSchema } from '~/entities/studio/schema'
 
 export default defineEventHandler(async (event) => {
+	const db = useDb()
 	const session = await auth.api.getSession({
 		headers: event.headers,
 	})
@@ -9,49 +12,84 @@ export default defineEventHandler(async (event) => {
 	if (!session || !session.user) {
 		throw createError({
 			statusCode: 401,
-			statusMessage: 'Неавторизованный доступ',
+			statusMessage: 'Unauthorized access',
 		})
 	}
 
-	const body = await readBody(event)
-	const { name, slug } = body
+	const body = await readValidatedBody(event, createStudioSchema.parse)
 
-	if (!name || !slug) {
-		throw createError({
-			statusCode: 400,
-			statusMessage: 'Поля name и slug обязательны для заполнения',
-		})
-	}
+	const currentUserId = session.user.id
 
-	const db = useDb()
+	const studioSlug = `${slugify(body.name, { lower: true })}-${Math.floor(1000 + Math.random() * 9000)}`
 
 	try {
-		const newStudioId = Math.random().toString(36).substring(2, 11)
+		const result = await db.transaction(async (tx) => {
+			const [newStudio] = await tx
+				.insert(studios)
+				.values({
+					slug: studioSlug,
+					name: body.name,
+					currency: body.currency,
+					bio: body.bio,
+					mission: body.mission,
+					categories: body.categories,
+					types: body.types,
+					ownerId: currentUserId,
+				})
+				.returning()
 
-		await db.insert(studio).values({
-			id: newStudioId,
-			name,
-			slug: slug.toLowerCase().trim().replace(/\s+/g, '-'),
-			ownerId: session.user.id,
-			createdAt: new Date(),
-			updatedAt: new Date(),
+			if (newStudio) {
+				const locationsToInsert = body.locations.map(
+					(loc: {
+						name: string
+						country: string
+						city: string
+						address: string
+						timezone: string
+					}) => ({
+						studioId: newStudio.id,
+						name: loc.name,
+						country: loc.country,
+						city: loc.city,
+						address: loc.address,
+						timezone: loc.timezone,
+					}),
+				)
+				await tx.insert(studioLocations).values(locationsToInsert)
+
+				if (body.logo) {
+					await tx.insert(mediaFiles).values({
+						url: body.logo.url,
+						providerPublicId: body.logo.providerPublicId,
+						entityId: newStudio.id,
+						entityType: 'STUDIO',
+						type: 'LOGO',
+					})
+				}
+
+				if (body.gallery && body.gallery.length > 0) {
+					const galleryInserts = body.gallery.map(
+						(
+							image: { url: string; providerPublicId: string },
+							index: number,
+						) => ({
+							url: image.url,
+							providerPublicId: image.providerPublicId,
+							entityId: newStudio.id,
+							entityType: 'STUDIO',
+							type: 'GALLERY',
+							order: index,
+						}),
+					)
+					await tx.insert(mediaFiles).values(galleryInserts)
+				}
+			}
+
+			return newStudio
 		})
 
-		return {
-			status: 'success',
-			message: 'Студия успешно зарегистрирована и привязана к вашему аккаунту',
-			studioId: newStudioId,
-		}
-	} catch (error: unknown) {
-		if (error instanceof Error && error.message.includes('23505')) {
-			throw createError({
-				statusCode: 409,
-				statusMessage: 'Этот slug уже занят другой студией',
-			})
-		}
-		throw createError({
-			statusCode: 500,
-			statusMessage: `Ошибка БД: ${error instanceof Error ? error.message : 'Неизвестная ошибка'}`,
-		})
+		return { success: true, studio: result }
+	} catch (error) {
+		throw createError({ statusCode: 500, message: (error as Error).message })
 	}
 })

@@ -25,7 +25,8 @@ import {
 } from '@/shared/ui/sidebar'
 
 defineProps<{
-	projects: {
+	group: string
+	menuItems: {
 		name: string
 		url: string
 		icon: LucideIcon
@@ -37,9 +38,9 @@ defineProps<{
 
 <template>
 	<SidebarGroup class="group-data-[collapsible=icon]:hidden">
-		<SidebarGroupLabel>Platform</SidebarGroupLabel>
+		<SidebarGroupLabel>{{ group }}</SidebarGroupLabel>
 		<SidebarMenu>
-			<SidebarMenuItem v-for="item in projects" :key="item.name">
+			<SidebarMenuItem v-for="item in menuItems" :key="item.name">
 				<SidebarMenuButton as-child>
 					<a :href="item.url">
 						<component :is="item.icon" />

@@ -50,12 +50,14 @@
     "pinia": "^3.0.4",
     "reka-ui": "^2.9.8",
     "shadcn-nuxt": "^2.7.3",
+    "slugify": "^1.6.9",
     "tailwind-merge": "^3.6.0",
     "tailwindcss": "^4.3.0",
     "vee-validate": "^4.15.1",
     "vue": "^3.5.34",
     "vue-router": "^5.0.7",
     "vue-sonner": "^2.0.9",
+    "ws": "^8.21.0",
     "zod": "^4.4.3"
   },
   "devDependencies": {
@@ -63,6 +65,7 @@
     "@tailwindcss/postcss": "^4.3.0",
     "@types/node": "^25.9.1",
     "@types/pg": "^8.20.0",
+    "@types/ws": "^8.18.1",
     "@vitest/coverage-v8": "^4.1.7",
     "@vue/test-utils": "^2.4.10",
     "dotenv": "^17.4.2",
@@ -78,6 +81,7 @@
     "@better-auth/passkey": {
       "@better-auth/core": "$@better-auth/core",
       "better-auth": "$better-auth"
-    }
+    },
+    "better-auth": "$better-auth"
   }
 }
