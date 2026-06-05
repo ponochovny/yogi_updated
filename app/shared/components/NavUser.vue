@@ -65,7 +65,7 @@ const signOutHandler = async () => {
 					<template v-if="user.role.length > 1">
 						<DropdownMenuGroup>
 							<DropdownMenuItem
-								v-if="!$route.fullPath.includes('profile')"
+								v-if="!$route.path.startsWith('/profile')"
 								class="flex items-center gap-2"
 								@click="navigateTo('/profile/settings')"
 							>
