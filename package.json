@@ -2,6 +2,7 @@
   "name": "yogi_updated",
   "type": "module",
   "private": true,
+  "version": "0.0.1-alpha",
   "scripts": {
     "dev": "nuxt dev",
     "generate": "nuxt generate",
