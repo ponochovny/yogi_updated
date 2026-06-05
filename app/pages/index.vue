@@ -40,7 +40,7 @@
 		<div class="flex flex-col gap-4 px-4 py-8">
 			<h2 class="text-2xl font-semibold">All Studios list</h2>
 			<div class="grid grid-cols-4 gap-4">
-				<template v-if="studios">
+				<template v-if="studios && studios.length > 0">
 					<StudioCard
 						v-for="studio in studios"
 						:key="studio.id"

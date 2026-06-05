@@ -65,11 +65,11 @@ export default defineNuxtConfig({
 
 	runtimeConfig: {
 		databaseUrl: process.env.DATABASE_URL,
-		// cloudinary
-		cloudinaryName: process.env.CLOUDINARY_CLOUD_NAME,
-		cloudinaryUploadPreset: process.env.CLOUDINARY_UPLOAD_PRESET,
 		public: {
 			baseUrl: '',
+			// cloudinary
+			cloudinaryName: process.env.CLOUDINARY_CLOUD_NAME ?? '',
+			cloudinaryUploadPreset: process.env.CLOUDINARY_UPLOAD_PRESET ?? '',
 		},
 	},
 

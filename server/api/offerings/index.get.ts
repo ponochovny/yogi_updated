@@ -27,6 +27,9 @@ export default defineEventHandler(async () => {
 			status: 'Success!',
 		}
 	} catch (error) {
-		throw createError({ statusCode: 500, message: (error as Error).message })
+		throw createError({
+			statusCode: 500,
+			message: (error as Error).message ?? 'Unknown error',
+		})
 	}
 })

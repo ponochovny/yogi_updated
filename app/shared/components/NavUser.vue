@@ -1,5 +1,11 @@
 <script setup lang="ts">
-import { BadgeCheck, ChevronsUpDown, LogOut, Sparkles } from '@lucide/vue'
+import {
+	BadgeCheck,
+	ChevronsUpDown,
+	LogOut,
+	Sparkles,
+	UserIcon,
+} from '@lucide/vue'
 
 import { Avatar, AvatarFallback, AvatarImage } from '@/shared/ui/avatar'
 import {
@@ -14,7 +20,6 @@ import {
 	SidebarMenu,
 	SidebarMenuButton,
 	SidebarMenuItem,
-	useSidebar,
 } from '@/shared/ui/sidebar'
 import { signOut } from '@/utils/auth-client'
 
@@ -26,8 +31,6 @@ defineProps<{
 		role: string[] | string
 	}
 }>()
-
-const { isMobile } = useSidebar()
 
 const signOutHandler = async () => {
 	await signOut().finally(() => navigateTo('/'))
@@ -56,23 +59,34 @@ const signOutHandler = async () => {
 				</DropdownMenuTrigger>
 				<DropdownMenuContent
 					class="w-(--reka-dropdown-menu-trigger-width) min-w-56 rounded-lg"
-					:side="isMobile ? 'bottom' : 'right'"
 					align="end"
 					:side-offset="4"
 				>
 					<template v-if="user.role.length > 1">
 						<DropdownMenuGroup>
-							<DropdownMenuItem v-if="user.role.includes('practitioner')">
-								<NuxtLink to="/" class="flex items-center gap-2">
-									<Sparkles />
-									Practitioner
-								</NuxtLink>
+							<DropdownMenuItem
+								v-if="!$route.fullPath.includes('profile')"
+								class="flex items-center gap-2"
+								@click="navigateTo('/profile/settings')"
+							>
+								<UserIcon />
+								User Profile
 							</DropdownMenuItem>
-							<DropdownMenuItem v-if="user.role.includes('business')">
-								<NuxtLink to="/business" class="flex items-center gap-2">
-									<BadgeCheck />
-									Business owner
-								</NuxtLink>
+							<DropdownMenuItem
+								v-if="user.role.includes('practitioner')"
+								class="flex items-center gap-2"
+								@click="navigateTo('/')"
+							>
+								<Sparkles />
+								Practitioner
+							</DropdownMenuItem>
+							<DropdownMenuItem
+								v-if="user.role.includes('business')"
+								class="flex items-center gap-2"
+								@click="navigateTo('/business')"
+							>
+								<BadgeCheck />
+								Business owner
 							</DropdownMenuItem>
 						</DropdownMenuGroup>
 						<DropdownMenuSeparator />
