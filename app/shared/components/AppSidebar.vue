@@ -69,7 +69,9 @@ const sidebarProps = inject('sidebarProps', {
 			/>
 		</SidebarContent>
 		<SidebarFooter>
-			<NavUser :user="userData" />
+			<ClientOnly>
+				<NavUser :user="userData" />
+			</ClientOnly>
 		</SidebarFooter>
 	</Sidebar>
 </template>

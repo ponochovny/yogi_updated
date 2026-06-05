@@ -20,16 +20,10 @@ const signOutHandler = async () => {
 			<div>layouts/default.vue</div>
 		</div>
 		<div
-			class="fixed left-0 top-0 border border-amber-500 flex justify-between items-center w-full p-4"
+			class="fixed left-0 top-0 flex justify-between items-center w-full p-4"
 		>
 			<NuxtLinkLocale to="/" as-child>
-				<NuxtImg
-					src="https://placehold.net/default.png"
-					width="65"
-					height="65"
-					alt="Nuxt Logo"
-					class="rounded-full"
-				/>
+				<NuxtImg src="/img/logoBg.svg" width="65" height="65" alt="Nuxt Logo" />
 			</NuxtLinkLocale>
 			<div class="flex gap-3">
 				<Darkmodetoggle />
