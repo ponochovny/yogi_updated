@@ -43,3 +43,15 @@ export const createStudioSchema = z.object({
 })
 
 export type CreateStudioInput = z.infer<typeof createStudioSchema>
+
+export type Studio = Omit<
+	typeof studios.$inferSelect,
+	'createdAt' | 'updatedAt'
+> & {
+	createdAt: string
+	updatedAt: string
+}
+export type StudioMedia = {
+	logo: string | null
+	gallery: string[]
+}

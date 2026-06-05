@@ -114,7 +114,7 @@ const submitStudio = async (values: CreateStudioInput) => {
 	isProcessing.value = true
 
 	try {
-		const response = await $fetch('/api/studios', {
+		const response = await $fetch('/api/business/studios', {
 			method: 'POST',
 			body: values,
 		})

@@ -1,9 +1,23 @@
 <script lang="ts" setup>
+import { placeholderImageUrl } from '~/config/constants'
 import { Avatar, AvatarFallback, AvatarImage } from '~/shared/ui/avatar'
 
-defineProps<{
-	offering: unknown
-}>()
+// defineProps<{
+// 	offering: any
+// }>()
+
+const offering = ref({
+	name: 'Test offering',
+	isActive: false,
+	banners: [{ url: '' }],
+	slug: '',
+	description: '',
+	studio: {
+		name: '',
+		slug: '',
+		logo: [{ url: '' }],
+	},
+})
 </script>
 
 <template>
@@ -32,7 +46,10 @@ defineProps<{
 				class="mt-4 inline-flex items-center space-x-2 group justify-self-end"
 			>
 				<Avatar>
-					<AvatarImage :src="offering.studio.logo[0]?.url" alt="Avatar" />
+					<AvatarImage
+						:src="offering.studio.logo[0]?.url || placeholderImageUrl"
+						alt="Avatar"
+					/>
 					<AvatarFallback>{{ offering.studio.name[0] }}</AvatarFallback>
 				</Avatar>
 				<span class="text-sm text-muted-foreground group-hover:underline">

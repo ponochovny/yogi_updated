@@ -1,19 +1,31 @@
-import { studios, studioLocations, mediaFiles } from '../../utils/db/schema'
+import { studios, studioLocations, mediaFiles } from '../../../utils/db/schema'
 import { and, eq, inArray, sql } from 'drizzle-orm'
 
-export default defineEventHandler(async () => {
+export default defineEventHandler(async (event) => {
 	const db = useDb()
+	const session = await auth.api.getSession({
+		headers: event.headers,
+	})
 
-	const allStudios = await db
+	if (!session || !session.user) {
+		throw createError({
+			statusCode: 401,
+			statusMessage: 'Unauthorized access',
+		})
+	}
+
+	const currentUserId = session.user.id
+
+	const userStudios = await db
 		.select()
 		.from(studios)
-		.where(eq(studios.isArchived, false))
+		.where(eq(studios.ownerId, currentUserId))
 
-	if (!allStudios.length) {
+	if (!userStudios.length) {
 		return { success: true, studios: [] }
 	}
 
-	const studioIds = allStudios.map((s) => s.id)
+	const studioIds = userStudios.map((s) => s.id)
 
 	const [locations, media] = await Promise.all([
 		db
@@ -31,7 +43,7 @@ export default defineEventHandler(async () => {
 			),
 	])
 
-	const studiosWithDetails = allStudios.map((studio) => {
+	const studiosWithDetails = userStudios.map((studio) => {
 		const studioLocs = locations.filter((l) => l.studioId === studio.id)
 		const studioMedia = media.filter((m) => m.entityId === studio.id)
 

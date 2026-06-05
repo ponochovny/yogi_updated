@@ -11,7 +11,9 @@ definePageMeta({
 
 const route = useRoute()
 
-const { data: studioData } = await useFetch(`/api/studios/${route.params.slug}`)
+const { data: studioData } = await useFetch(
+	`/api/business/studios/${route.params.slug}`,
+)
 const studio = computed(() => studioData.value?.studio)
 </script>
 

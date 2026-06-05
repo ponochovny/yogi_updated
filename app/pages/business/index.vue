@@ -2,21 +2,19 @@
 import { PlusIcon } from '@lucide/vue'
 
 definePageMeta({
-	title: 'Настройки профиля',
+	title: 'Main Dashboard',
 	breadcrumbs: [{ name: 'Main Dashboard', url: '/business' }],
 })
 
-const updateTitle = inject<((newValue: string) => void) | undefined>(
-	'pageTitle',
-)
-if (updateTitle) updateTitle('Dashboard')
-
-const { data: studiosData } = await useFetch(`/api/studios`)
+const { data: studiosData, pending } = useFetch(`/api/business/studios`)
 const studios = computed(() => studiosData.value?.studios)
 </script>
 
 <template>
 	<div>
+		<div v-if="pending" class="flex justify-center py-20">
+			<div class="animate-spin rounded-full h-8 w-8 border-b-2 border-white" />
+		</div>
 		<div
 			v-if="studios?.length === 0"
 			class="size-full rounded-4xl bg-white/10 flex items-center justify-center p-24 flex-col gap-4 text-center"
@@ -45,8 +43,8 @@ const studios = computed(() => studiosData.value?.studios)
 						class="w-14 h-14 rounded-xl bg-gray-50 border border-gray-100 shrink-0 overflow-hidden"
 					>
 						<NuxtImg
-							v-if="studio.logoUrl"
-							:src="studio.logoUrl"
+							v-if="studio.logo"
+							:src="studio.logo"
 							class="w-full h-full object-cover"
 						/>
 						<div
@@ -75,7 +73,7 @@ const studios = computed(() => studiosData.value?.studios)
 							Locations
 						</p>
 						<p class="text-sm font-semibold">
-							{{ studio.locationsCount }}
+							{{ studio.locations.length }}
 						</p>
 					</div>
 					<div>

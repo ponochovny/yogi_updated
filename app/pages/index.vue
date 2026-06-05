@@ -17,8 +17,8 @@
 				<Button>Go to single cause page</Button>
 			</NuxtLinkLocale>
 		</div>
-		<div class="grid grid-cols-4 gap-4 px-4 py-8">
-			<Card
+		<!-- <div class="grid grid-cols-4 gap-4 px-4 py-8">
+			<OfferingCard
 				v-for="offering in res.data
 					.sort((a, b) => b.isActive - a.isActive)
 					.filter((offering) => offering.isActive)"
@@ -31,32 +31,31 @@
 			>
 				No active offerings available.
 			</div>
+		</div> -->
+		<div class="grid grid-cols-4 gap-4 px-4 py-8">
+			<template v-if="studios">
+				<StudioCard
+					v-for="studio in studios"
+					:key="studio.id"
+					:studio="studio"
+					:studio-media="{ logo: studio.logo, gallery: studio.gallery }"
+					:studio-location="studio.locations"
+				/>
+			</template>
+			<div v-else class="col-span-4 text-center text-muted-foreground">
+				No studios
+			</div>
 		</div>
-		<Button @click="createStudio">Create studio</Button>
 	</div>
 </template>
 
 <script setup lang="ts">
 import { useI18n } from 'vue-i18n'
-import Card from '~/entities/product/Card.vue'
+// import OfferingCard from '~/entities/offering/ui/Card.vue'
+import StudioCard from '~/entities/studio/ui/Card.vue'
 import { PagesConfig } from '~/config/pages.config'
 const { locales, setLocale } = useI18n()
 
-const res = await $fetch('/api/offerings')
-// console.log(res)
-
-const createStudio = async () => {
-	try {
-		const response = await $fetch('/api/studios', {
-			method: 'POST',
-			body: {
-				name: 'My New Studio 2',
-				slug: 'my-new-studio-3',
-			},
-		})
-		console.log('Studio created successfully:', response)
-	} catch (error) {
-		console.error('Error creating studio:', error)
-	}
-}
+const { data: studiosData } = useFetch(`/api/studios`)
+const studios = computed(() => studiosData.value?.studios)
 </script>

@@ -1,9 +1,24 @@
-import { studios, studioLocations, mediaFiles } from '../../../utils/db/schema'
+import {
+	studios,
+	studioLocations,
+	mediaFiles,
+} from '../../../../utils/db/schema'
 import { and, eq } from 'drizzle-orm'
 
 export default defineEventHandler(async (event) => {
 	const db = useDb()
+	const session = await auth.api.getSession({
+		headers: event.headers,
+	})
 
+	if (!session || !session.user) {
+		throw createError({
+			statusCode: 401,
+			statusMessage: 'Unauthorized access',
+		})
+	}
+
+	const currentUserId = session.user.id
 	const slug = getRouterParam(event, 'slug')
 
 	if (!slug) {
@@ -13,13 +28,13 @@ export default defineEventHandler(async (event) => {
 	const [studio] = await db
 		.select()
 		.from(studios)
-		.where(eq(studios.slug, slug))
+		.where(and(eq(studios.slug, slug), eq(studios.ownerId, currentUserId)))
 		.limit(1)
 
 	if (!studio) {
 		throw createError({
 			statusCode: 404,
-			message: 'Studio not found',
+			message: 'Studio not found or you do not have permission to view it',
 		})
 	}
 
