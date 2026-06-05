@@ -90,6 +90,9 @@ export default defineEventHandler(async (event) => {
 
 		return { success: true, studio: result }
 	} catch (error) {
-		throw createError({ statusCode: 500, message: (error as Error).message })
+		throw createError({
+			statusCode: 500,
+			message: (error as Error).message ?? 'Unknown error',
+		})
 	}
 })

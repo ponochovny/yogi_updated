@@ -30,10 +30,12 @@ const isSaving = ref(false)
 
 const openCloudinaryWidget = () => {
 	if (typeof window !== 'undefined' && window.cloudinary) {
+		const { cloudinaryName, cloudinaryUploadPreset } = useRuntimeConfig()
+
 		const widget = window.cloudinary.createUploadWidget(
 			{
-				cloudName: 'dllruwqbd',
-				uploadPreset: 'yogi_uploads',
+				cloudName: cloudinaryName,
+				uploadPreset: cloudinaryUploadPreset,
 				sources: ['local', 'url', 'camera'],
 				multiple: false,
 				cropping: true,
