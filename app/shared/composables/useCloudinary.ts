@@ -9,6 +9,8 @@ const openUploadWidget = (
 	options: { multiple: boolean; cropping: boolean },
 	onSuccess: (media: MediaObject) => void,
 ) => {
+	const { cloudinaryName, cloudinaryUploadPreset } = useRuntimeConfig()
+
 	if (
 		typeof window !== 'undefined' &&
 		(window as WindowCloudinary).cloudinary
@@ -16,8 +18,8 @@ const openUploadWidget = (
 		// @ts-expect-error: window.cloudinary can be undefined, but we've already checked for it
 		const widget = (window as WindowCloudinary).cloudinary.createUploadWidget(
 			{
-				cloudName: 'dllruwqbd',
-				uploadPreset: 'yogi_uploads',
+				cloudName: cloudinaryName,
+				uploadPreset: cloudinaryUploadPreset,
 				sources: ['local', 'url'],
 				clientAllowedFormats: ['png', 'jpeg', 'webp', 'jpg'],
 				maxImageFileSize: 5000000,

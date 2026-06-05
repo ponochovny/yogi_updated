@@ -31,3 +31,5 @@ playwright-report/
 test-results/
 
 /prisma/generated
+
+INITIAL.md

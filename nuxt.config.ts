@@ -59,11 +59,27 @@ export default defineNuxtConfig({
 	},
 
 	routeRules: {
-		'/business/**': { appLayout: 'business' },
-		'/profile/**': { appLayout: 'dashboard-user' },
+		'/business/**': { appLayout: 'business', appMiddleware: 'auth' },
+		'/profile/**': { appLayout: 'dashboard-user', appMiddleware: 'auth' },
 	},
 
 	runtimeConfig: {
 		databaseUrl: process.env.DATABASE_URL,
+		// cloudinary
+		cloudinaryName: process.env.CLOUDINARY_CLOUD_NAME,
+		cloudinaryUploadPreset: process.env.CLOUDINARY_UPLOAD_PRESET,
+		public: {
+			baseUrl: '',
+		},
+	},
+
+	app: {
+		head: {
+			titleTemplate: '%s · Yogi App',
+			htmlAttrs: {
+				lang: 'en',
+			},
+			link: [{ rel: 'icon', type: 'image/x-icon', href: '/favicon.ico' }],
+		},
 	},
 })

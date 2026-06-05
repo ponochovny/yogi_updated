@@ -3,21 +3,7 @@ import { getOfferings } from '@/../server/db/offerings'
 export default defineEventHandler(async () => {
 	try {
 		// eslint-disable-next-line @typescript-eslint/no-explicit-any
-		const offerings = await getOfferings<any[]>({
-			include: {
-				studio: {
-					include: {
-						logo: true,
-					},
-				},
-				banners: true,
-				practitioners: {
-					include: {
-						user: true,
-					},
-				},
-			},
-		})
+		const offerings = await getOfferings<any[]>()
 
 		// const offerings = await new Promise((resolve) => {
 		// 	setTimeout(() => {
@@ -40,10 +26,7 @@ export default defineEventHandler(async () => {
 			data: offerings,
 			status: 'Success!',
 		}
-	} catch {
-		return {
-			data: [],
-			status: 'Error!',
-		}
+	} catch (error) {
+		throw createError({ statusCode: 500, message: (error as Error).message })
 	}
 })

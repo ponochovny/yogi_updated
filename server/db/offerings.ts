@@ -1,3 +1,3 @@
 export const getOfferings = <T>(): Promise<T> => {
-	return []
+	return new Promise((r) => r([] as T))
 }

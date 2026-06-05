@@ -3,10 +3,6 @@ import SidebarDashboardLayout from '~/widgets/sidebar-dashboard/index.vue'
 import { InfoIcon, MapPinIcon, ShoppingCartIcon } from '@lucide/vue'
 import { PagesConfig } from '~/config/pages.config'
 
-definePageMeta({
-	middleware: ['auth'],
-})
-
 const sidebarProps = {
 	group: 'Platform',
 	menuLinks: [
