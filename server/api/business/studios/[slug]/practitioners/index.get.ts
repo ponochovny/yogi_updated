@@ -3,25 +3,34 @@ import { user } from '~~/server/utils/db/schema/auth-schema'
 import { and, eq } from 'drizzle-orm'
 
 export default defineEventHandler(async (event) => {
+	// VALIDATING AUTHORIZATION
 	const session = await auth.api.getSession({
 		headers: event.headers,
 	})
-
 	if (!session || !session.user) {
 		throw createError({
 			statusCode: 401,
 			statusMessage: 'Unauthorized access',
 		})
 	}
-	const currentUserId = session.user.id
+
+	// VALIDATING SLUG PARAMETER
 	const slug = getRouterParam(event, 'slug')
+	if (!slug) {
+		throw createError({
+			statusCode: 400,
+			statusMessage: 'Slug is required',
+		})
+	}
+
+	const currentUserId = session.user.id
 	const db = useDb()
 
 	// Checking if the studio exists and belongs to the current user (owner)
 	const [studio] = await db
 		.select()
 		.from(studios)
-		.where(and(eq(studios.slug, slug!), eq(studios.ownerId, currentUserId)))
+		.where(and(eq(studios.slug, slug), eq(studios.ownerId, currentUserId)))
 		.limit(1)
 
 	if (!studio) throw createError({ statusCode: 404 })

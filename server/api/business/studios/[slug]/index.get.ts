@@ -3,7 +3,6 @@ import { mediaFiles } from '~~/server/utils/db/schema/_other'
 import { and, eq } from 'drizzle-orm'
 
 export default defineEventHandler(async (event) => {
-	const db = useDb()
 	const session = await auth.api.getSession({
 		headers: event.headers,
 	})
@@ -15,12 +14,17 @@ export default defineEventHandler(async (event) => {
 		})
 	}
 
-	const currentUserId = session.user.id
+	// VALIDATING SLUG PARAMETER
 	const slug = getRouterParam(event, 'slug')
-
 	if (!slug) {
-		throw createError({ statusCode: 400, message: 'Slug is required' })
+		throw createError({
+			statusCode: 400,
+			statusMessage: 'Slug is required',
+		})
 	}
+
+	const currentUserId = session.user.id
+	const db = useDb()
 
 	const [studio] = await db
 		.select()

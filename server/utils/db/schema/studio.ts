@@ -8,7 +8,7 @@ import {
 	unique,
 } from 'drizzle-orm/pg-core'
 import { user } from './auth-schema'
-import { practitionerRoles } from '~~/server/utils/auth/config'
+import { practitionerRoles } from '../../auth/config'
 
 export const studioRoleEnum = pgEnum('studio_role', [
 	practitionerRoles.MANAGER,

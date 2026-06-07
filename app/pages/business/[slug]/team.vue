@@ -115,7 +115,13 @@ const addTeamMember = async () => {
 							</div>
 						</td>
 						<td class="px-6 py-4 text-sm text-gray-200">
-							{{ member.role === 'MANAGER' ? 'Manager' : 'Trainer' }}
+							{{
+								member.role === 'MANAGER'
+									? 'Manager'
+									: member.role === 'OWNER'
+										? 'Owner'
+										: 'Trainer'
+							}}
 						</td>
 						<td class="px-6 py-4">
 							<span

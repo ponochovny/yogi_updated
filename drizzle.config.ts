@@ -11,6 +11,6 @@ export default defineConfig({
 	],
 	out: './server/utils/db/migrations',
 	dbCredentials: {
-		url: import.meta.env.DATABASE_URL!,
+		url: process.env.DATABASE_URL!,
 	},
 })

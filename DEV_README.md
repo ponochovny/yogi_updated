@@ -38,13 +38,13 @@ npm run db:migrate
 ### Auth config
 
 ```
-server/util/auth/index.ts
+server/utils/auth/index.ts
 ```
 
 ### Generated auth schema path
 
 ```
-server/util/db/schema/auth-schema.ts
+server/utils/db/schema/auth-schema.ts
 ```
 
 # 📝Other notes
@@ -129,7 +129,7 @@ console.log('Session data:', session)
 ## 📝Better Auth - User types
 
 ```TS
-import type { user as DrizzleUser } from '@/../server/utils/db/schema/auth-schema'
+import type { user as DrizzleUser } from '~~/server/utils/db/schema/auth-schema'
 
 const user = session.value?.data?.user as unknown as typeof DrizzleUser.$inferSelect
 ```

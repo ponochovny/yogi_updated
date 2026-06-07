@@ -16,19 +16,27 @@ export default defineEventHandler(async (event) => {
 			statusMessage: 'Unauthorized access',
 		})
 	}
-	const currentUserId = session.user.id
-	const slug = getRouterParam(event, 'slug')
 
+	// VALIDATING SLUG PARAMETER
+	const slug = getRouterParam(event, 'slug')
+	if (!slug) {
+		throw createError({
+			statusCode: 400,
+			statusMessage: 'Slug is required',
+		})
+	}
+
+	const currentUserId = session.user.id
 	const body = await readValidatedBody(event, addPractitionerSchema.parse)
+	const db = useDb()
 
 	try {
-		const db = useDb()
 		const result = await db.transaction(async (tx) => {
 			// 1. Checking if the studio exists and belongs to the current user (owner)
 			const [studio] = await tx
 				.select()
 				.from(studios)
-				.where(and(eq(studios.slug, slug!), eq(studios.ownerId, currentUserId)))
+				.where(and(eq(studios.slug, slug), eq(studios.ownerId, currentUserId)))
 				.limit(1)
 
 			if (!studio) {
@@ -66,36 +74,28 @@ export default defineEventHandler(async (event) => {
 				})
 			}
 
-			// 4. Checking if the user is already linked to the studio as a practitioner (to avoid duplicates) --- IGNORE ---
-			const [existingLink] = await tx
-				.select()
-				.from(studioPractitioners)
-				.where(
-					and(
-						eq(studioPractitioners.studioId, studio.id),
-						eq(studioPractitioners.userId, targetUser.id),
-					),
-				)
-				.limit(1)
-
-			if (existingLink) {
-				throw createError({
-					statusCode: 409,
-					message: 'Этот сотрудник уже добавлен в студию',
-				})
+			// 4. Linking the user to the studio; map DB unique conflict to 409
+			let newPractitioner
+			try {
+				;[newPractitioner] = await tx
+					.insert(studioPractitioners)
+					.values({
+						studioId: studio.id,
+						userId: targetUser.id,
+						role: body.role,
+						salaryActive: body.salaryActive,
+						isActive: true,
+					})
+					.returning()
+			} catch (e) {
+				if ((e as { code?: string }).code === '23505') {
+					throw createError({
+						statusCode: 409,
+						message: 'Practitioner is already added to this studio',
+					})
+				}
+				throw e
 			}
-
-			// 5. Linking the user to the studio with the specified role and salaryActive status
-			const [newPractitioner] = await tx
-				.insert(studioPractitioners)
-				.values({
-					studioId: studio.id,
-					userId: targetUser.id,
-					role: body.role,
-					salaryActive: body.salaryActive,
-					isActive: true,
-				})
-				.returning()
 
 			return { practitionerLink: newPractitioner, user: targetUser }
 		})
@@ -104,12 +104,13 @@ export default defineEventHandler(async (event) => {
 		// "You have been added to studio X. Click the link to set your password."
 
 		return { success: true, data: result }
-	} catch (error) {
+	} catch (error: unknown) {
 		if (error instanceof FetchError) {
 			throw createError({
 				statusCode: error.statusCode || 500,
 				message: error.message,
 			})
 		}
+		throw error
 	}
 })

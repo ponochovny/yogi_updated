@@ -10,7 +10,10 @@ import {
 } from 'drizzle-orm/pg-core'
 import { relations } from 'drizzle-orm'
 import { studios } from './studio'
-import { offeringType, pricingType } from '~~/app/entities/offering/schema'
+import {
+	offeringType,
+	pricingType,
+} from '../../../../app/entities/offering/schema'
 
 export const offeringTypeEnum = pgEnum('offering_type', [
 	offeringType.GROUP,
