@@ -1,5 +1,5 @@
-import { auth } from '../../../utils/auth'
-import { studios, studioLocations } from '../../../utils/db/schema'
+import { auth } from '~~/server/utils/auth'
+import { studios, studioLocations } from '~~/server/utils/db/schema/studio'
 import slugify from 'slugify'
 import { createStudioSchema } from '~/entities/studio/schema'
 

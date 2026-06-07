@@ -19,7 +19,7 @@
     "db:migrate": "drizzle-kit migrate",
     "db:push": "drizzle-kit push",
     "build": "nuxt build && npm run db:migrate",
-    "db:auth:generate": "npx auth@latest generate --config server/utils/auth/index.ts --output server/utils/db/auth-schema.ts"
+    "db:auth:generate": "npx auth@latest generate --config server/utils/auth/index.ts --output server/utils/db/schema/auth-schema.ts"
   },
   "dependencies": {
     "@lucide/vue": "^1.16.0",

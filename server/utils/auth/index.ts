@@ -1,6 +1,7 @@
 import { betterAuth } from 'better-auth'
 import { drizzleAdapter } from 'better-auth/adapters/drizzle'
 import { useDb } from '../db'
+import { userRoles } from './config'
 
 export const auth = betterAuth({
 	database: drizzleAdapter(useDb(), {
@@ -21,7 +22,7 @@ export const auth = betterAuth({
 			role: {
 				type: 'string[]',
 				defaultValue() {
-					return ['user']
+					return [userRoles.USER]
 				},
 				required: false,
 				input: false,

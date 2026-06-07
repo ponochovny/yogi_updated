@@ -24,7 +24,7 @@ drizzle.config.ts
 ### Generate the auth schema based on the config
 
 ```bash
-npx auth@latest generate --config server/utils/auth/index.ts --output server/utils/db/auth-schema.ts
+npx auth@latest generate --config server/utils/auth/index.ts --output server/utils/db/schema/auth-schema.ts
 ```
 
 ```bash
@@ -44,7 +44,7 @@ server/util/auth/index.ts
 ### Generated auth schema path
 
 ```
-server/util/db/auth-schema.ts
+server/util/db/schema/auth-schema.ts
 ```
 
 # 📝Other notes
@@ -129,7 +129,7 @@ console.log('Session data:', session)
 ## 📝Better Auth - User types
 
 ```TS
-import type { user as DrizzleUser } from '@/../server/utils/db/auth-schema'
+import type { user as DrizzleUser } from '@/../server/utils/db/schema/auth-schema'
 
 const user = session.value?.data?.user as unknown as typeof DrizzleUser.$inferSelect
 ```

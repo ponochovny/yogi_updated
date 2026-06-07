@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import type { user as DrizzleUser } from '@/../server/utils/db/auth-schema'
+import type { user as DrizzleUser } from '~~/server/utils/db/schema/auth-schema'
 import { toast } from 'vue-sonner'
 import { placeholderImageUrl } from '~/config/constants'
 

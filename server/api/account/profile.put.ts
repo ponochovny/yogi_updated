@@ -1,5 +1,5 @@
-import { useDb } from '../../utils/db'
-import { user } from '../../utils/db/auth-schema'
+import { useDb } from '~~/server/utils/db'
+import { user } from '~~/server/utils/db/schema/auth-schema'
 import { eq } from 'drizzle-orm'
 
 export default defineEventHandler(async (event) => {

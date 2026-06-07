@@ -1,4 +1,4 @@
-import { getOfferings } from '@/../server/db/offerings'
+import { getOfferings } from '~~/server/db/offerings'
 
 export default defineEventHandler(async () => {
 	try {
