@@ -29,7 +29,6 @@ export default defineNuxtConfig({
 				'@vue/core',
 				'@vueuse/core',
 				'@lucide/vue',
-				'@vue/devtools-core',
 				'@vue/devtools-kit',
 				'@vue/devtools-core',
 				'better-auth/vue',

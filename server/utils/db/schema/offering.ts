@@ -9,10 +9,11 @@ import {
 	integer,
 } from 'drizzle-orm/pg-core'
 import { relations } from 'drizzle-orm'
-import { studios } from './studio'
+import { studios, studioPractitioners, studioLocations } from './studio'
 import {
 	offeringType,
 	pricingType,
+	ActivityType,
 } from '../../../../app/entities/offering/schema'
 
 export const offeringTypeEnum = pgEnum('offering_type', [
@@ -23,6 +24,12 @@ export const pricingTypeEnum = pgEnum('pricing_type', [
 	pricingType.DROP_IN,
 	pricingType.PACK,
 	pricingType.MEMBERSHIP,
+])
+
+export const activityTypeEnum = pgEnum('activity_type', [
+	ActivityType.CLASS,
+	ActivityType.APPOINTMENT,
+	ActivityType.EVENT,
 ])
 
 // 1. Categories (Tags). Needed to understand what an membership applies to.
@@ -38,6 +45,7 @@ export const offeringCategories = pgTable('offering_categories', {
 // 2. Offering
 export const offerings = pgTable('offerings', {
 	id: uuid('id').defaultRandom().primaryKey(),
+	slug: varchar('slug').notNull(),
 	studioId: uuid('studio_id')
 		.notNull()
 		.references(() => studios.id, { onDelete: 'cascade' }),
@@ -47,6 +55,17 @@ export const offerings = pgTable('offerings', {
 
 	name: varchar('name').notNull(),
 	description: text('description'),
+	gallery: text('gallery').array().default([]).notNull(),
+
+	// ДОБАВЛЕНЫ НОВЫЕ ТИПЫ
+	activityType: activityTypeEnum('activity_type').default('CLASS').notNull(),
+	isPrivate: boolean('is_private').default(false).notNull(),
+
+	locationId: uuid('location_id').references(() => studioLocations.id, {
+		onDelete: 'set null',
+	}),
+	timezone: varchar('timezone').notNull(), // Например 'Europe/Kyiv'
+
 	type: offeringTypeEnum('type').default('GROUP').notNull(),
 
 	// Basic settings
@@ -56,6 +75,16 @@ export const offerings = pgTable('offerings', {
 	isPublished: boolean('is_published').default(false).notNull(), // Draft or active
 	createdAt: timestamp('created_at').defaultNow().notNull(),
 	updatedAt: timestamp('updated_at').defaultNow().notNull(),
+})
+
+export const offeringPractitioners = pgTable('offering_practitioners', {
+	id: uuid('id').defaultRandom().primaryKey(),
+	offeringId: uuid('offering_id')
+		.notNull()
+		.references(() => offerings.id, { onDelete: 'cascade' }),
+	practitionerId: uuid('practitioner_id')
+		.notNull()
+		.references(() => studioPractitioners.id, { onDelete: 'cascade' }),
 })
 
 // 3. Pricing Options

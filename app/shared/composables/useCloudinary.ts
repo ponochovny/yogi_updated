@@ -9,7 +9,9 @@ const openUploadWidget = (
 	options: { multiple: boolean; cropping: boolean },
 	onSuccess: (media: MediaObject) => void,
 ) => {
-	const { cloudinaryName, cloudinaryUploadPreset } = useRuntimeConfig()
+	const {
+		public: { cloudinaryName, cloudinaryUploadPreset },
+	} = useRuntimeConfig()
 
 	if (
 		typeof window !== 'undefined' &&

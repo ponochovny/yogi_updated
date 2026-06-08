@@ -30,7 +30,9 @@ const isSaving = ref(false)
 
 const openCloudinaryWidget = () => {
 	if (typeof window !== 'undefined' && window.cloudinary) {
-		const { cloudinaryName, cloudinaryUploadPreset } = useRuntimeConfig()
+		const {
+			public: { cloudinaryName, cloudinaryUploadPreset },
+		} = useRuntimeConfig()
 
 		const widget = window.cloudinary.createUploadWidget(
 			{
