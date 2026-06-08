@@ -9,6 +9,7 @@ import {
 } from '~/entities/profile/schema'
 import { toTypedSchema } from '@vee-validate/zod'
 import openUploadWidget from '~/shared/composables/useCloudinary'
+import { userRoles } from '~~/server/auth/config'
 
 useHead({
 	script: [
@@ -23,7 +24,7 @@ definePageMeta({
 	breadcrumbs: [{ name: 'Profile settings' }],
 })
 
-const { data: sessionData } = await useFetch<{
+const { data: sessionData, refresh } = await useFetch<{
 	user: typeof DrizzleUser.$inferSelect
 }>('/api/auth/get-session')
 const user = computed(() => sessionData.value?.user)
@@ -35,17 +36,11 @@ const {
 	isSubmitting,
 	values: formValues,
 	handleSubmit,
-	setFieldValue,
 } = useForm({
 	validationSchema: profileSchema,
 	initialValues: {
-		name: user.value?.name || '',
-		bio: user.value?.bio || '',
-		avatar: {
-			url: user.value?.image || '',
-			providerPublicId: '',
-		},
-		role: user.value?.role || [],
+		name: sessionData.value?.user?.name || '',
+		bio: sessionData.value?.user?.bio || '',
 	},
 })
 const errorMsg = ref('')
@@ -59,16 +54,14 @@ const saveProfile = async (values: UpdateProfileInput) => {
 	isProcessing.value = true
 
 	try {
-		const response = await $fetch('/api/account/profile', {
+		await $fetch('/api/account/profile', {
 			method: 'PUT',
 			body: {
 				name: values.name,
 				bio: values.bio,
-				avatar: values.avatar,
 			},
 		})
 		toast.success('Profile updated successfully!')
-		console.log(response)
 	} catch (error) {
 		toast.error(
 			'Failed to update profile: ' +
@@ -79,7 +72,10 @@ const saveProfile = async (values: UpdateProfileInput) => {
 		isProcessing.value = false
 	}
 }
-const submitProfileUpdate = handleSubmit(saveProfile)
+const submitProfileUpdate = handleSubmit(saveProfile, (errors) => {
+	errorMsg.value = 'Please fix the validation errors before submitting.'
+	console.log('Validation errors:', errors)
+})
 
 const uploadAvatar = () => {
 	openUploadWidget(
@@ -94,11 +90,7 @@ const uploadAvatar = () => {
 					},
 				})
 
-				setFieldValue('avatar', {
-					url: media.url,
-					providerPublicId: media.providerPublicId,
-				})
-
+				refresh() // Refresh session to get updated user data
 				toast.success('Avatar updated successfully!')
 			} catch (error) {
 				toast.error(
@@ -118,7 +110,7 @@ const uploadAvatar = () => {
 			<Avatar class="size-20 text-3xl">
 				<AvatarImage
 					:src="
-						formValues.avatar?.url?.replace(
+						user?.image?.replace(
 							'/upload/',
 							'/upload/w_100,h_100,c_thumb,g_custom/',
 						) || placeholderImageUrl
@@ -131,52 +123,61 @@ const uploadAvatar = () => {
 			<Button type="button" @click="uploadAvatar"> Change Photo </Button>
 		</div>
 
-		<form class="space-y-4" @submit.prevent="submitProfileUpdate">
-			<div>
-				<div
-					v-if="formValues.role?.filter((r) => r !== 'user').length"
-					class="flex gap-1 flex-wrap mb-4"
-				>
-					<Badge
-						v-for="role in Array.isArray(formValues.role)
-							? formValues.role.filter((r) => r !== 'user')
-							: [formValues.role]"
-						:key="role"
-						class="px-2 py-1 text-xs text-white rounded-full"
-						:class="
-							{
-								user: 'bg-blue-500',
-								practitioner: 'bg-blue-500',
-								business: 'bg-yellow-600',
-								'super-admin': 'bg-amber-600',
-							}[role] || 'bg-gray-500'
-						"
-					>
-						{{ role.charAt(0).toUpperCase() + role.slice(1) }}
-					</Badge>
-				</div>
-				<Label for="profile-name" class="block text-sm font-medium mb-1">
-					Name
-				</Label>
-				<Input
-					id="profile-name"
-					v-model="formValues.name"
-					type="text"
-					class="w-full border rounded-md p-2 focus:ring-2 focus:ring-blue-500 outline-none"
-				/>
-			</div>
+		<div
+			v-if="
+				user &&
+				(Array.isArray(user.role) ? user.role : [user.role]).filter(
+					(r) => r && r !== userRoles.USER,
+				).length > 0
+			"
+			class="flex gap-1 flex-wrap mb-4"
+		>
+			<Badge
+				v-for="role in user.role?.filter((r) => r !== userRoles.USER)"
+				:key="role"
+				class="px-2 py-1 text-xs text-white rounded-full"
+				:class="
+					{
+						[userRoles.USER]: 'bg-blue-500',
+						[userRoles.PRACTITIONER]: 'bg-blue-500',
+						[userRoles.BUSINESS]: 'bg-yellow-600',
+						[userRoles.SUPER_ADMIN]: 'bg-amber-600',
+					}[role] || 'bg-gray-500'
+				"
+			>
+				{{ role.charAt(0).toUpperCase() + role.slice(1) }}
+			</Badge>
+		</div>
 
-			<div>
-				<Label for="profile-bio" class="block text-sm font-medium mb-1">
-					About (Bio)
-				</Label>
-				<Textarea
-					id="profile-bio"
-					v-model="formValues.bio"
-					rows="4"
-					class="w-full border rounded-md p-2 focus:ring-2 focus:ring-blue-500 outline-none"
-				/>
-			</div>
+		<form class="space-y-4" @submit.prevent="submitProfileUpdate">
+			<FormField v-slot="{ componentField }" name="name">
+				<FormItem>
+					<FormLabel>Name</FormLabel>
+					<FormControl>
+						<Input
+							placeholder="Enter your name"
+							type="text"
+							v-bind="componentField"
+							autocomplete="off"
+						/>
+					</FormControl>
+					<FormMessage />
+				</FormItem>
+			</FormField>
+
+			<FormField v-slot="{ componentField }" name="bio">
+				<FormItem>
+					<FormLabel>About (Bio)</FormLabel>
+					<FormControl>
+						<Textarea
+							rows="4"
+							placeholder="You can write a short bio about yourself here."
+							v-bind="componentField"
+						/>
+					</FormControl>
+					<FormMessage />
+				</FormItem>
+			</FormField>
 
 			<Button type="submit" :disabled="submitDisabled">
 				<Spinner v-if="submitDisabled" />

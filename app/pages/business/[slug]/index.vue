@@ -1,5 +1,6 @@
 <script lang="ts" setup>
 import { PlusIcon, Settings2Icon, StickyNotes, UsersIcon } from '@lucide/vue'
+import { placeholderImageUrl } from '~/config/constants'
 
 definePageMeta({
 	title: 'Business Overview',
@@ -29,7 +30,7 @@ const offerings = computed(() => offeringsData.value?.offerings)
 		>
 			<div class="flex items-center gap-4">
 				<NuxtImg
-					:src="studio?.logo?.url || 'https://placehold.net/default.png'"
+					:src="studio?.logo?.url || placeholderImageUrl"
 					class="w-16 h-16 rounded-full object-cover"
 				/>
 				<div>

@@ -7,14 +7,7 @@ export const updateAvatarSchema = z.object({
 
 export const updateProfileSchema = z.object({
 	name: z.string().trim().min(1, 'Name is required'),
-	bio: z.string().trim().min(1, 'Bio is required'),
-	// avatar: z
-	// 	.object({
-	// 		url: z.url('Invalid URL format for profile image'),
-	// 		providerPublicId: z.string().trim(),
-	// 	})
-	// 	.optional(),
-	role: z.array(z.string()).optional(),
+	bio: z.string().trim().optional(),
 })
 
 export type UpdateProfileInput = z.infer<typeof updateProfileSchema>

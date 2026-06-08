@@ -9,7 +9,7 @@ export function getEntityGallery(
 	return sql<string[]>`(
     SELECT COALESCE(json_agg(url ORDER BY "order" ASC), '[]'::json)
     FROM media_files
-    WHERE media_files.entity_id = ${entityIdColumn}
+    WHERE media_files.entity_id = ${entityIdColumn}::text
     AND media_files.entity_type = ${entityType}
     AND media_files.type = ${mediaType}
   )`

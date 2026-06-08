@@ -20,7 +20,6 @@ const emit = defineEmits<{
 
 const modelValue = useVModel(props, 'modelValue', emit, {
 	passive: true,
-	defaultValue: '',
 })
 
 const delegatedProps = reactiveOmit(props, 'class')

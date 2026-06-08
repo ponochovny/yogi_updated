@@ -1,7 +1,8 @@
 import * as z from 'zod'
 import type { InternalApi } from 'nitropack'
 
-export type OfferingItem = InternalApi['/api/offerings']['get']['offerings'][0]
+export type OfferingItem =
+	InternalApi['/api/offerings']['get']['offerings'][number]
 
 export const offeringType = {
 	GROUP: 'GROUP',

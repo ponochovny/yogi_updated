@@ -59,15 +59,19 @@ export const studioPractitioners = pgTable(
 	(table) => [unique().on(table.studioId, table.userId)],
 )
 
-export const studioLocations = pgTable('studio_locations', {
-	id: uuid('id').defaultRandom().primaryKey(),
-	studioId: uuid('studio_id')
-		.notNull()
-		.references(() => studios.id, { onDelete: 'cascade' }),
-	name: text('name').notNull(),
-	country: text('country').notNull(),
-	city: text('city').notNull(),
-	address: text('address').notNull(),
-	timezone: text('timezone').default('UTC').notNull(),
-	createdAt: timestamp('created_at').defaultNow().notNull(),
-})
+export const studioLocations = pgTable(
+	'studio_locations',
+	{
+		id: uuid('id').defaultRandom().primaryKey(),
+		studioId: uuid('studio_id')
+			.notNull()
+			.references(() => studios.id, { onDelete: 'cascade' }),
+		name: text('name').notNull(),
+		country: text('country').notNull(),
+		city: text('city').notNull(),
+		address: text('address').notNull(),
+		timezone: text('timezone').default('UTC').notNull(),
+		createdAt: timestamp('created_at').defaultNow().notNull(),
+	},
+	(table) => [unique().on(table.id, table.studioId)],
+)

@@ -7,8 +7,9 @@ import {
 	uuid,
 	pgEnum,
 	integer,
+	check,
 } from 'drizzle-orm/pg-core'
-import { relations } from 'drizzle-orm'
+import { relations, sql } from 'drizzle-orm'
 import { studios, studioPractitioners, studioLocations } from './studio'
 import {
 	offeringType,
@@ -40,38 +41,47 @@ export const offeringCategories = pgTable('offering_categories', {
 	color: varchar('color').default('#000000'), // For a beautiful UI in the calendar
 })
 
-export const offerings = pgTable('offerings', {
-	id: uuid('id').defaultRandom().primaryKey(),
-	slug: varchar('slug').notNull().unique(),
-	studioId: uuid('studio_id')
-		.notNull()
-		.references(() => studios.id, { onDelete: 'cascade' }),
-	categoryId: uuid('category_id').references(() => offeringCategories.id, {
-		onDelete: 'set null',
-	}),
+export const offerings = pgTable(
+	'offerings',
+	{
+		id: uuid('id').defaultRandom().primaryKey(),
+		slug: varchar('slug').notNull().unique(),
+		studioId: uuid('studio_id')
+			.notNull()
+			.references(() => studios.id, { onDelete: 'cascade' }),
+		categoryId: uuid('category_id').references(() => offeringCategories.id, {
+			onDelete: 'set null',
+		}),
 
-	name: varchar('name').notNull(),
-	description: text('description'),
-	gallery: text('gallery').array().default([]),
+		name: varchar('name').notNull(),
+		description: text('description'),
+		gallery: text('gallery').array().default([]),
 
-	activityType: activityTypeEnum('activity_type').default('CLASS').notNull(),
-	isPrivate: boolean('is_private').default(false).notNull(),
+		activityType: activityTypeEnum('activity_type').default('CLASS').notNull(),
+		isPrivate: boolean('is_private').default(false).notNull(),
 
-	locationId: uuid('location_id').references(() => studioLocations.id, {
-		onDelete: 'set null',
-	}),
-	timezone: varchar('timezone').default('UTC').notNull(),
+		locationId: uuid('location_id').references(() => studioLocations.id, {
+			onDelete: 'set null',
+		}),
+		timezone: varchar('timezone').default('UTC').notNull(),
 
-	type: offeringTypeEnum('type').default('GROUP').notNull(),
+		type: offeringTypeEnum('type').default('GROUP').notNull(),
 
-	// Basic settings
-	duration: integer('duration').notNull(), // Duration in minutes (e.g., 60 or 90)
-	capacity: integer('capacity'), // Seat limit. Null means unlimited (e.g., for online streams)
+		// Basic settings
+		duration: integer('duration').notNull(), // Duration in minutes (e.g., 60 or 90)
+		capacity: integer('capacity'), // Seat limit. Null means unlimited (e.g., for online streams)
 
-	isPublished: boolean('is_published').default(false).notNull(), // Draft or active
-	createdAt: timestamp('created_at').defaultNow().notNull(),
-	updatedAt: timestamp('updated_at').defaultNow().notNull(),
-})
+		isPublished: boolean('is_published').default(false).notNull(), // Draft or active
+		createdAt: timestamp('created_at').defaultNow().notNull(),
+		updatedAt: timestamp('updated_at').defaultNow().notNull(),
+	},
+	() => [
+		check(
+			'offerings_location_studio_match',
+			sql`location_id IS NULL OR studio_id = (SELECT studio_id FROM studio_locations WHERE id = location_id)`,
+		),
+	],
+)
 
 // TODO: Prevent the same practitioner from being linked to the same offering multiple times
 export const offeringPractitioners = pgTable('offering_practitioners', {

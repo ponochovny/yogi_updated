@@ -1,6 +1,10 @@
 import { offerings, offeringPractitioners } from '~~/server/db/schema/offering'
-import { studios } from '~~/server/db/schema/studio'
-import { and, eq } from 'drizzle-orm'
+import {
+	studioLocations,
+	studioPractitioners,
+	studios,
+} from '~~/server/db/schema/studio'
+import { and, eq, inArray } from 'drizzle-orm'
 import { createOfferingSchema } from '~/entities/offering/schema'
 import slugify from 'slugify'
 import {
@@ -53,6 +57,42 @@ export default defineEventHandler(async (event) => {
 
 	try {
 		const result = await db.transaction(async (tx) => {
+			// 1.1 Validations
+			if (body.locationId) {
+				const [location] = await tx
+					.select({ id: studioLocations.id })
+					.from(studioLocations)
+					.where(
+						and(
+							eq(studioLocations.id, body.locationId),
+							eq(studioLocations.studioId, studio.id),
+						),
+					)
+					.limit(1)
+				if (!location) {
+					throw createError({
+						statusCode: 400,
+						statusMessage: 'Invalid location for this studio',
+					})
+				}
+			}
+			const validPractitioners = await tx
+				.select({ id: studioPractitioners.id })
+				.from(studioPractitioners)
+				.where(
+					and(
+						eq(studioPractitioners.studioId, studio.id),
+						inArray(studioPractitioners.id, body.practitionerIds),
+					),
+				)
+			if (validPractitioners.length !== body.practitionerIds.length) {
+				throw createError({
+					statusCode: 400,
+					statusMessage:
+						'One or more practitioners are invalid for this studio',
+				})
+			}
+
 			// 2. Offering creation
 			const [newOffering] = await tx
 				.insert(offerings)

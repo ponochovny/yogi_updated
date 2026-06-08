@@ -24,7 +24,7 @@ drizzle.config.ts
 ### Generate the auth schema based on the config
 
 ```bash
-npx auth@latest generate --config server/utils/auth/index.ts --output server/utils/db/schema/auth-schema.ts
+npx auth@latest generate --config server/utils/auth/index.ts --output server/db/schema/auth-schema.ts
 ```
 
 ```bash

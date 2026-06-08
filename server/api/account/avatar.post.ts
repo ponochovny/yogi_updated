@@ -8,7 +8,7 @@ import { updateAvatarSchema } from '~/entities/profile/schema'
 
 export default defineEventHandler(async (event) => {
 	const session = await auth.api.getSession({ headers: event.headers })
-	if (!session)
+	if (!session || !session.user)
 		throw createError({ statusCode: 401, message: 'Not authorized' })
 
 	const userId = session.user.id

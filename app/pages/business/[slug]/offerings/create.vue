@@ -180,7 +180,9 @@ const removeFromGallery = (index: number) => {
 								:src="placeholderImageUrl"
 								class="h-40 aspect-video rounded-2xl object-cover border"
 							/>
-							<Button @click="uploadGallery"> Set Gallery </Button>
+							<Button type="button" @click="uploadGallery">
+								Set Gallery
+							</Button>
 						</div>
 					</div>
 

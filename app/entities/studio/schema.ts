@@ -1,7 +1,7 @@
 import { z } from 'zod'
 import type { InternalApi } from 'nitropack'
 
-export type StudioItem = InternalApi['/api/studios']['get']['studios'][0]
+export type StudioItem = InternalApi['/api/studios']['get']['studios'][number]
 
 export const createStudioSchema = z.object({
 	name: z.string().trim().min(1, 'Studio name is required'),

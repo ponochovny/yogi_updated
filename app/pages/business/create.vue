@@ -8,6 +8,7 @@ import {
 } from '~/entities/studio/schema'
 import openUploadWidget from '~/shared/composables/useCloudinary'
 import { toast } from 'vue-sonner'
+import { placeholderImageUrl } from '~/config/constants'
 
 definePageMeta({
 	title: 'Studio Creation',
@@ -151,11 +152,11 @@ const removeFromGallery = (index: number) => {
 				<h2 class="text-lg font-semibold border-b pb-2">Studio Logo</h2>
 				<div class="mb-6 flex items-center space-x-4">
 					<NuxtImg
-						:src="formValues.logo?.url || 'https://placehold.net/default.png'"
+						:src="formValues.logo?.url || placeholderImageUrl"
 						alt="Avatar"
 						class="w-20 h-20 rounded-full object-cover border"
 					/>
-					<Button @click="uploadLogo"> Set Logo </Button>
+					<Button type="button" @click="uploadLogo"> Set Logo </Button>
 				</div>
 				<h2 class="text-lg font-semibold border-b pb-2">
 					Gallery (Interior, hall)
@@ -167,7 +168,7 @@ const removeFromGallery = (index: number) => {
 						class="relative"
 					>
 						<NuxtImg
-							:src="image.url || 'https://placehold.net/default.png'"
+							:src="image.url || placeholderImageUrl"
 							class="h-40 aspect-video rounded-2xl object-cover border"
 						/>
 						<Button
@@ -182,10 +183,10 @@ const removeFromGallery = (index: number) => {
 					</div>
 					<NuxtImg
 						v-if="!formValues.gallery?.length"
-						:src="'https://placehold.net/default.png'"
+						:src="placeholderImageUrl"
 						class="h-40 aspect-video rounded-2xl object-cover border"
 					/>
-					<Button @click="uploadGallery"> Set Gallery </Button>
+					<Button type="button" @click="uploadGallery"> Set Gallery </Button>
 				</div>
 				<h2 class="text-lg font-semibold border-b pb-2">1. Main Information</h2>
 				<FormField v-slot="{ componentField }" name="name">
@@ -232,6 +233,7 @@ const removeFromGallery = (index: number) => {
 				<div class="flex items-center justify-between border-b pb-2">
 					<h2 class="text-lg font-semibold">2. Locations</h2>
 					<Button
+						type="button"
 						variant="outline"
 						size="sm"
 						class="text-sm font-medium"
@@ -251,6 +253,7 @@ const removeFromGallery = (index: number) => {
 							<h3 class="font-medium mb-3">Location #{{ index + 1 }}</h3>
 							<Button
 								v-if="index !== 0"
+								type="button"
 								variant="ghost"
 								size="icon"
 								class="text-red-500 hover:text-red-700"

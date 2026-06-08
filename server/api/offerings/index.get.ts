@@ -1,7 +1,11 @@
 import { offerings } from '~~/server/db/schema/offering'
 import { studios, studioLocations } from '~~/server/db/schema/studio'
-import { mediaFiles } from '~~/server/db/schema/_other'
-import { aliasedTable, and, eq } from 'drizzle-orm'
+import {
+	MediaEntityTypeEnum,
+	mediaFiles,
+	MediaTypeEnum,
+} from '~~/server/db/schema/_other'
+import { aliasedTable, and, eq, sql } from 'drizzle-orm'
 import { getEntityGallery } from '~~/server/utils/db-helpers'
 
 export default defineEventHandler(async () => {
@@ -20,7 +24,11 @@ export default defineEventHandler(async () => {
 				duration: offerings.duration,
 				capacity: offerings.capacity,
 
-				gallery: getEntityGallery(offerings.id, 'OFFERING', 'GALLERY'),
+				gallery: getEntityGallery(
+					offerings.id,
+					MediaEntityTypeEnum.OFFERING,
+					MediaTypeEnum.GALLERY,
+				),
 
 				studio: {
 					name: studios.name,
@@ -39,9 +47,9 @@ export default defineEventHandler(async () => {
 			.leftJoin(
 				studioLogo,
 				and(
-					eq(studioLogo.entityId, studios.id),
-					eq(studioLogo.entityType, 'STUDIO'),
-					eq(studioLogo.type, 'LOGO'),
+					eq(studioLogo.entityId, sql`${studios.id}::text`),
+					eq(studioLogo.entityType, MediaEntityTypeEnum.STUDIO),
+					eq(studioLogo.type, MediaTypeEnum.LOGO),
 				),
 			)
 			.where(eq(offerings.isPublished, true))
@@ -49,6 +57,9 @@ export default defineEventHandler(async () => {
 		return { success: true, offerings: data }
 	} catch (error) {
 		console.error('Offerings fetch failed:', error)
-		throw createError({ statusCode: 500, message: 'Failed to fetch offerings' })
+		throw createError({
+			statusCode: 500,
+			statusMessage: 'Failed to fetch offerings',
+		})
 	}
 })
