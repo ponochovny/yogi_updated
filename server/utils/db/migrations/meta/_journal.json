@@ -43,6 +43,41 @@
       "when": 1780836598688,
       "tag": "0005_tan_wong",
       "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "7",
+      "when": 1780852111316,
+      "tag": "0006_fantastic_agent_brand",
+      "breakpoints": true
+    },
+    {
+      "idx": 7,
+      "version": "7",
+      "when": 1780861575829,
+      "tag": "0007_needy_green_goblin",
+      "breakpoints": true
+    },
+    {
+      "idx": 8,
+      "version": "7",
+      "when": 1780873480144,
+      "tag": "0008_aromatic_beyonder",
+      "breakpoints": true
+    },
+    {
+      "idx": 9,
+      "version": "7",
+      "when": 1780883375158,
+      "tag": "0009_great_goliath",
+      "breakpoints": true
+    },
+    {
+      "idx": 10,
+      "version": "7",
+      "when": 1780921152600,
+      "tag": "0010_striped_night_thrasher",
+      "breakpoints": true
     }
   ]
 }
