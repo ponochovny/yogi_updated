@@ -5,8 +5,8 @@ export default defineNuxtConfig({
 	devtools: { enabled: true },
 
 	modules: [
-		'@nuxtjs/seo',
-		'@nuxtjs/leaflet',
+		// '@nuxtjs/seo',
+		// '@nuxtjs/leaflet',
 		'@nuxtjs/i18n',
 		'@nuxtjs/eslint-module',
 		'@nuxtjs/color-mode',
@@ -14,8 +14,8 @@ export default defineNuxtConfig({
 		'@nuxt/fonts',
 		'@nuxt/eslint',
 		// '@nuxt/a11y',
-		'@nuxt/test-utils',
-		'@pinia/nuxt',
+		// '@nuxt/test-utils',
+		// '@pinia/nuxt',
 		'nuxt-vitalizer',
 		'shadcn-nuxt',
 	],

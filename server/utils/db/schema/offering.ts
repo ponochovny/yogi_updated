@@ -25,7 +25,6 @@ export const pricingTypeEnum = pgEnum('pricing_type', [
 	pricingType.PACK,
 	pricingType.MEMBERSHIP,
 ])
-
 export const activityTypeEnum = pgEnum('activity_type', [
 	ActivityType.CLASS,
 	ActivityType.APPOINTMENT,
@@ -55,7 +54,6 @@ export const offerings = pgTable('offerings', {
 	description: text('description'),
 	gallery: text('gallery').array().default([]).notNull(),
 
-	// ДОБАВЛЕНЫ НОВЫЕ ТИПЫ
 	activityType: activityTypeEnum('activity_type').default('CLASS').notNull(),
 	isPrivate: boolean('is_private').default(false).notNull(),
 
