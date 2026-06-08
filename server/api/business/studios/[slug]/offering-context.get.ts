@@ -2,8 +2,8 @@ import {
 	studios,
 	studioPractitioners,
 	studioLocations,
-} from '~~/server/utils/db/schema/studio'
-import { user } from '~~/server/utils/db/schema/auth-schema'
+} from '~~/server/db/schema/studio'
+import { user } from '~~/server/db/schema/auth-schema'
 import { and, eq } from 'drizzle-orm'
 
 export default defineEventHandler(async (event) => {

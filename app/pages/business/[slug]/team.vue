@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { placeholderImageUrl } from '~/config/constants'
-import { practitionerRoles } from '~~/server/utils/auth/config'
+import { practitionerRoles } from '~~/server/auth/config'
 
 definePageMeta({
 	title: 'Team',

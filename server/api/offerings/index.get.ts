@@ -1,6 +1,6 @@
-import { offerings } from '~~/server/utils/db/schema/offering'
-import { studios, studioLocations } from '~~/server/utils/db/schema/studio'
-import { mediaFiles } from '~~/server/utils/db/schema/_other'
+import { offerings } from '~~/server/db/schema/offering'
+import { studios, studioLocations } from '~~/server/db/schema/studio'
+import { mediaFiles } from '~~/server/db/schema/_other'
 import { aliasedTable, and, eq } from 'drizzle-orm'
 import { getEntityGallery } from '~~/server/utils/db-helpers'
 

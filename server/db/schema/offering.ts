@@ -14,7 +14,7 @@ import {
 	offeringType,
 	pricingType,
 	ActivityType,
-} from '../../../../app/entities/offering/schema'
+} from '../../../app/entities/offering/schema'
 
 export const offeringTypeEnum = pgEnum('offering_type', [
 	offeringType.GROUP,

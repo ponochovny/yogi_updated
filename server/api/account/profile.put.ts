@@ -1,7 +1,12 @@
 import { useDb } from '~~/server/utils/db'
-import { user } from '~~/server/utils/db/schema/auth-schema'
+import { user } from '~~/server/db/schema/auth-schema'
 import { updateProfileSchema } from '~/entities/profile/schema'
 import { eq } from 'drizzle-orm'
+import {
+	mediaFiles,
+	MediaEntityTypeEnum,
+	MediaTypeEnum,
+} from '~~/server/db/schema/_other'
 
 export default defineEventHandler(async (event) => {
 	const session = await auth.api.getSession({

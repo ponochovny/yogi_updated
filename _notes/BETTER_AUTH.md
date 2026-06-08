@@ -63,7 +63,7 @@ console.log('Session data:', session)
 ## 📝Better Auth - User types
 
 ```TS
-import type { user as DrizzleUser } from '~~/server/utils/db/schema/auth-schema'
+import type { user as DrizzleUser } from '~~/server/db/schema/auth-schema'
 
 const user = session.value?.data?.user as unknown as typeof DrizzleUser.$inferSelect
 ```

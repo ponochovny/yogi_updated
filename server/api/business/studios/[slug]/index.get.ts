@@ -1,5 +1,5 @@
-import { studios, studioLocations } from '~~/server/utils/db/schema/studio'
-import { mediaFiles } from '~~/server/utils/db/schema/_other'
+import { studios, studioLocations } from '~~/server/db/schema/studio'
+import { mediaFiles } from '~~/server/db/schema/_other'
 import { and, eq } from 'drizzle-orm'
 
 export default defineEventHandler(async (event) => {

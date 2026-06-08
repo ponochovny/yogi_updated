@@ -1,5 +1,5 @@
-import { offerings } from '~~/server/utils/db/schema/offering'
-import { studios, studioLocations } from '~~/server/utils/db/schema/studio'
+import { offerings } from '~~/server/db/schema/offering'
+import { studios, studioLocations } from '~~/server/db/schema/studio'
 import { and, eq } from 'drizzle-orm'
 
 export default defineEventHandler(async (event) => {

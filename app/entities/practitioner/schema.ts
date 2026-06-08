@@ -1,5 +1,5 @@
 import { z } from 'zod'
-import { practitionerRoles } from '~~/server/utils/auth/config'
+import { practitionerRoles } from '~~/server/auth/config'
 
 export const addPractitionerSchema = z.object({
 	email: z.email('Email is not valid'),

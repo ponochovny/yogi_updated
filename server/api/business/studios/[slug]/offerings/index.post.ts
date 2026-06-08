@@ -1,12 +1,9 @@
-import {
-	offerings,
-	offeringPractitioners,
-} from '~~/server/utils/db/schema/offering'
-import { studios } from '~~/server/utils/db/schema/studio'
+import { offerings, offeringPractitioners } from '~~/server/db/schema/offering'
+import { studios } from '~~/server/db/schema/studio'
 import { and, eq } from 'drizzle-orm'
 import { createOfferingSchema } from '~/entities/offering/schema'
 import slugify from 'slugify'
-import { MediaEntityTypeEnum } from '~~/server/utils/db/schema/_other'
+import { MediaEntityTypeEnum } from '~~/server/db/schema/_other'
 
 export default defineEventHandler(async (event) => {
 	const session = await auth.api.getSession({

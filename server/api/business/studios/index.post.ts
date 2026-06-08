@@ -1,9 +1,6 @@
 import { auth } from '~~/server/utils/auth'
-import { studios, studioLocations } from '~~/server/utils/db/schema/studio'
-import {
-	mediaFiles,
-	MediaEntityTypeEnum,
-} from '~~/server/utils/db/schema/_other'
+import { studios, studioLocations } from '~~/server/db/schema/studio'
+import { mediaFiles, MediaEntityTypeEnum } from '~~/server/db/schema/_other'
 import { createStudioSchema } from '~/entities/studio/schema'
 import slugify from 'slugify'
 

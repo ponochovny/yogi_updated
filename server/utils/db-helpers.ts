@@ -1,5 +1,5 @@
 import { type AnyColumn, sql } from 'drizzle-orm'
-import type { MediaTypeEnum } from './db/schema/_other'
+import type { MediaTypeEnum } from '../db/schema/_other'
 
 export function getEntityGallery(
 	entityIdColumn: AnyColumn,

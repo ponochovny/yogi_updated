@@ -1,4 +1,4 @@
-import { mediaFiles } from '~~/server/utils/db/schema/_other'
+import { mediaFiles } from '~~/server/db/schema/_other'
 import { and, eq } from 'drizzle-orm'
 
 export default defineEventHandler(async (event) => {
