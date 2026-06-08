@@ -73,13 +73,16 @@ const addTeamMember = async () => {
 				</div>
 				<div class="w-40">
 					<label class="block text-sm font-medium mb-1">Role</label>
-					<select
-						v-model="form.role"
-						class="w-full border rounded-lg px-3 py-2"
-					>
-						<option value="PRACTITIONER">Trainer</option>
-						<option value="MANAGER">Manager</option>
-					</select>
+					<div class="*:w-full">
+						<NativeSelect v-model="form.role">
+							<NativeSelectOption :value="practitionerRoles.PRACTITIONER">
+								Trainer
+							</NativeSelectOption>
+							<NativeSelectOption :value="practitionerRoles.MANAGER">
+								Manager
+							</NativeSelectOption>
+						</NativeSelect>
+					</div>
 				</div>
 				<Button type="submit" :disabled="isSubmitting">
 					{{ isSubmitting ? '...' : 'Add Member' }}

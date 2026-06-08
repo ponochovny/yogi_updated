@@ -1,11 +1,9 @@
 <script lang="ts" setup>
 import { placeholderImageUrl } from '~/config/constants'
-import type { Studio, StudioMedia } from '../schema'
+import type { StudioItem } from '../schema'
 
 defineProps<{
-	studio: Studio
-	studioMedia: StudioMedia
-	studioLocation?: { address: string; city: string; country: string }[]
+	studio: StudioItem
 }>()
 </script>
 
@@ -15,7 +13,7 @@ defineProps<{
 	>
 		<div>
 			<NuxtImg
-				:src="studioMedia.gallery[0] || placeholderImageUrl"
+				:src="studio.gallery[0] || placeholderImageUrl"
 				alt="Image"
 				class="aspect-video h-full w-full rounded-t-3xl object-cover"
 			/>
@@ -25,11 +23,11 @@ defineProps<{
 				<h3 class="text-lg font-bold">{{ studio.name }}</h3>
 			</NuxtLink>
 			<p
-				v-if="studioLocation && studioLocation[0]"
+				v-if="studio.locations && studio.locations[0]"
 				class="flex-1 text-muted-foreground truncate"
 			>
-				{{ studioLocation[0].address }}, {{ studioLocation[0].city }},
-				{{ studioLocation[0].country }}
+				{{ studio.locations[0].address }}, {{ studio.locations[0].city }},
+				{{ studio.locations[0].country }}
 			</p>
 			<p class="flex-1 text-muted-foreground line-clamp-4">
 				{{ studio.bio }}

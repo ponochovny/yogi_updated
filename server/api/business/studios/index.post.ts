@@ -1,6 +1,9 @@
 import { auth } from '~~/server/utils/auth'
 import { studios, studioLocations } from '~~/server/utils/db/schema/studio'
-import { mediaFiles } from '~~/server/utils/db/schema/_other'
+import {
+	mediaFiles,
+	MediaEntityTypeEnum,
+} from '~~/server/utils/db/schema/_other'
 import { createStudioSchema } from '~/entities/studio/schema'
 import slugify from 'slugify'
 
@@ -63,7 +66,7 @@ export default defineEventHandler(async (event) => {
 						url: body.logo.url,
 						providerPublicId: body.logo.providerPublicId,
 						entityId: newStudio.id,
-						entityType: 'STUDIO',
+						entityType: MediaEntityTypeEnum.STUDIO,
 						type: 'LOGO',
 					})
 				}
@@ -77,8 +80,8 @@ export default defineEventHandler(async (event) => {
 							url: image.url,
 							providerPublicId: image.providerPublicId,
 							entityId: newStudio.id,
-							entityType: 'STUDIO',
-							type: 'GALLERY',
+							entityType: MediaEntityTypeEnum.STUDIO,
+							type: MediaTypeEnum.GALLERY,
 							order: index,
 						}),
 					)

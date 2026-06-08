@@ -1,4 +1,7 @@
 import { z } from 'zod'
+import type { InternalApi } from 'nitropack'
+
+export type StudioItem = InternalApi['/api/studios']['get']['studios'][0]
 
 export const createStudioSchema = z.object({
 	name: z.string().trim().min(1, 'Studio name is required'),
@@ -43,15 +46,3 @@ export const createStudioSchema = z.object({
 })
 
 export type CreateStudioInput = z.infer<typeof createStudioSchema>
-
-export type Studio = Omit<
-	typeof studios.$inferSelect,
-	'createdAt' | 'updatedAt'
-> & {
-	createdAt: string
-	updatedAt: string
-}
-export type StudioMedia = {
-	logo: string | null
-	gallery: string[]
-}

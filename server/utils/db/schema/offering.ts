@@ -32,7 +32,6 @@ export const activityTypeEnum = pgEnum('activity_type', [
 	ActivityType.EVENT,
 ])
 
-// 1. Categories (Tags). Needed to understand what an membership applies to.
 export const offeringCategories = pgTable('offering_categories', {
 	id: uuid('id').defaultRandom().primaryKey(),
 	studioId: uuid('studio_id')
@@ -42,7 +41,6 @@ export const offeringCategories = pgTable('offering_categories', {
 	color: varchar('color').default('#000000'), // For a beautiful UI in the calendar
 })
 
-// 2. Offering
 export const offerings = pgTable('offerings', {
 	id: uuid('id').defaultRandom().primaryKey(),
 	slug: varchar('slug').notNull(),
@@ -87,7 +85,6 @@ export const offeringPractitioners = pgTable('offering_practitioners', {
 		.references(() => studioPractitioners.id, { onDelete: 'cascade' }),
 })
 
-// 3. Pricing Options
 export const pricingOptions = pgTable('pricing_options', {
 	id: uuid('id').defaultRandom().primaryKey(),
 	studioId: uuid('studio_id')
@@ -114,7 +111,6 @@ export const pricingOptions = pgTable('pricing_options', {
 	createdAt: timestamp('created_at').defaultNow().notNull(),
 })
 
-// --- RELATIONS ---
 export const offeringsRelations = relations(offerings, ({ one }) => ({
 	studio: one(studios, {
 		fields: [offerings.studioId],

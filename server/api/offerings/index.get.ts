@@ -1,35 +1,53 @@
-import { getOfferings } from '~~/server/db/offerings'
+import { offerings } from '~~/server/utils/db/schema/offering'
+import { studios, studioLocations } from '~~/server/utils/db/schema/studio'
+import { mediaFiles } from '~~/server/utils/db/schema/_other'
+import { aliasedTable, and, eq } from 'drizzle-orm'
+import { getEntityGallery } from '~~/server/utils/db-helpers'
 
 export default defineEventHandler(async () => {
+	const db = useDb()
+
+	const studioLogo = aliasedTable(mediaFiles, 'studio_logo')
+
 	try {
-		// eslint-disable-next-line @typescript-eslint/no-explicit-any
-		const offerings = await getOfferings<any[]>()
+		const data = await db
+			.select({
+				id: offerings.id,
+				name: offerings.name,
+				slug: offerings.slug,
+				description: offerings.description,
+				activityType: offerings.activityType,
+				duration: offerings.duration,
+				capacity: offerings.capacity,
 
-		// const offerings = await new Promise((resolve) => {
-		// 	setTimeout(() => {
-		// 		resolve([
-		// 			{
-		// 				id: 1,
-		// 				title: 'Offering 1',
-		// 				description: 'Description for Offering 1',
-		// 			},
-		// 			{
-		// 				id: 2,
-		// 				title: 'Offering 2',
-		// 				description: 'Description for Offering 2',
-		// 			},
-		// 		])
-		// 	}, 1000)
-		// })
+				gallery: getEntityGallery(offerings.id, 'OFFERING', 'GALLERY'),
 
-		return {
-			data: offerings,
-			status: 'Success!',
-		}
+				studio: {
+					name: studios.name,
+					slug: studios.slug,
+					logo: studioLogo.url,
+				},
+				location: {
+					name: studioLocations.name,
+					city: studioLocations.city,
+					address: studioLocations.address,
+				},
+			})
+			.from(offerings)
+			.innerJoin(studios, eq(offerings.studioId, studios.id))
+			.leftJoin(studioLocations, eq(offerings.locationId, studioLocations.id))
+			.leftJoin(
+				studioLogo,
+				and(
+					eq(studioLogo.entityId, studios.id),
+					eq(studioLogo.entityType, 'STUDIO'),
+					eq(studioLogo.type, 'LOGO'),
+				),
+			)
+			.where(eq(offerings.isPublished, true))
+
+		return { success: true, offerings: data }
 	} catch (error) {
-		throw createError({
-			statusCode: 500,
-			message: (error as Error).message ?? 'Unknown error',
-		})
+		throw createError({ statusCode: 500, message: (error as Error).message })
 	}
 })
