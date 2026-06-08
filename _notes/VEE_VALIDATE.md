@@ -1,6 +1,11 @@
 ## Vee Validate - Boilerplate
 
-``` VUE
+``` TS
+// export type CreateStudioInput = z.infer<typeof createStudioSchema>
+import {
+	type CreateStudioInput,
+} from '~/entities/studio/schema'
+
 const studioSchema = toTypedSchema(createStudioSchema)
 
 const {
@@ -27,8 +32,6 @@ const submitDisabled = computed(
 // 	remove: removeLocation,
 // } = useFieldArray('locations')
 
-const submitStudio = handleSubmit(async (values) => createStudio(values))
-
 const createStudio = async (values: CreateStudioInput) => {
 	errorMsg.value = ''
 	isProcessing.value = true
@@ -54,6 +57,11 @@ const createStudio = async (values: CreateStudioInput) => {
 	}
 }
 
+const submitStudio = handleSubmit(createStudio)
+// const submitStudio = handleSubmit(createStudio, (errors) => {
+// 	errorMsg.value = 'Please fix the validation errors before submitting.'
+// 	console.log('Validation Errors:', errors)
+// })
 ```
 
 ``` VUE

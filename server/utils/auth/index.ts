@@ -2,6 +2,8 @@ import { betterAuth } from 'better-auth'
 import { drizzleAdapter } from 'better-auth/adapters/drizzle'
 import { useDb } from '../db'
 import { userRoles } from './config'
+import { customSession } from 'better-auth/plugins'
+import { and, eq } from 'drizzle-orm'
 
 export const auth = betterAuth({
 	database: drizzleAdapter(useDb(), {
@@ -29,4 +31,32 @@ export const auth = betterAuth({
 			},
 		},
 	},
+	plugins: [
+		customSession(async ({ user, session }) => {
+			const db = useDb()
+
+			const [avatarFile] = await db
+				.select({ url: mediaFiles.url })
+				.from(mediaFiles)
+				.where(
+					and(
+						eq(mediaFiles.entityId, user.id),
+						eq(mediaFiles.entityType, 'USER'),
+						eq(mediaFiles.type, 'AVATAR'),
+					),
+				)
+				.limit(1)
+
+			if (avatarFile) {
+				user.image = avatarFile.url
+			}
+
+			return {
+				...session,
+				user: {
+					...user,
+				},
+			}
+		}),
+	],
 })

@@ -6,7 +6,12 @@ export interface MediaObject {
 type WindowCloudinary = { cloudinary: { createUploadWidget: unknown } }
 
 const openUploadWidget = (
-	options: { multiple: boolean; cropping: boolean },
+	options: {
+		multiple: boolean
+		cropping: boolean
+		isCamera?: boolean
+		aspectRatio?: number
+	},
 	onSuccess: (media: MediaObject) => void,
 ) => {
 	const {
@@ -22,8 +27,9 @@ const openUploadWidget = (
 			{
 				cloudName: cloudinaryName,
 				uploadPreset: cloudinaryUploadPreset,
-				sources: ['local', 'url'],
+				sources: ['local', 'url', options.isCamera && 'camera'],
 				clientAllowedFormats: ['png', 'jpeg', 'webp', 'jpg'],
+				croppingAspectRatio: options.aspectRatio || undefined,
 				maxImageFileSize: 5000000,
 				multiple: options.multiple,
 				cropping: options.cropping,

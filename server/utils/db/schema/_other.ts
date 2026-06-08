@@ -36,7 +36,7 @@ export const mediaFiles = pgTable('media_files', {
 	url: text('url').notNull(),
 	providerPublicId: text('provider_public_id').notNull(),
 
-	entityId: uuid('entity_id').notNull(), // Studio ID, Offering ID or User ID
+	entityId: text('entity_id').notNull(), // Studio ID, Offering ID or User ID
 	// entityType: text('entity_type').notNull(), // 'STUDIO', 'OFFERING', 'USER'
 	entityType: mediaEntityTypeEnum('entity_type').notNull(),
 

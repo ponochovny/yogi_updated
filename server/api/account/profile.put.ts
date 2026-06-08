@@ -1,5 +1,6 @@
 import { useDb } from '~~/server/utils/db'
 import { user } from '~~/server/utils/db/schema/auth-schema'
+import { updateProfileSchema } from '~/entities/profile/schema'
 import { eq } from 'drizzle-orm'
 
 export default defineEventHandler(async (event) => {
@@ -15,31 +16,44 @@ export default defineEventHandler(async (event) => {
 	}
 	const currentUserId = session.user.id
 
-	const body = await readBody(event)
+	const body = await readValidatedBody(event, updateProfileSchema.parse)
+	const db = useDb()
 
 	try {
-		const db = useDb()
+		const result = await db.transaction(async (tx) => {
+			const [updatedUser] = await db
+				.update(user)
+				.set({
+					name: body.name,
+					bio: body.bio,
+					updatedAt: new Date(),
+				})
+				.where(eq(user.id, currentUserId))
+				.returning({
+					id: user.id,
+					name: user.name,
+					bio: user.bio,
+				})
 
-		const [updatedUser] = await db
-			.update(user)
-			.set({
-				name: body.name,
-				bio: body.bio,
-				image: body.profileImage,
-				updatedAt: new Date(),
-			})
-			.where(eq(user.id, currentUserId))
-			.returning({
-				id: user.id,
-				name: user.name,
-				bio: user.bio,
-				image: user.image,
-			})
+			if (updatedUser) {
+				if (body.avatar) {
+					await tx.insert(mediaFiles).values({
+						url: body.avatar.url,
+						providerPublicId: body.avatar.providerPublicId,
+						entityId: updatedUser.id,
+						entityType: MediaEntityTypeEnum.USER,
+						type: MediaTypeEnum.AVATAR,
+					})
+				}
+			}
+
+			return updatedUser
+		})
 
 		return {
 			success: true,
 			message: 'Profile updated successfully',
-			user: updatedUser,
+			user: result,
 		}
 	} catch (error: unknown) {
 		throw createError({
