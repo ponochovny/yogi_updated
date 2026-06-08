@@ -4,7 +4,11 @@ import { useDb } from '../db'
 import { userRoles } from '../../auth/config'
 import { customSession } from 'better-auth/plugins'
 import { and, eq } from 'drizzle-orm'
-import { mediaFiles } from '../../db/schema/_other'
+import {
+	MediaEntityTypeEnum,
+	mediaFiles,
+	MediaTypeEnum,
+} from '../../db/schema/_other'
 
 export const auth = betterAuth({
 	database: drizzleAdapter(useDb(), {
@@ -42,8 +46,8 @@ export const auth = betterAuth({
 				.where(
 					and(
 						eq(mediaFiles.entityId, user.id),
-						eq(mediaFiles.entityType, 'USER'),
-						eq(mediaFiles.type, 'AVATAR'),
+						eq(mediaFiles.entityType, MediaEntityTypeEnum.USER),
+						eq(mediaFiles.type, MediaTypeEnum.AVATAR),
 					),
 				)
 				.limit(1)

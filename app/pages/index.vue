@@ -71,7 +71,6 @@ definePageMeta({
 const { locales, setLocale } = useI18n()
 
 const { data: studiosData } = useFetch(`/api/studios`)
-$fetch(`/api/studios`)
 const studios = computed(() => studiosData.value?.studios || [])
 
 const { data: offeringsData } = useFetch(`/api/offerings`)

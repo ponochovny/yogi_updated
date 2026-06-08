@@ -105,8 +105,6 @@ const createStudio = async (values: CreateStudioInput) => {
 	errorMsg.value = ''
 	isProcessing.value = true
 
-	console.log('Form Values:', values)
-
 	try {
 		const response = await $fetch('/api/business/studios', {
 			method: 'POST',

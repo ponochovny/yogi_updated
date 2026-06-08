@@ -13,7 +13,7 @@ defineProps<{
 	>
 		<div>
 			<NuxtImg
-				:src="studio.gallery[0] || placeholderImageUrl"
+				:src="studio.gallery?.[0] || placeholderImageUrl"
 				alt="Image"
 				class="aspect-video h-full w-full rounded-t-3xl object-cover"
 			/>

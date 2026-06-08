@@ -26,20 +26,21 @@ export default defineEventHandler(async (event) => {
 	const currentUserId = session.user.id
 	const db = useDb()
 
+	const [studio] = await db
+		.select()
+		.from(studios)
+		.where(and(eq(studios.slug, slug), eq(studios.ownerId, currentUserId)))
+		.limit(1)
+
+	if (!studio) {
+		throw createError({
+			statusCode: 404,
+			statusMessage:
+				'Studio not found or you do not have permission to view it',
+		})
+	}
+
 	try {
-		const [studio] = await db
-			.select()
-			.from(studios)
-			.where(and(eq(studios.slug, slug), eq(studios.ownerId, currentUserId)))
-			.limit(1)
-
-		if (!studio) {
-			throw createError({
-				statusCode: 404,
-				message: 'Studio not found or you do not have permission to view it',
-			})
-		}
-
 		const data = await db
 			.select({
 				id: offerings.id,
@@ -60,6 +61,7 @@ export default defineEventHandler(async (event) => {
 
 		return { success: true, offerings: data }
 	} catch (error) {
-		throw createError({ statusCode: 500, message: (error as Error).message })
+		console.error('Offerings fetch failed:', error)
+		throw createError({ statusCode: 500, message: 'Failed to fetch offerings' })
 	}
 })

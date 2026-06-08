@@ -26,17 +26,15 @@ const submitDisabled = computed(
 	() => isProcessing.value || isValidating.value || isSubmitting.value,
 )
 
-// const {
-// 	fields: locationFields,
-// 	push: addLocation,
-// 	remove: removeLocation,
-// } = useFieldArray('locations')
+const {
+	fields: locationFields,
+	push: addLocation,
+	remove: removeLocation,
+} = useFieldArray('locations')
 
 const createStudio = async (values: CreateStudioInput) => {
 	errorMsg.value = ''
 	isProcessing.value = true
-
-	console.log('Form Values:', values)
 
 	try {
 		const response = await $fetch('/api/business/studios', {
@@ -57,8 +55,8 @@ const createStudio = async (values: CreateStudioInput) => {
 	}
 }
 
-const submitStudio = handleSubmit(createStudio)
-// const submitStudio = handleSubmit(createStudio, (errors) => {
+const submitHandler = handleSubmit(createStudio)
+// const submitHandler = handleSubmit(createStudio, (errors) => {
 // 	errorMsg.value = 'Please fix the validation errors before submitting.'
 // 	console.log('Validation Errors:', errors)
 // })

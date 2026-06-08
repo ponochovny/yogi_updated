@@ -27,7 +27,7 @@ const openUploadWidget = (
 			{
 				cloudName: cloudinaryName,
 				uploadPreset: cloudinaryUploadPreset,
-				sources: ['local', 'url', options.isCamera && 'camera'],
+				sources: ['local', 'url', ...(options.isCamera ? ['camera'] : [])],
 				clientAllowedFormats: ['png', 'jpeg', 'webp', 'jpg'],
 				croppingAspectRatio: options.aspectRatio || undefined,
 				maxImageFileSize: 5000000,

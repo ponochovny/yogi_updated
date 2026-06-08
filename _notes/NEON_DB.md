@@ -6,9 +6,9 @@
 
 ```TS
 // app/utils/auth-client.ts
+import { createAuthClient } from '@neondatabase/auth'
 
 export const authClient = createAuthClient({
-	// baseURL: 'http://localhost:3000/api/auth, <-- Replace this line
-	baseURL: process.env.NEON_AUTH_URL, // with this
+	baseURL: process.env.NEON_AUTH_URL,
 })
 ```

@@ -70,10 +70,8 @@ const createOffering = async (values: CreateOfferingInput) => {
 	errorMsg.value = ''
 	isProcessing.value = true
 
-	console.log('Form Values:', values)
-
 	try {
-		const response = await $fetch('/api/business/studios/${slug}/offerings', {
+		const response = await $fetch(`/api/business/studios/${slug}/offerings`, {
 			method: 'POST',
 			body: values,
 		})

@@ -23,7 +23,11 @@ export const ActivityType = {
 export const createOfferingSchema = z.object({
 	name: z.string().min(2),
 	description: z.string().optional(),
-	activityType: z.enum(['CLASS', 'APPOINTMENT', 'EVENT']),
+	activityType: z.enum([
+		ActivityType.CLASS,
+		ActivityType.APPOINTMENT,
+		ActivityType.EVENT,
+	]),
 	isPrivate: z.boolean(),
 	locationId: z.uuid().nullable(), // null means online
 	timezone: z.string(),

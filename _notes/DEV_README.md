@@ -4,13 +4,13 @@
 ### Database config
 
 ```
-server/util/db/index.ts
+server/utils/db/index.ts
 ```
 
 ### Database schema (Drizzle ORM)
 
 ```
-server/util/db/schema (folder)
+server/db/schema (folder)
 ```
 
 ### Drizzle ORM config

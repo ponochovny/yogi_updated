@@ -3,7 +3,11 @@ import { studios } from '~~/server/db/schema/studio'
 import { and, eq } from 'drizzle-orm'
 import { createOfferingSchema } from '~/entities/offering/schema'
 import slugify from 'slugify'
-import { MediaEntityTypeEnum } from '~~/server/db/schema/_other'
+import {
+	MediaEntityTypeEnum,
+	mediaFiles,
+	MediaTypeEnum,
+} from '~~/server/db/schema/_other'
 
 export default defineEventHandler(async (event) => {
 	const session = await auth.api.getSession({
@@ -33,22 +37,22 @@ export default defineEventHandler(async (event) => {
 
 	const offeringSlug = `${slugify(body.name, { lower: true })}-${Math.floor(1000 + Math.random() * 9000)}`
 
+	// 1. Check if studio exists and the user is it's owner
+	const [studio] = await db
+		.select()
+		.from(studios)
+		.where(and(eq(studios.slug, slug), eq(studios.ownerId, currentUserId)))
+		.limit(1)
+
+	if (!studio) {
+		throw createError({
+			statusCode: 404,
+			statusMessage: "Studio is not found or you don't have permissions",
+		})
+	}
+
 	try {
 		const result = await db.transaction(async (tx) => {
-			// 1. Check if studio exists and the user is it's owner
-			const [studio] = await tx
-				.select()
-				.from(studios)
-				.where(and(eq(studios.slug, slug!), eq(studios.ownerId, currentUserId)))
-				.limit(1)
-
-			if (!studio) {
-				throw createError({
-					statusCode: 404,
-					message: "Studio is not found or you don't have permissions",
-				})
-			}
-
 			// 2. Offering creation
 			const [newOffering] = await tx
 				.insert(offerings)
@@ -63,7 +67,7 @@ export default defineEventHandler(async (event) => {
 					timezone: body.timezone,
 					duration: body.duration,
 					capacity: body.capacity,
-					isPublished: true,
+					isPublished: true, // TODO: temporary, as there is no "publish" flow for now. All offerings are published by default
 				})
 				.returning()
 
@@ -104,6 +108,7 @@ export default defineEventHandler(async (event) => {
 
 		return { success: true, offering: result }
 	} catch (error: unknown) {
-		throw createError({ statusCode: 500, message: (error as Error).message })
+		console.error('Offering creation failed:', error)
+		throw createError({ statusCode: 500, message: 'Failed to create offering' })
 	}
 })

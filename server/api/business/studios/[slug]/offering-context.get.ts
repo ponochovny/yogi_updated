@@ -34,13 +34,13 @@ export default defineEventHandler(async (event) => {
 	const [studio] = await db
 		.select()
 		.from(studios)
-		.where(and(eq(studios.slug, slug!), eq(studios.ownerId, currentUserId)))
+		.where(and(eq(studios.slug, slug), eq(studios.ownerId, currentUserId)))
 		.limit(1)
 
 	if (!studio) {
 		throw createError({
 			statusCode: 404,
-			message: "Studio is not found or you don't have permissions",
+			statusMessage: "Studio is not found or you don't have permissions",
 		})
 	}
 

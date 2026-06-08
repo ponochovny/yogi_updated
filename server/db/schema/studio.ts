@@ -68,6 +68,6 @@ export const studioLocations = pgTable('studio_locations', {
 	country: text('country').notNull(),
 	city: text('city').notNull(),
 	address: text('address').notNull(),
-	timezone: text('timezone').notNull(),
+	timezone: text('timezone').default('UTC').notNull(),
 	createdAt: timestamp('created_at').defaultNow().notNull(),
 })

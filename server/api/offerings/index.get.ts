@@ -48,6 +48,7 @@ export default defineEventHandler(async () => {
 
 		return { success: true, offerings: data }
 	} catch (error) {
-		throw createError({ statusCode: 500, message: (error as Error).message })
+		console.error('Offerings fetch failed:', error)
+		throw createError({ statusCode: 500, message: 'Failed to fetch offerings' })
 	}
 })

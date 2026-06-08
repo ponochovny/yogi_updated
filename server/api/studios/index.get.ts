@@ -1,5 +1,9 @@
 import { studios, studioLocations } from '~~/server/db/schema/studio'
-import { mediaFiles } from '~~/server/db/schema/_other'
+import {
+	MediaEntityTypeEnum,
+	mediaFiles,
+	MediaTypeEnum,
+} from '~~/server/db/schema/_other'
 import { and, eq, inArray } from 'drizzle-orm'
 
 export default defineEventHandler(async () => {
@@ -38,7 +42,7 @@ export default defineEventHandler(async () => {
 				.where(
 					and(
 						inArray(mediaFiles.entityId, studioIds),
-						eq(mediaFiles.entityType, 'STUDIO'),
+						eq(mediaFiles.entityType, MediaEntityTypeEnum.STUDIO),
 					),
 				),
 		])
@@ -47,9 +51,10 @@ export default defineEventHandler(async () => {
 			const studioLocs = locations.filter((l) => l.studioId === studio.id)
 			const studioMedia = media.filter((m) => m.entityId === studio.id)
 
-			const logo = studioMedia.filter((m) => m.type === 'LOGO')[0]?.url || null
+			const logo =
+				studioMedia.filter((m) => m.type === MediaTypeEnum.LOGO)[0]?.url || null
 			const gallery = studioMedia
-				.filter((m) => m.type === 'GALLERY')
+				.filter((m) => m.type === MediaTypeEnum.GALLERY)
 				.map((m) => m.url)
 
 			const studioLocationsFormatted = studioLocs.map((l) => ({
@@ -68,6 +73,10 @@ export default defineEventHandler(async () => {
 
 		return { success: true, studios: studiosWithDetails }
 	} catch (error) {
-		throw createError({ statusCode: 500, message: (error as Error).message })
+		console.error('Studios fetch failed:', error)
+		throw createError({
+			statusCode: 500,
+			statusMessage: 'Failed to fetch studios',
+		})
 	}
 })

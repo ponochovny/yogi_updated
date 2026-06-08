@@ -5,7 +5,7 @@ import { placeholderImageUrl } from '~/config/constants'
 import { useForm } from 'vee-validate'
 import {
 	updateProfileSchema,
-	type CreateProfileInput,
+	type UpdateProfileInput,
 } from '~/entities/profile/schema'
 import { toTypedSchema } from '@vee-validate/zod'
 import openUploadWidget from '~/shared/composables/useCloudinary'
@@ -35,7 +35,7 @@ const {
 	isSubmitting,
 	values: formValues,
 	handleSubmit,
-	// setFieldValue,
+	setFieldValue,
 } = useForm({
 	validationSchema: profileSchema,
 	initialValues: {
@@ -54,63 +54,10 @@ const submitDisabled = computed(
 	() => isProcessing.value || isValidating.value || isSubmitting.value,
 )
 
-// const profileData = ref({
-// 	name: sessionData.value?.user.name || '',
-// 	bio: sessionData.value?.user.bio || '',
-// 	profileImage: sessionData.value?.user.image || '',
-// 	role: sessionData.value?.user.role || [],
-// })
-// const isSaving = ref(false)
-
-// const openCloudinaryWidget = () => {
-// 	if (typeof window !== 'undefined' && window.cloudinary) {
-// 		const {
-// 			public: { cloudinaryName, cloudinaryUploadPreset },
-// 		} = useRuntimeConfig()
-
-// 		const widget = window.cloudinary.createUploadWidget(
-// 			{
-// 				cloudName: cloudinaryName,
-// 				uploadPreset: cloudinaryUploadPreset,
-// 				sources: ['local', 'url', 'camera'],
-// 				multiple: false,
-// 				cropping: true,
-// 				croppingAspectRatio: 1,
-// 				clientAllowedFormats: ['png', 'jpeg', 'jpg', 'webp'],
-// 				maxImageFileSize: 5000000,
-// 			},
-// 			(error, result) => {
-// 				if (!error && result && result.event === 'success') {
-// 					const croppedUrl = result.info.secure_url.replace(
-// 						'/upload/',
-// 						'/upload/w_100,h_100,c_thumb,g_custom/',
-// 					)
-
-// 					formValues.value.profileImage = croppedUrl
-// 				}
-// 			},
-// 		)
-// 		widget.open(
-// 			null,
-// 			formValues.value.profileImage
-// 				? {
-// 						files: [
-// 							formValues.value.profileImage.replace(
-// 								'/upload/w_100,h_100,c_thumb,g_custom/',
-// 								'/upload/',
-// 							),
-// 						],
-// 					}
-// 				: undefined,
-// 		)
-// 	}
-// }
-
-const saveProfile = async (values: CreateProfileInput) => {
+const saveProfile = async (values: UpdateProfileInput) => {
 	errorMsg.value = ''
 	isProcessing.value = true
 
-	console.log('Form Values:', values)
 	try {
 		const response = await $fetch('/api/account/profile', {
 			method: 'PUT',
@@ -134,11 +81,6 @@ const saveProfile = async (values: CreateProfileInput) => {
 }
 const submitProfileUpdate = handleSubmit(saveProfile)
 
-// const uploadAvatar = () => {
-// 	openUploadWidget({ multiple: true, cropping: false }, (media) => {
-// 		setFieldValue('profileImage', [...(formValues.profileImage || []), media])
-// 	})
-// }
 const uploadAvatar = () => {
 	openUploadWidget(
 		{ multiple: false, cropping: true, isCamera: true, aspectRatio: 1 },
@@ -150,6 +92,11 @@ const uploadAvatar = () => {
 						url: media.url,
 						providerPublicId: media.providerPublicId,
 					},
+				})
+
+				setFieldValue('avatar', {
+					url: media.url,
+					providerPublicId: media.providerPublicId,
 				})
 
 				toast.success('Avatar updated successfully!')

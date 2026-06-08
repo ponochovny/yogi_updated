@@ -1,5 +1,10 @@
-import { mediaFiles } from '~~/server/db/schema/_other'
+import {
+	MediaEntityTypeEnum,
+	mediaFiles,
+	MediaTypeEnum,
+} from '~~/server/db/schema/_other'
 import { and, eq } from 'drizzle-orm'
+import { updateAvatarSchema } from '~/entities/profile/schema'
 
 export default defineEventHandler(async (event) => {
 	const session = await auth.api.getSession({ headers: event.headers })
@@ -7,7 +12,7 @@ export default defineEventHandler(async (event) => {
 		throw createError({ statusCode: 401, message: 'Not authorized' })
 
 	const userId = session.user.id
-	const body: { url: string; providerPublicId: string } = await readBody(event)
+	const body = await readValidatedBody(event, updateAvatarSchema.parse)
 	const db = useDb()
 
 	if (!body.url)
@@ -36,6 +41,7 @@ export default defineEventHandler(async (event) => {
 
 		return { success: true, url: body.url }
 	} catch (error) {
-		throw createError({ statusCode: 500, message: (error as Error).message })
+		console.error('Avatar upload failed:', error)
+		throw createError({ statusCode: 500, message: 'Failed to update avatar' })
 	}
 })

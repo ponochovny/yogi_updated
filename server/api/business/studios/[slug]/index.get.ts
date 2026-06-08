@@ -35,7 +35,8 @@ export default defineEventHandler(async (event) => {
 	if (!studio) {
 		throw createError({
 			statusCode: 404,
-			message: 'Studio not found or you do not have permission to view it',
+			statusMessage:
+				'Studio not found or you do not have permission to view it',
 		})
 	}
 

@@ -42,7 +42,7 @@ export const offeringCategories = pgTable('offering_categories', {
 
 export const offerings = pgTable('offerings', {
 	id: uuid('id').defaultRandom().primaryKey(),
-	slug: varchar('slug').notNull(),
+	slug: varchar('slug').notNull().unique(),
 	studioId: uuid('studio_id')
 		.notNull()
 		.references(() => studios.id, { onDelete: 'cascade' }),
@@ -52,7 +52,7 @@ export const offerings = pgTable('offerings', {
 
 	name: varchar('name').notNull(),
 	description: text('description'),
-	gallery: text('gallery').array().default([]).notNull(),
+	gallery: text('gallery').array().default([]),
 
 	activityType: activityTypeEnum('activity_type').default('CLASS').notNull(),
 	isPrivate: boolean('is_private').default(false).notNull(),
@@ -60,7 +60,7 @@ export const offerings = pgTable('offerings', {
 	locationId: uuid('location_id').references(() => studioLocations.id, {
 		onDelete: 'set null',
 	}),
-	timezone: varchar('timezone').notNull(), // Например 'Europe/Kyiv'
+	timezone: varchar('timezone').default('UTC').notNull(),
 
 	type: offeringTypeEnum('type').default('GROUP').notNull(),
 
@@ -73,6 +73,7 @@ export const offerings = pgTable('offerings', {
 	updatedAt: timestamp('updated_at').defaultNow().notNull(),
 })
 
+// TODO: Prevent the same practitioner from being linked to the same offering multiple times
 export const offeringPractitioners = pgTable('offering_practitioners', {
 	id: uuid('id').defaultRandom().primaryKey(),
 	offeringId: uuid('offering_id')

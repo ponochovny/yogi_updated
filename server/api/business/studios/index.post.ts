@@ -1,6 +1,10 @@
 import { auth } from '~~/server/utils/auth'
 import { studios, studioLocations } from '~~/server/db/schema/studio'
-import { mediaFiles, MediaEntityTypeEnum } from '~~/server/db/schema/_other'
+import {
+	mediaFiles,
+	MediaEntityTypeEnum,
+	MediaTypeEnum,
+} from '~~/server/db/schema/_other'
 import { createStudioSchema } from '~/entities/studio/schema'
 import slugify from 'slugify'
 
@@ -64,7 +68,7 @@ export default defineEventHandler(async (event) => {
 						providerPublicId: body.logo.providerPublicId,
 						entityId: newStudio.id,
 						entityType: MediaEntityTypeEnum.STUDIO,
-						type: 'LOGO',
+						type: MediaTypeEnum.LOGO,
 					})
 				}
 
