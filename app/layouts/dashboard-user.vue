@@ -36,5 +36,6 @@ provide('sidebarProps', sidebarProps)
 			<div>layouts/dashboard-user.vue</div>
 		</div>
 		<slot />
+		<Toaster />
 	</SidebarDashboardLayout>
 </template>

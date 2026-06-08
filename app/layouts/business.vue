@@ -29,5 +29,6 @@ provide('sidebarProps', sidebarProps)
 			<div>layouts/business.vue</div>
 		</div>
 		<slot />
+		<Toaster />
 	</SidebarDashboardLayout>
 </template>

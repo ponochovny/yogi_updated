@@ -157,13 +157,7 @@ const removeFromGallery = (index: number) => {
 						alt="Avatar"
 						class="w-20 h-20 rounded-full object-cover border"
 					/>
-					<Button
-						type="button"
-						class="px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-md text-sm transition"
-						@click="uploadLogo"
-					>
-						Set Logo
-					</Button>
+					<Button @click="uploadLogo"> Set Logo </Button>
 				</div>
 				<h2 class="text-lg font-semibold border-b pb-2">
 					Gallery (Interior, hall)
@@ -193,13 +187,7 @@ const removeFromGallery = (index: number) => {
 						:src="'https://placehold.net/default.png'"
 						class="h-40 aspect-video rounded-2xl object-cover border"
 					/>
-					<Button
-						type="button"
-						class="px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-md text-sm transition"
-						@click="uploadGallery"
-					>
-						Set Gallery
-					</Button>
+					<Button @click="uploadGallery"> Set Gallery </Button>
 				</div>
 				<h2 class="text-lg font-semibold border-b pb-2">1. Main Information</h2>
 				<FormField v-slot="{ componentField }" name="name">
@@ -246,7 +234,6 @@ const removeFromGallery = (index: number) => {
 				<div class="flex items-center justify-between border-b pb-2">
 					<h2 class="text-lg font-semibold">2. Locations</h2>
 					<Button
-						type="button"
 						variant="outline"
 						size="sm"
 						class="text-sm font-medium"
@@ -266,7 +253,6 @@ const removeFromGallery = (index: number) => {
 							<h3 class="font-medium mb-3">Location #{{ index + 1 }}</h3>
 							<Button
 								v-if="index !== 0"
-								type="button"
 								variant="ghost"
 								size="icon"
 								class="text-red-500 hover:text-red-700"

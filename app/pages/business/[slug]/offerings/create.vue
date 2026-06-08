@@ -182,13 +182,7 @@ const removeFromGallery = (index: number) => {
 								:src="placeholderImageUrl"
 								class="h-40 aspect-video rounded-2xl object-cover border"
 							/>
-							<Button
-								type="button"
-								class="px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-md text-sm transition"
-								@click="uploadGallery"
-							>
-								Set Gallery
-							</Button>
+							<Button @click="uploadGallery"> Set Gallery </Button>
 						</div>
 					</div>
 
