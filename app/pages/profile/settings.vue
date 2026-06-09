@@ -90,7 +90,7 @@ const uploadAvatar = () => {
 					},
 				})
 
-				refresh() // Refresh session to get updated user data
+				await refresh() // Refresh session to get updated user data
 				toast.success('Avatar updated successfully!')
 			} catch (error) {
 				toast.error(
