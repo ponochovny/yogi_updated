@@ -139,28 +139,30 @@ export default defineEventHandler(async (event) => {
 				)
 			}
 
-			// Update offering gallery media
-			// TODO: Optimize by diffing existing vs new media to minimize queries and avoid deleting all and re-inserting when there are no changes
-			await tx
-				.delete(mediaFiles)
-				.where(
-					and(
-						eq(mediaFiles.entityId, offering.id),
-						eq(mediaFiles.entityType, MediaEntityTypeEnum.OFFERING),
-						eq(mediaFiles.type, MediaTypeEnum.GALLERY),
-					),
-				)
-			if (body.gallery && body.gallery.length > 0) {
-				await tx.insert(mediaFiles).values(
-					body.gallery.map((image, index) => ({
-						url: image.url,
-						providerPublicId: image.providerPublicId,
-						entityId: offering.id,
-						entityType: MediaEntityTypeEnum.OFFERING,
-						type: MediaTypeEnum.GALLERY,
-						order: index,
-					})),
-				)
+			if (body.gallery !== undefined) {
+				// Update offering gallery media
+				// TODO: Optimize by diffing existing vs new media to minimize queries and avoid deleting all and re-inserting when there are no changes
+				await tx
+					.delete(mediaFiles)
+					.where(
+						and(
+							eq(mediaFiles.entityId, offering.id),
+							eq(mediaFiles.entityType, MediaEntityTypeEnum.OFFERING),
+							eq(mediaFiles.type, MediaTypeEnum.GALLERY),
+						),
+					)
+				if (body.gallery.length > 0) {
+					await tx.insert(mediaFiles).values(
+						body.gallery.map((image, index) => ({
+							url: image.url,
+							providerPublicId: image.providerPublicId,
+							entityId: offering.id,
+							entityType: MediaEntityTypeEnum.OFFERING,
+							type: MediaTypeEnum.GALLERY,
+							order: index,
+						})),
+					)
+				}
 			}
 
 			// Fetch the updated offering with associated practitioners and gallery media
