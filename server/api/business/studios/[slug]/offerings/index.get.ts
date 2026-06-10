@@ -44,6 +44,7 @@ export default defineEventHandler(async (event) => {
 		const data = await db
 			.select({
 				id: offerings.id,
+				slug: offerings.slug,
 				name: offerings.name,
 				activityType: offerings.activityType,
 				duration: offerings.duration,

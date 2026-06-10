@@ -1,5 +1,11 @@
 <script lang="ts" setup>
-import { PlusIcon, Settings2Icon, StickyNotes, UsersIcon } from '@lucide/vue'
+import {
+	PencilIcon,
+	PlusIcon,
+	Settings2Icon,
+	StickyNotes,
+	UsersIcon,
+} from '@lucide/vue'
 import { placeholderImageUrl } from '~/config/constants'
 
 definePageMeta({
@@ -98,6 +104,7 @@ const offerings = computed(() => offeringsData.value?.offerings)
 							<th class="p-4">Duration</th>
 							<th class="p-4">Location</th>
 							<th class="p-4">Status</th>
+							<th class="p-4" />
 						</tr>
 					</thead>
 					<tbody class="divide-y text-sm">
@@ -136,9 +143,34 @@ const offerings = computed(() => offeringsData.value?.offerings)
 									{{ offering.isPublished ? 'Published' : 'Draft' }}
 								</span>
 							</td>
+							<td class="p-4 text-right">
+								<DropdownMenu>
+									<DropdownMenuTrigger as-child>
+										<Button variant="ghost" size="sm">
+											<Settings2Icon />
+										</Button>
+									</DropdownMenuTrigger>
+									<DropdownMenuContent align="center" side="left">
+										<DropdownMenuGroup>
+											<DropdownMenuItem
+												v-if="!$route.path.startsWith('/profile')"
+												class="flex items-center gap-2"
+												@click="
+													navigateTo(
+														`/business/${studio?.slug}/offerings/${offering.slug}/edit`,
+													)
+												"
+											>
+												<PencilIcon />
+												Edit
+											</DropdownMenuItem>
+										</DropdownMenuGroup>
+									</DropdownMenuContent>
+								</DropdownMenu>
+							</td>
 						</tr>
 						<tr v-if="!offerings?.length">
-							<td colspan="5" class="p-8 text-center text-gray-400 text-sm">
+							<td colspan="6" class="p-8 text-center text-gray-400 text-sm">
 								You haven't created any offerings yet.
 							</td>
 						</tr>

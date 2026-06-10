@@ -22,6 +22,7 @@ import {
 	SidebarMenuItem,
 } from '@/shared/ui/sidebar'
 import { signOut } from '@/utils/auth-client'
+import { userRoles } from '~~/server/auth/config'
 
 defineProps<{
 	user: {
@@ -73,7 +74,7 @@ const signOutHandler = async () => {
 								User Profile
 							</DropdownMenuItem>
 							<DropdownMenuItem
-								v-if="user.role.includes('practitioner')"
+								v-if="user.role.includes(userRoles.PRACTITIONER)"
 								class="flex items-center gap-2"
 								@click="navigateTo('/')"
 							>
@@ -81,7 +82,7 @@ const signOutHandler = async () => {
 								Practitioner
 							</DropdownMenuItem>
 							<DropdownMenuItem
-								v-if="user.role.includes('business')"
+								v-if="user.role.includes(userRoles.BUSINESS)"
 								class="flex items-center gap-2"
 								@click="navigateTo('/business')"
 							>
