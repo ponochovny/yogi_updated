@@ -1,5 +1,6 @@
-import { useDb } from '../../utils/db'
-import { user } from '../../utils/db/auth-schema'
+import { useDb } from '~~/server/utils/db'
+import { user } from '~~/server/db/schema/auth-schema'
+import { updateProfileSchema } from '~/entities/profile/schema'
 import { eq } from 'drizzle-orm'
 
 export default defineEventHandler(async (event) => {
@@ -15,17 +16,15 @@ export default defineEventHandler(async (event) => {
 	}
 	const currentUserId = session.user.id
 
-	const body = await readBody(event)
+	const body = await readValidatedBody(event, updateProfileSchema.parse)
+	const db = useDb()
 
 	try {
-		const db = useDb()
-
 		const [updatedUser] = await db
 			.update(user)
 			.set({
 				name: body.name,
 				bio: body.bio,
-				image: body.profileImage,
 				updatedAt: new Date(),
 			})
 			.where(eq(user.id, currentUserId))
@@ -33,7 +32,6 @@ export default defineEventHandler(async (event) => {
 				id: user.id,
 				name: user.name,
 				bio: user.bio,
-				image: user.image,
 			})
 
 		return {

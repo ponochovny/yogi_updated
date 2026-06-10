@@ -8,6 +8,7 @@ import {
 } from '~/entities/studio/schema'
 import openUploadWidget from '~/shared/composables/useCloudinary'
 import { toast } from 'vue-sonner'
+import { placeholderImageUrl } from '~/config/constants'
 
 definePageMeta({
 	title: 'Studio Creation',
@@ -55,11 +56,16 @@ const types = [
 	'Treatment',
 	'Private Party',
 ]
-const localTimezone = Intl.DateTimeFormat().resolvedOptions().timeZone
 
 const studioSchema = toTypedSchema(createStudioSchema)
 
-const form = useForm({
+const {
+	isValidating,
+	isSubmitting,
+	values: formValues,
+	handleSubmit,
+	setFieldValue,
+} = useForm({
 	validationSchema: studioSchema,
 	initialValues: {
 		name: '',
@@ -69,7 +75,7 @@ const form = useForm({
 				country: '',
 				city: '',
 				address: '',
-				timezone: localTimezone, // Automatically set (e.g. 'Europe/Kyiv')
+				timezone: guessUserTimezone(),
 			},
 		],
 		currency: currencies[0],
@@ -84,25 +90,9 @@ const form = useForm({
 
 const errorMsg = ref('')
 const isProcessing = ref(false)
-
-const createStudio = form.handleSubmit(async (values) => {
-	errorMsg.value = ''
-
-	console.log('Form Values:', values)
-
-	await submitStudio(values)
-
-	// try {
-	// 	// Call your API to create the studio with the form values
-	// 	// Example: await api.createStudio(values)
-	// 	// On success, you can redirect or show a success message
-
-	// } catch {
-	// 	errorMsg.value = 'Failed to create studio. Please try again.'
-	// } finally {
-	// 	isProcessing.value = false
-	// }
-})
+const submitDisabled = computed(
+	() => isProcessing.value || isValidating.value || isSubmitting.value,
+)
 
 const {
 	fields: locationFields,
@@ -110,7 +100,10 @@ const {
 	remove: removeLocation,
 } = useFieldArray('locations')
 
-const submitStudio = async (values: CreateStudioInput) => {
+const submitStudio = handleSubmit(async (values) => createStudio(values))
+
+const createStudio = async (values: CreateStudioInput) => {
+	errorMsg.value = ''
 	isProcessing.value = true
 
 	try {
@@ -132,82 +125,50 @@ const submitStudio = async (values: CreateStudioInput) => {
 	}
 }
 
+// MEDIA FLOW >
 const uploadLogo = () => {
 	openUploadWidget({ multiple: false, cropping: true }, (media) => {
-		form.setFieldValue('logo', media)
+		setFieldValue('logo', media)
 	})
-	// widget.open(
-	// 	null,
-	// 	form.values.logo
-	// 		? {
-	// 				files: [
-	// 					form.values.logo.url?.replace(
-	// 						'/upload/w_100,h_100,c_thumb,g_custom/',
-	// 						'/upload/',
-	// 					),
-	// 				],
-	// 			}
-	// 		: undefined,
-	// )
 }
 const uploadGallery = () => {
 	openUploadWidget({ multiple: true, cropping: false }, (media) => {
-		form.setFieldValue('gallery', [...(form.values.gallery || []), media])
+		setFieldValue('gallery', [...(formValues.gallery || []), media])
 	})
-	// widget.open(
-	// 	null,
-	// 	form.values.gallery && form.values.gallery.length > 0
-	// 		? {
-	// 				files: [
-	// 					form.values.gallery && form.values.gallery.length > 0
-	// 						? form.values.gallery.map((image) =>
-	// 								image.url.replace('/upload/c_thumb,g_custom/', '/upload/'),
-	// 							)
-	// 						: '',
-	// 				],
-	// 			}
-	// 		: undefined,
-	// )
 }
-
 const removeFromGallery = (index: number) => {
-	form.setFieldValue(
+	setFieldValue(
 		'gallery',
-		form.values.gallery?.filter((_, i) => i !== index) || [],
+		formValues.gallery?.filter((_, i) => i !== index) || [],
 	)
 }
+// MEDIA FLOW <
 </script>
 
 <template>
 	<div>
-		<form class="space-y-4" @submit.prevent="createStudio">
+		<form class="space-y-4" @submit.prevent="submitStudio">
 			<div class="space-y-6">
 				<h2 class="text-lg font-semibold border-b pb-2">Studio Logo</h2>
 				<div class="mb-6 flex items-center space-x-4">
 					<NuxtImg
-						:src="form.values.logo?.url || 'https://placehold.net/default.png'"
+						:src="formValues.logo?.url || placeholderImageUrl"
 						alt="Avatar"
 						class="w-20 h-20 rounded-full object-cover border"
 					/>
-					<Button
-						type="button"
-						class="px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-md text-sm transition"
-						@click="uploadLogo"
-					>
-						Set Logo
-					</Button>
+					<Button type="button" @click="uploadLogo"> Set Logo </Button>
 				</div>
 				<h2 class="text-lg font-semibold border-b pb-2">
 					Gallery (Interior, hall)
 				</h2>
 				<div class="mb-6 flex items-center flex-wrap space-x-4 space-y-4">
 					<div
-						v-for="(image, index) in form.values.gallery"
+						v-for="(image, index) in formValues.gallery"
 						:key="index"
 						class="relative"
 					>
 						<NuxtImg
-							:src="image.url || 'https://placehold.net/default.png'"
+							:src="image.url || placeholderImageUrl"
 							class="h-40 aspect-video rounded-2xl object-cover border"
 						/>
 						<Button
@@ -221,17 +182,11 @@ const removeFromGallery = (index: number) => {
 						</Button>
 					</div>
 					<NuxtImg
-						v-if="!form.values.gallery?.length"
-						:src="'https://placehold.net/default.png'"
+						v-if="!formValues.gallery?.length"
+						:src="placeholderImageUrl"
 						class="h-40 aspect-video rounded-2xl object-cover border"
 					/>
-					<Button
-						type="button"
-						class="px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-md text-sm transition"
-						@click="uploadGallery"
-					>
-						Set Gallery
-					</Button>
+					<Button type="button" @click="uploadGallery"> Set Gallery </Button>
 				</div>
 				<h2 class="text-lg font-semibold border-b pb-2">1. Main Information</h2>
 				<FormField v-slot="{ componentField }" name="name">
@@ -469,7 +424,18 @@ const removeFromGallery = (index: number) => {
 				</FormField>
 			</div>
 			<div class="mt-6 flex justify-end">
-				<Button type="submit" :disabled="isProcessing"> Create Studio </Button>
+				<Button type="submit" :disabled="submitDisabled">
+					<Spinner v-if="submitDisabled" />
+					{{
+						isSubmitting
+							? 'Submitting...'
+							: isValidating
+								? 'Validating...'
+								: isProcessing
+									? 'Creating...'
+									: 'Create Studio'
+					}}
+				</Button>
 			</div>
 
 			<p v-if="errorMsg" class="mt-4 text-sm text-destructive">

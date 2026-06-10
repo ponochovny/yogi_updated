@@ -1,14 +1,18 @@
-import { studios, studioLocations, mediaFiles } from '../../../utils/db/schema'
+import { studios, studioLocations } from '~~/server/db/schema/studio'
+import { mediaFiles } from '~~/server/db/schema/_other'
 import { and, eq } from 'drizzle-orm'
 
 export default defineEventHandler(async (event) => {
-	const db = useDb()
-
+	// VALIDATING SLUG PARAMETER
 	const slug = getRouterParam(event, 'slug')
-
 	if (!slug) {
-		throw createError({ statusCode: 400, message: 'Slug is required' })
+		throw createError({
+			statusCode: 400,
+			statusMessage: 'Slug is required',
+		})
 	}
+
+	const db = useDb()
 
 	const [studio] = await db
 		.select()
@@ -19,7 +23,7 @@ export default defineEventHandler(async (event) => {
 	if (!studio) {
 		throw createError({
 			statusCode: 404,
-			message: 'Studio not found',
+			statusMessage: 'Studio not found',
 		})
 	}
 

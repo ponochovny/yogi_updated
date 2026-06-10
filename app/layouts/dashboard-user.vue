@@ -1,4 +1,5 @@
 <script lang="ts" setup>
+import 'vue-sonner/style.css'
 import SidebarDashboardLayout from '~/widgets/sidebar-dashboard/index.vue'
 import { InfoIcon, MapPinIcon, ShoppingCartIcon } from '@lucide/vue'
 import { PagesConfig } from '~/config/pages.config'
@@ -36,5 +37,6 @@ provide('sidebarProps', sidebarProps)
 			<div>layouts/dashboard-user.vue</div>
 		</div>
 		<slot />
+		<Toaster />
 	</SidebarDashboardLayout>
 </template>

@@ -5,29 +5,8 @@
     {
       "idx": 0,
       "version": "7",
-      "when": 1780123366239,
-      "tag": "0000_early_tiger_shark",
-      "breakpoints": true
-    },
-    {
-      "idx": 1,
-      "version": "7",
-      "when": 1780123713219,
-      "tag": "0001_giant_post",
-      "breakpoints": true
-    },
-    {
-      "idx": 2,
-      "version": "7",
-      "when": 1780306589813,
-      "tag": "0002_boring_falcon",
-      "breakpoints": true
-    },
-    {
-      "idx": 3,
-      "version": "7",
-      "when": 1780564325028,
-      "tag": "0003_conscious_bulldozer",
+      "when": 1780955968655,
+      "tag": "0000_rich_magdalene",
       "breakpoints": true
     }
   ]

@@ -24,31 +24,27 @@ const session = useSession()
 const errorMsg = ref('')
 const isProcessing = ref(false)
 
-const authSchema = toTypedSchema(
-	z.object({
-		name: z.string().trim().optional(),
-		email: z.string().email('Enter a valid email address'),
-		password: z.string().min(6, 'Password must contain at least 6 characters'),
-	}),
-)
-
-const form = useForm({
-	validationSchema: authSchema,
-	initialValues: {
-		name: '',
-		email: '',
-		password: '',
-	},
+const loginSchema = z.object({
+	email: z.email('Enter a valid email address'),
+	password: z.string().min(6, 'Password must contain at least 6 characters'),
 })
 
-const handleRegister = form.handleSubmit(async (values) => {
+const registerSchema = loginSchema.extend({
+	name: z.string().trim().min(1, 'Name is required'),
+})
+
+type FormValues = z.infer<typeof registerSchema>
+
+const validationSchema = computed(() => {
+	return toTypedSchema(props.mode === 'sign-up' ? registerSchema : loginSchema)
+})
+
+const { handleSubmit } = useForm<FormValues>({
+	validationSchema,
+})
+
+const handleRegister = handleSubmit(async (values) => {
 	errorMsg.value = ''
-
-	if (!values.name?.trim()) {
-		errorMsg.value = 'Please enter your name'
-		return
-	}
-
 	isProcessing.value = true
 
 	const { error } = await signUp.email({
@@ -68,8 +64,7 @@ const handleRegister = form.handleSubmit(async (values) => {
 	await router.push('/profile/settings')
 })
 
-const handleLogin = form.handleSubmit(async (values) => {
-	console.log('Login values 2:', values) // Debug log
+const handleLogin = handleSubmit(async (values) => {
 	errorMsg.value = ''
 	isProcessing.value = true
 

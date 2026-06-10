@@ -1,11 +1,8 @@
 <script lang="ts" setup>
+import 'vue-sonner/style.css'
 import SidebarDashboardLayout from '~/widgets/sidebar-dashboard/index.vue'
 import { ChartNoAxesCombinedIcon, PlusIcon } from '@lucide/vue'
 import { PagesConfig } from '~/config/pages.config'
-
-definePageMeta({
-	middleware: ['auth'],
-})
 
 const sidebarProps = {
 	group: 'Business',
@@ -33,5 +30,6 @@ provide('sidebarProps', sidebarProps)
 			<div>layouts/business.vue</div>
 		</div>
 		<slot />
+		<Toaster />
 	</SidebarDashboardLayout>
 </template>

@@ -1,0 +1,1 @@
+ALTER TABLE "offerings" ADD COLUMN "gallery" text[] DEFAULT '{}' NOT NULL;

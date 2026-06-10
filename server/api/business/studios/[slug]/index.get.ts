@@ -1,12 +1,8 @@
-import {
-	studios,
-	studioLocations,
-	mediaFiles,
-} from '../../../../utils/db/schema'
+import { studios, studioLocations } from '~~/server/db/schema/studio'
+import { mediaFiles } from '~~/server/db/schema/_other'
 import { and, eq } from 'drizzle-orm'
 
 export default defineEventHandler(async (event) => {
-	const db = useDb()
 	const session = await auth.api.getSession({
 		headers: event.headers,
 	})
@@ -18,12 +14,17 @@ export default defineEventHandler(async (event) => {
 		})
 	}
 
-	const currentUserId = session.user.id
+	// VALIDATING SLUG PARAMETER
 	const slug = getRouterParam(event, 'slug')
-
 	if (!slug) {
-		throw createError({ statusCode: 400, message: 'Slug is required' })
+		throw createError({
+			statusCode: 400,
+			statusMessage: 'Slug is required',
+		})
 	}
+
+	const currentUserId = session.user.id
+	const db = useDb()
 
 	const [studio] = await db
 		.select()
@@ -34,7 +35,8 @@ export default defineEventHandler(async (event) => {
 	if (!studio) {
 		throw createError({
 			statusCode: 404,
-			message: 'Studio not found or you do not have permission to view it',
+			statusMessage:
+				'Studio not found or you do not have permission to view it',
 		})
 	}
 

@@ -1,5 +1,6 @@
 <script lang="ts" setup>
 import { Calendar, MapPin } from '@lucide/vue'
+import { placeholderImageUrl } from '~/config/constants'
 const route = useRoute()
 console.log(route.params.slug)
 
@@ -11,7 +12,7 @@ const cause = {
 	organizator_location: 'Diani Beach, Kenya',
 	about:
 		"Energy healing glowing rejuvenated skin sage smudge sticks music therapy bliss vitamins and supplements yoga wheel. Spirulina chlorella and chlorophyll wellness spa microbiome testing kit goopglow glowlotion nourishing chocolate protein supplement healthy blood sugar immune boosting wellness shots infrared sauna blanket. Rejuvenation facial spa nutrient dense all natural no nasties gummies powders and sprays infused reflexology oat almond rice and cashew mylk glutem sensitivity hyaluronic acid glow serum.Clean beauty superfoods practicing mindfulness beauty dust boost your mood sympathetic nervous system. Breathwork exercises high performance protein bar read it on goop essential oil heal oil balm wellness lymphatic drainage bone broth avoiding edocrine disruptors. Wellness spa healthy glow colon hydrotherapy brain boosting mushroom infused coffee holistic health inner beauty simple meditation mind-body diet fertility program.Support your microbiome keffir health literacy nourish your hair from the inside out ketogenic testing strips my aromatherapy personality diet culture. Green juice 3 ways microdermabrasion holotropic breathwork dry yoga fish oil omega 3 fats super elixer organic skincare. Melatonin infused gummies inner beauty support I'm gluten free irritable bowel syndrome activated charcoal toothpaste prebiotic probiotic postbiotic sleep mist doing whole30 daily rituals for divine feminine energy. Digestive enzymes clean beauty kombucha Himalayan salt lamps six day detox self love beauty supplements metaboloism boosting superpowder ayurvedic wellness. Infrared sauna what is wellness anyway?.",
-	image: 'https://placehold.net/default.png',
+	image: placeholderImageUrl,
 	organizator_logo:
 		'https://img.freepik.com/free-vector/branding-identity-corporate-vector-logo-a-design_460848-8717.jpg?w=2000',
 	earned: 12000,
@@ -39,7 +40,7 @@ const studioCauses = [
 ]
 
 const chips = [5, 10, 20, 50]
-const modelValue = ref<number | null>(null)
+const modelValue = ref<number>(5)
 const currency = { symbol: '$' }
 const handleChipClick = (chip: number) => {
 	modelValue.value = chip

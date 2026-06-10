@@ -13,6 +13,7 @@ import {
 	SidebarMenuButton,
 	SidebarMenuItem,
 } from '@/shared/ui/sidebar'
+import { placeholderImageUrl } from '~/config/constants.js'
 
 const props = withDefaults(defineProps<SidebarProps>(), {
 	variant: 'inset',
@@ -24,7 +25,10 @@ const userData = computed(() => ({
 	name: session.value?.data?.user?.name || 'John Doe',
 	email: session.value?.data?.user?.email || 'john@example.com',
 	avatar:
-		session.value?.data?.user?.image || 'https://placehold.net/default.png',
+		session.value?.data?.user?.image?.replace(
+			'/upload/',
+			'/upload/w_100,h_100,c_thumb,g_custom/',
+		) || placeholderImageUrl,
 	// @ts-expect-error: role is an array in the session, but we want to display a single role in the NavUser component. We can take the first role from the array for display purposes.
 	role: session.value?.data?.user?.role || ['user'],
 }))

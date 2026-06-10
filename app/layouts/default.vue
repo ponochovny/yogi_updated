@@ -36,9 +36,7 @@ const signOutHandler = async () => {
 				</template>
 				<template v-else-if="!session.data?.user">
 					<NuxtLink to="/register" as-child>
-						<Button class="bg-amber-600 hover:bg-amber-700 text-white"
-							>Sign up</Button
-						>
+						<Button> Sign up </Button>
 					</NuxtLink>
 					<NuxtLink to="/login" as-child>
 						<Button variant="outline">Log in</Button>

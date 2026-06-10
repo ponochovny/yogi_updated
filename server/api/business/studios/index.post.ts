@@ -1,7 +1,12 @@
-import { auth } from '../../../utils/auth'
-import { studios, studioLocations } from '../../../utils/db/schema'
-import slugify from 'slugify'
+import { auth } from '~~/server/utils/auth'
+import { studios, studioLocations } from '~~/server/db/schema/studio'
+import {
+	mediaFiles,
+	MediaEntityTypeEnum,
+	MediaTypeEnum,
+} from '~~/server/db/schema/_other'
 import { createStudioSchema } from '~/entities/studio/schema'
+import slugify from 'slugify'
 
 export default defineEventHandler(async (event) => {
 	const db = useDb()
@@ -62,8 +67,8 @@ export default defineEventHandler(async (event) => {
 						url: body.logo.url,
 						providerPublicId: body.logo.providerPublicId,
 						entityId: newStudio.id,
-						entityType: 'STUDIO',
-						type: 'LOGO',
+						entityType: MediaEntityTypeEnum.STUDIO,
+						type: MediaTypeEnum.LOGO,
 					})
 				}
 
@@ -76,8 +81,8 @@ export default defineEventHandler(async (event) => {
 							url: image.url,
 							providerPublicId: image.providerPublicId,
 							entityId: newStudio.id,
-							entityType: 'STUDIO',
-							type: 'GALLERY',
+							entityType: MediaEntityTypeEnum.STUDIO,
+							type: MediaTypeEnum.GALLERY,
 							order: index,
 						}),
 					)
