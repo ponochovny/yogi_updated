@@ -49,3 +49,16 @@ export const createOfferingSchema = z.object({
 })
 
 export type CreateOfferingInput = z.infer<typeof createOfferingSchema>
+
+export const createSlotSchema = z.object({
+	startDate: z.string(), // Expected in 'YYYY-MM-DD' format
+	endDate: z.string(), // Expected in 'YYYY-MM-DD' format
+	rules: z.array(
+		z.object({
+			dayOfWeek: z.number().min(0).max(6), // 0 (Sun) - 6 (Sat)
+			startTime: z.string(), // Expected in 'HH:mm' format
+			endTime: z.string(), // Expected in 'HH:mm' format
+			practitionerId: z.uuid(),
+		}),
+	),
+})

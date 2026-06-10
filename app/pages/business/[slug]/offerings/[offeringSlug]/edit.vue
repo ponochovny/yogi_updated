@@ -61,7 +61,7 @@ const {
 		isPrivate: false,
 		locationId: null as string | null,
 		timezone: guessUserTimezone(),
-		duration: 60,
+		duration: 60 as number,
 		capacity: null as number | null,
 		practitionerIds: [],
 	},
@@ -266,6 +266,8 @@ const removeFromGallery = (index: number) => {
 									placeholder="Offering duration"
 									v-bind="componentField"
 									autocomplete="off"
+									:min="5"
+									:step="1"
 								/>
 							</FormControl>
 							<FormMessage />
@@ -308,6 +310,8 @@ const removeFromGallery = (index: number) => {
 									v-bind="componentField"
 									autocomplete="off"
 									type="number"
+									:min="0"
+									:step="1"
 								/>
 							</FormControl>
 							<FormMessage />

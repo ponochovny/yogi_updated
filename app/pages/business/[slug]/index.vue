@@ -1,5 +1,6 @@
 <script lang="ts" setup>
 import {
+	CalendarCogIcon,
 	PencilIcon,
 	PlusIcon,
 	Settings2Icon,
@@ -163,6 +164,18 @@ const offerings = computed(() => offeringsData.value?.offerings)
 											>
 												<PencilIcon />
 												Edit
+											</DropdownMenuItem>
+											<DropdownMenuItem
+												v-if="!$route.path.startsWith('/profile')"
+												class="flex items-center gap-2"
+												@click="
+													navigateTo(
+														`/business/${studio?.slug}/offerings/${offering.slug}/schedule`,
+													)
+												"
+											>
+												<CalendarCogIcon />
+												Schedule
 											</DropdownMenuItem>
 										</DropdownMenuGroup>
 									</DropdownMenuContent>
