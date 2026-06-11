@@ -73,6 +73,7 @@ export default defineNuxtConfig({
 
 	app: {
 		head: {
+			title: 'Unnamed',
 			titleTemplate: '%s · Yogi App',
 			htmlAttrs: {
 				lang: 'en',

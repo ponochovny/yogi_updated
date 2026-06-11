@@ -12,6 +12,7 @@ import openUploadWidget from '~/shared/composables/useCloudinary'
 import { userRoles } from '~~/server/auth/config'
 
 useHead({
+	title: 'Profile settings',
 	script: [
 		{
 			src: 'https://upload-widget.cloudinary.com/global/all.js',
