@@ -14,8 +14,14 @@ import {
 	offeringType,
 	pricingType,
 	ActivityType,
+	offeringSlotStatus,
 } from '../../../app/entities/offering/schema'
 
+export const offeringSlotStatusEnum = pgEnum('offering_slot_status', [
+	offeringSlotStatus.ACTIVE,
+	offeringSlotStatus.COMPLETED,
+	offeringSlotStatus.CANCELLED,
+])
 export const offeringTypeEnum = pgEnum('offering_type', [
 	offeringType.GROUP,
 	offeringType.PRIVATE,
@@ -151,7 +157,7 @@ export const offeringSlots = pgTable('offering_slots', {
 	endTime: timestamp('end_time', { withTimezone: true }).notNull(),
 
 	// Slot status
-	status: varchar('status').default('ACTIVE').notNull(), // ACTIVE, CANCELLED, COMPLETED
+	status: offeringSlotStatusEnum('status').default('ACTIVE').notNull(),
 
 	// Specific capacity override (if the venue is smaller on this day)
 	capacityOverride: integer('capacity_override'),

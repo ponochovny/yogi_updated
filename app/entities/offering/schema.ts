@@ -4,6 +4,12 @@ import type { InternalApi } from 'nitropack'
 export type OfferingItem =
 	InternalApi['/api/offerings']['get']['offerings'][number]
 
+export const offeringSlotStatus = {
+	ACTIVE: 'ACTIVE',
+	COMPLETED: 'COMPLETED',
+	CANCELLED: 'CANCELLED',
+} as const
+
 export const offeringType = {
 	GROUP: 'GROUP',
 	PRIVATE: 'PRIVATE',

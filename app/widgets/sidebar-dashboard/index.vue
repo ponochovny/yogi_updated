@@ -34,31 +34,38 @@ const breadcrumbs = computed(
 						orientation="vertical"
 						class="mr-2 data-[orientation=vertical]:h-4"
 					/>
-					<Breadcrumb>
-						<BreadcrumbList>
-							<template v-if="breadcrumbs.length === 0">
-								<BreadcrumbItem>
-									<BreadcrumbPage>{{ pageTitle }}</BreadcrumbPage>
-								</BreadcrumbItem>
-							</template>
-							<template v-else>
-								<BreadcrumbItem
-									v-for="(breadcrumb, index) in breadcrumbs"
-									:key="index"
-								>
-									<BreadcrumbLink
-										v-if="breadcrumb.url !== $route.path"
-										:href="breadcrumb.url"
+					<!-- TODO: REMOVE "CLIENT ONLY" AND FIX CONSOLE WARNINGS -->
+					<ClientOnly>
+						<Breadcrumb>
+							<BreadcrumbList>
+								<template v-if="breadcrumbs.length === 0">
+									<BreadcrumbItem>
+										<BreadcrumbPage>{{ pageTitle }}</BreadcrumbPage>
+									</BreadcrumbItem>
+								</template>
+								<template v-else>
+									<BreadcrumbItem
+										v-for="(breadcrumb, index) in breadcrumbs"
+										:key="index"
 									>
-										{{ breadcrumb.name }}
-									</BreadcrumbLink>
-									<BreadcrumbPage v-else>{{ breadcrumb.name }}</BreadcrumbPage>
+										<BreadcrumbLink
+											v-if="breadcrumb.url !== $route.path"
+											:href="breadcrumb.url"
+										>
+											{{ breadcrumb.name }}
+										</BreadcrumbLink>
+										<BreadcrumbPage v-else>{{
+											breadcrumb.name
+										}}</BreadcrumbPage>
 
-									<BreadcrumbSeparator v-if="index < breadcrumbs.length - 1" />
-								</BreadcrumbItem>
-							</template>
-						</BreadcrumbList>
-					</Breadcrumb>
+										<BreadcrumbSeparator
+											v-if="index < breadcrumbs.length - 1"
+										/>
+									</BreadcrumbItem>
+								</template>
+							</BreadcrumbList>
+						</Breadcrumb>
+					</ClientOnly>
 				</div>
 			</header>
 			<div class="p-4 pt-0 flex-1">

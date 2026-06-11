@@ -3,7 +3,7 @@ import { placeholderImageUrl } from '~/config/constants'
 import { practitionerRoles } from '~~/server/auth/config'
 
 definePageMeta({
-	title: 'Team',
+	title: 'Team Management',
 	breadcrumbs: [{ name: 'Businesses', url: '/business' }, { name: 'Team' }],
 })
 
@@ -42,6 +42,10 @@ const addTeamMember = async () => {
 		isSubmitting.value = false
 	}
 }
+
+useHead({
+	title: () => `${slug || ''} - Team Management`,
+})
 </script>
 
 <template>

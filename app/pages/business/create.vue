@@ -19,6 +19,7 @@ definePageMeta({
 })
 
 useHead({
+	title: 'Studio Creation',
 	script: [
 		{
 			src: 'https://upload-widget.cloudinary.com/global/all.js',
@@ -359,7 +360,7 @@ const removeFromGallery = (index: number) => {
 								<SelectTrigger class="w-full">
 									<SelectValue placeholder="Select currencies" />
 								</SelectTrigger>
-								<SelectContent>
+								<SelectContent position="item-aligned">
 									<SelectGroup>
 										<SelectLabel>Currencies</SelectLabel>
 										<SelectItem
@@ -384,7 +385,7 @@ const removeFromGallery = (index: number) => {
 								<SelectTrigger class="w-full">
 									<SelectValue placeholder="Select categories" />
 								</SelectTrigger>
-								<SelectContent>
+								<SelectContent position="item-aligned">
 									<SelectGroup>
 										<SelectLabel>Categories</SelectLabel>
 										<SelectItem
@@ -409,7 +410,7 @@ const removeFromGallery = (index: number) => {
 								<SelectTrigger class="w-full">
 									<SelectValue placeholder="Select types" />
 								</SelectTrigger>
-								<SelectContent>
+								<SelectContent position="item-aligned">
 									<SelectGroup>
 										<SelectLabel>Types</SelectLabel>
 										<SelectItem v-for="type in types" :key="type" :value="type">

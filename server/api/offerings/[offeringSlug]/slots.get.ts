@@ -1,7 +1,7 @@
 import { offeringSlots, offerings } from '~~/server/db/schema/offering'
 import { user } from '~~/server/db/schema/auth-schema'
 import { studioPractitioners } from '~~/server/db/schema/studio'
-import { eq, and, gt } from 'drizzle-orm'
+import { eq } from 'drizzle-orm'
 
 export default defineEventHandler(async (event) => {
 	const offeringSlug = getRouterParam(event, 'offeringSlug')
@@ -19,9 +19,7 @@ export default defineEventHandler(async (event) => {
 		if (!offering)
 			throw createError({ statusCode: 404, message: 'Offering not found' })
 
-		// 2. Fetch future ACTIVE slots with coach info
-		const now = new Date()
-
+		// 2. Fetch slots with coach info
 		const slots = await db
 			.select({
 				id: offeringSlots.id,
@@ -39,13 +37,7 @@ export default defineEventHandler(async (event) => {
 				eq(offeringSlots.practitionerId, studioPractitioners.id),
 			)
 			.innerJoin(user, eq(studioPractitioners.userId, user.id))
-			.where(
-				and(
-					eq(offeringSlots.offeringId, offering.id),
-					eq(offeringSlots.status, 'ACTIVE'),
-					gt(offeringSlots.startTime, now), // Only future slots
-				),
-			)
+			.where(eq(offeringSlots.offeringId, offering.id))
 			.orderBy(offeringSlots.startTime)
 
 		return slots
