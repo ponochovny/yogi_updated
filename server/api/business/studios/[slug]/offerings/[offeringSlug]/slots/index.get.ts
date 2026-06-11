@@ -1,7 +1,7 @@
 import { offeringSlots, offerings } from '~~/server/db/schema/offering'
 import { user } from '~~/server/db/schema/auth-schema'
-import { studioPractitioners } from '~~/server/db/schema/studio'
-import { eq } from 'drizzle-orm'
+import { studioPractitioners, studios } from '~~/server/db/schema/studio'
+import { and, eq } from 'drizzle-orm'
 
 export default defineEventHandler(async (event) => {
 	const session = await auth.api.getSession({
@@ -15,15 +15,48 @@ export default defineEventHandler(async (event) => {
 		})
 	}
 
+	const slug = getRouterParam(event, 'slug')
 	const offeringSlug = getRouterParam(event, 'offeringSlug')
-	if (!offeringSlug) {
+
+	// Validate required parameters
+	if (!slug || !offeringSlug) {
 		throw createError({
 			statusCode: 400,
-			statusMessage: 'Offering slug is required',
+			statusMessage: 'Studio slug and offering slug are required',
 		})
 	}
 
+	const currentUserId = session.user.id
 	const db = useDb()
+
+	// Verify the studio exists and belongs to the current user
+	const [studio] = await db
+		.select()
+		.from(studios)
+		.where(and(eq(studios.slug, slug), eq(studios.ownerId, currentUserId)))
+		.limit(1)
+	if (!studio) {
+		throw createError({
+			statusCode: 404,
+			statusMessage:
+				'Studio not found or you do not have permission to edit this offering',
+		})
+	}
+
+	// Verify the offering exists and belongs to the studio
+	const [offering] = await db
+		.select()
+		.from(offerings)
+		.where(
+			and(eq(offerings.slug, offeringSlug), eq(offerings.studioId, studio.id)),
+		)
+		.limit(1)
+	if (!offering) {
+		throw createError({
+			statusCode: 404,
+			statusMessage: 'Offering not found',
+		})
+	}
 
 	try {
 		// 1. Find the offering by slug

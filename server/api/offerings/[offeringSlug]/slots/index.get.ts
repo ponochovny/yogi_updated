@@ -1,7 +1,7 @@
 import { offeringSlots, offerings } from '~~/server/db/schema/offering'
 import { user } from '~~/server/db/schema/auth-schema'
 import { studioPractitioners } from '~~/server/db/schema/studio'
-import { eq } from 'drizzle-orm'
+import { and, eq } from 'drizzle-orm'
 
 export default defineEventHandler(async (event) => {
 	const offeringSlug = getRouterParam(event, 'offeringSlug')
@@ -19,7 +19,9 @@ export default defineEventHandler(async (event) => {
 		const [offering] = await db
 			.select({ id: offerings.id })
 			.from(offerings)
-			.where(eq(offerings.slug, offeringSlug))
+			.where(
+				and(eq(offerings.slug, offeringSlug), eq(offerings.isPublished, true)),
+			)
 			.limit(1)
 
 		if (!offering)
@@ -48,9 +50,12 @@ export default defineEventHandler(async (event) => {
 
 		return slots
 	} catch (error) {
+		if (error && typeof error === 'object' && 'statusCode' in error) {
+			throw error
+		}
 		throw createError({
-			statusCode: (error as { statusCode: number }).statusCode || 500,
-			statusMessage: (error as Error).message,
+			statusCode: 500,
+			statusMessage: 'Failed to fetch offering slots',
 		})
 	}
 })

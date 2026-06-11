@@ -159,19 +159,9 @@ groupSlots()
 						<NativeSelectOption :value="0"> Sunday </NativeSelectOption>
 					</NativeSelect>
 
-					<Input
-						id="time-picker"
-						v-model="rule.startTime"
-						type="time"
-						class="text-sm w-30"
-					/>
+					<Input v-model="rule.startTime" type="time" class="text-sm w-30" />
 					<span class="text-gray-500">-</span>
-					<Input
-						id="time-picker"
-						v-model="rule.endTime"
-						type="time"
-						class="text-sm w-30"
-					/>
+					<Input v-model="rule.endTime" type="time" class="text-sm w-30" />
 
 					<Input
 						v-model="rule.practitionerId"

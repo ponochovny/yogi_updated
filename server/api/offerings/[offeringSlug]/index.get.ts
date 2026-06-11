@@ -130,9 +130,12 @@ export default defineEventHandler(async (event) => {
 			},
 		}
 	} catch (error) {
+		if (error && typeof error === 'object' && 'statusCode' in error) {
+			throw error
+		}
 		throw createError({
-			statusCode: (error as { statusCode: number }).statusCode || 500,
-			statusMessage: (error as Error).message,
+			statusCode: 500,
+			statusMessage: 'Failed to fetch offering',
 		})
 	}
 })

@@ -4,12 +4,16 @@ import { format } from 'date-fns'
 const route = useRoute()
 const offeringSlug = route.params.slug
 
-const { data: offeringsData } = await useFetch(`/api/offerings/${offeringSlug}`)
+const offeringReq = useFetch(`/api/offerings/${offeringSlug}`)
+const slotsReq = useFetch(`/api/offerings/${offeringSlug}/slots`)
+
+const [{ data: offeringsData }, { data: offeringsSlots }] = await Promise.all([
+	offeringReq,
+	slotsReq,
+])
+
 const offering = computed(() => offeringsData.value?.offering || null)
 
-const { data: offeringsSlots } = await useFetch(
-	`/api/offerings/${offeringSlug}/slots`,
-)
 const rawSlots = computed(() => offeringsSlots.value || [])
 
 // Group slots by date for UI presentation
