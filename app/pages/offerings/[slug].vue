@@ -16,16 +16,17 @@ const rawSlots = computed(() => offeringsSlots.value || [])
 const groupedSlots = computed(() => {
 	if (!rawSlots.value) return {}
 
-	return rawSlots.value.reduce((acc, slot) => {
-		// Format UTC to Local string representation for grouping (e.g., 'June 15, 2026')
-		const dateKey = format(new Date(slot.startTime), 'MMMM d, yyyy')
+	return rawSlots.value.reduce<Record<string, typeof rawSlots.value>>(
+		(acc, slot) => {
+			// Format UTC to Local string representation for grouping (e.g., 'June 15, 2026')
+			const dateKey = format(new Date(slot.startTime), 'MMMM d, yyyy')
 
-		// @ts-expect-error: We know the structure of the slot object and that practitioner is included
-		if (!acc[dateKey]) acc[dateKey] = []
-		// @ts-expect-error: We know the structure of the slot object and that practitioner is included
-		acc[dateKey].push(slot)
-		return acc
-	}, {})
+			if (!acc[dateKey]) acc[dateKey] = []
+			acc[dateKey].push(slot)
+			return acc
+		},
+		{},
+	)
 })
 </script>
 
@@ -52,7 +53,7 @@ const groupedSlots = computed(() => {
 					</h4>
 
 					<div class="space-y-2">
-						<button
+						<div
 							v-for="slot in slots"
 							:key="slot.id"
 							class="w-full flex justify-between items-center p-3 bg-white/10 border border-gray-600 rounded-lg hover:border-gray-400 transition text-left"
@@ -66,7 +67,7 @@ const groupedSlots = computed(() => {
 								</div>
 							</div>
 							<Button variant="outline" size="sm"> Book Now </Button>
-						</button>
+						</div>
 					</div>
 				</div>
 			</div>

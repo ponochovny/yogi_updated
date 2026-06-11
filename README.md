@@ -1,6 +1,6 @@
 # YOGI APP
 
-#### Stack:
+## Stack:
 - Nuxt 4
 - TailwindCSS
 - Shadcn
@@ -9,12 +9,12 @@
 - Better Auth
 - Cloudinary
 
-#### Services:
+## Services:
 - Booking
 - E-commerce (Marketplace)
 - Dashboard
 
-#### Utils:
+## Utils:
 - date-fns
 - zod
 - vee-validate

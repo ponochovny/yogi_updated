@@ -4,7 +4,24 @@ import { studioPractitioners } from '~~/server/db/schema/studio'
 import { eq } from 'drizzle-orm'
 
 export default defineEventHandler(async (event) => {
+	const session = await auth.api.getSession({
+		headers: event.headers,
+	})
+
+	if (!session || !session.user) {
+		throw createError({
+			statusCode: 401,
+			statusMessage: 'Unauthorized access',
+		})
+	}
+
 	const offeringSlug = getRouterParam(event, 'offeringSlug')
+	if (!offeringSlug) {
+		throw createError({
+			statusCode: 400,
+			statusMessage: 'Offering slug is required',
+		})
+	}
 
 	const db = useDb()
 
@@ -13,7 +30,7 @@ export default defineEventHandler(async (event) => {
 		const [offering] = await db
 			.select({ id: offerings.id })
 			.from(offerings)
-			.where(eq(offerings.slug, offeringSlug!))
+			.where(eq(offerings.slug, offeringSlug))
 			.limit(1)
 
 		if (!offering)
@@ -40,7 +57,7 @@ export default defineEventHandler(async (event) => {
 			.where(eq(offeringSlots.offeringId, offering.id))
 			.orderBy(offeringSlots.startTime)
 
-		return slots
+		return { success: true, slots }
 	} catch (error) {
 		throw createError({
 			statusCode: 500,

@@ -25,10 +25,9 @@ export default defineEventHandler(async (event) => {
 		})
 	}
 
-	const currentUserId = session.user.id
 	const db = useDb()
+	const currentUserId = session.user.id
 
-	// 1. Check if studio exists and the user is it's owner
 	const [studio] = await db
 		.select()
 		.from(studios)
@@ -44,7 +43,9 @@ export default defineEventHandler(async (event) => {
 	const [offering] = await db
 		.select()
 		.from(offerings)
-		.where(and(eq(offerings.slug, offeringSlug)))
+		.where(
+			and(eq(offerings.slug, offeringSlug), eq(offerings.studioId, studio.id)),
+		)
 		.limit(1)
 	if (!offering) {
 		throw createError({
@@ -52,17 +53,6 @@ export default defineEventHandler(async (event) => {
 			statusMessage: 'Offering not found',
 		})
 	}
-
-	// 2. Additional data
-	// const offeringPractitionersArray = await db
-	// 	.select({
-	// 		id: offeringPractitioners.id,
-	// 		name: user.name,
-	// 		email: user.email,
-	// 		avatar: user.image,
-	// 	})
-	// 	.from(offeringPractitioners)
-	// 	.where(and(eq(offeringPractitioners.offeringId, offering.id)))
 
 	const practitioners = await db
 		.select({

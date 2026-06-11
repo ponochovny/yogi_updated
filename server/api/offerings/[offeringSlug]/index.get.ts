@@ -26,106 +26,113 @@ export default defineEventHandler(async (event) => {
 	const db = useDb()
 	const studioLogo = aliasedTable(mediaFiles, 'studio_logo')
 
-	// Verify the offering exists and is published
-	const [offering] = await db
-		.select({
-			id: offerings.id,
-			slug: offerings.slug,
-			name: offerings.name,
-			description: offerings.description,
-			activityType: offerings.activityType,
-			isPrivate: offerings.isPrivate,
-			location: {
-				name: studioLocations.name,
-				country: studioLocations.country,
-				city: studioLocations.city,
-				address: studioLocations.address,
-			},
-			timezone: offerings.timezone,
-			duration: offerings.duration,
-			capacity: offerings.capacity,
-			studio: {
-				logo: studioLogo.url,
-				name: studios.name,
-				slug: studios.slug,
-				id: studios.id,
-			},
-		})
-		.from(offerings)
-		.where(
-			and(eq(offerings.slug, offeringSlug), eq(offerings.isPublished, true)),
-		)
-		.leftJoin(studioLocations, eq(offerings.locationId, studioLocations.id))
-		.innerJoin(studios, eq(offerings.studioId, studios.id))
-		.leftJoin(
-			studioLogo,
-			and(
-				eq(studioLogo.entityId, sql`${studios.id}::text`),
-				eq(studioLogo.entityType, MediaEntityTypeEnum.STUDIO),
-				eq(studioLogo.type, MediaTypeEnum.LOGO),
-			),
-		)
-		.limit(1)
-
-	if (!offering) {
-		throw createError({
-			statusCode: 404,
-			statusMessage: 'Offering not found',
-		})
-	}
-
-	// Fetch associated practitioners and gallery media files in parallel
-	const [practitionerRows, galleryRows] = await Promise.all([
-		db
-			.select({ practitionerId: offeringPractitioners.practitionerId })
-			.from(offeringPractitioners)
-			.where(eq(offeringPractitioners.offeringId, offering.id)),
-		db
+	try {
+		// Verify the offering exists and is published
+		const [offering] = await db
 			.select({
-				url: mediaFiles.url,
-				providerPublicId: mediaFiles.providerPublicId,
+				id: offerings.id,
+				slug: offerings.slug,
+				name: offerings.name,
+				description: offerings.description,
+				activityType: offerings.activityType,
+				isPrivate: offerings.isPrivate,
+				location: {
+					name: studioLocations.name,
+					country: studioLocations.country,
+					city: studioLocations.city,
+					address: studioLocations.address,
+				},
+				timezone: offerings.timezone,
+				duration: offerings.duration,
+				capacity: offerings.capacity,
+				studio: {
+					logo: studioLogo.url,
+					name: studios.name,
+					slug: studios.slug,
+					id: studios.id,
+				},
 			})
-			.from(mediaFiles)
+			.from(offerings)
 			.where(
+				and(eq(offerings.slug, offeringSlug), eq(offerings.isPublished, true)),
+			)
+			.leftJoin(studioLocations, eq(offerings.locationId, studioLocations.id))
+			.innerJoin(studios, eq(offerings.studioId, studios.id))
+			.leftJoin(
+				studioLogo,
 				and(
-					eq(mediaFiles.entityId, offering.id),
-					eq(mediaFiles.entityType, MediaEntityTypeEnum.OFFERING),
-					eq(mediaFiles.type, MediaTypeEnum.GALLERY),
+					eq(studioLogo.entityId, sql`${studios.id}::text`),
+					eq(studioLogo.entityType, MediaEntityTypeEnum.STUDIO),
+					eq(studioLogo.type, MediaTypeEnum.LOGO),
 				),
 			)
-			.orderBy(mediaFiles.order),
-	])
+			.limit(1)
 
-	const practitionerDetails = await db
-		.select({
-			id: studioPractitioners.id,
-			name: user.name,
-			avatar: user.image,
-		})
-		.from(studioPractitioners)
-		.innerJoin(user, eq(studioPractitioners.userId, user.id))
-		.where(
-			and(
-				eq(studioPractitioners.studioId, offering.studio.id),
-				eq(studioPractitioners.salaryActive, true),
-			),
-		)
+		if (!offering) {
+			throw createError({
+				statusCode: 404,
+				statusMessage: 'Offering not found',
+			})
+		}
 
-	return {
-		success: true,
-		offering: {
-			...offering,
-			practitioners: practitionerDetails
-				.filter((detail) =>
-					practitionerRows.some((row) => row.practitionerId === detail.id),
+		// Fetch associated practitioners and gallery media files in parallel
+		const [practitionerRows, galleryRows] = await Promise.all([
+			db
+				.select({ practitionerId: offeringPractitioners.practitionerId })
+				.from(offeringPractitioners)
+				.where(eq(offeringPractitioners.offeringId, offering.id)),
+			db
+				.select({
+					url: mediaFiles.url,
+					providerPublicId: mediaFiles.providerPublicId,
+				})
+				.from(mediaFiles)
+				.where(
+					and(
+						eq(mediaFiles.entityId, offering.id),
+						eq(mediaFiles.entityType, MediaEntityTypeEnum.OFFERING),
+						eq(mediaFiles.type, MediaTypeEnum.GALLERY),
+					),
 				)
-				.map((detail) => {
-					return {
-						name: detail.name,
-						avatar: detail.avatar,
-					}
-				}),
-			gallery: galleryRows.map((r) => r.url),
-		},
+				.orderBy(mediaFiles.order),
+		])
+
+		const practitionerDetails = await db
+			.select({
+				id: studioPractitioners.id,
+				name: user.name,
+				avatar: user.image,
+			})
+			.from(studioPractitioners)
+			.innerJoin(user, eq(studioPractitioners.userId, user.id))
+			.where(
+				and(
+					eq(studioPractitioners.studioId, offering.studio.id),
+					eq(studioPractitioners.salaryActive, true),
+				),
+			)
+
+		return {
+			success: true,
+			offering: {
+				...offering,
+				practitioners: practitionerDetails
+					.filter((detail) =>
+						practitionerRows.some((row) => row.practitionerId === detail.id),
+					)
+					.map((detail) => {
+						return {
+							name: detail.name,
+							avatar: detail.avatar,
+						}
+					}),
+				gallery: galleryRows.map((r) => r.url),
+			},
+		}
+	} catch (error) {
+		throw createError({
+			statusCode: (error as { statusCode: number }).statusCode || 500,
+			statusMessage: (error as Error).message,
+		})
 	}
 })

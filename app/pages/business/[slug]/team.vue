@@ -44,7 +44,7 @@ const addTeamMember = async () => {
 }
 
 useHead({
-	title: () => `${slug || ''} - Team Management`,
+	title: () => `${slug || 'Studio'} - Team Management`,
 })
 </script>
 

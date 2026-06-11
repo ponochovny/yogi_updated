@@ -5,6 +5,12 @@ import { eq } from 'drizzle-orm'
 
 export default defineEventHandler(async (event) => {
 	const offeringSlug = getRouterParam(event, 'offeringSlug')
+	if (!offeringSlug) {
+		throw createError({
+			statusCode: 400,
+			statusMessage: 'Offering slug is required',
+		})
+	}
 
 	const db = useDb()
 
@@ -13,7 +19,7 @@ export default defineEventHandler(async (event) => {
 		const [offering] = await db
 			.select({ id: offerings.id })
 			.from(offerings)
-			.where(eq(offerings.slug, offeringSlug!))
+			.where(eq(offerings.slug, offeringSlug))
 			.limit(1)
 
 		if (!offering)
@@ -43,7 +49,7 @@ export default defineEventHandler(async (event) => {
 		return slots
 	} catch (error) {
 		throw createError({
-			statusCode: 500,
+			statusCode: (error as { statusCode: number }).statusCode || 500,
 			statusMessage: (error as Error).message,
 		})
 	}

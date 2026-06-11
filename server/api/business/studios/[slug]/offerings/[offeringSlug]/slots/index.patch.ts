@@ -62,8 +62,6 @@ export default defineEventHandler(async (event) => {
 
 		const body = await readValidatedBody(event, updateSlotsSchema.parse)
 
-		console.log('Updating slot with data:', body)
-
 		await db
 			.update(offeringSlots)
 			.set({
@@ -74,7 +72,6 @@ export default defineEventHandler(async (event) => {
 				and(
 					eq(offeringSlots.offeringId, offering.id),
 					eq(offeringSlots.id, body.id),
-					eq(offeringSlots.practitionerId, body.practitionerId),
 				),
 			)
 
@@ -95,8 +92,8 @@ export default defineEventHandler(async (event) => {
 			)
 			.limit(1)
 
-		return { success: true, offering: updatedSlot }
-	} catch (error: unknown) {
+		return { success: true, updatedSlot }
+	} catch (error) {
 		console.error('Offering update failed:', error)
 		throw createError({
 			statusCode: 500,

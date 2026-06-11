@@ -61,7 +61,7 @@ const generateSlots = async () => {
 const { data: offeringsSlots } = await useFetch(
 	`/api/business/studios/${slug}/offerings/${offeringSlug}/slots`,
 )
-const rawSlots = computed(() => offeringsSlots.value || [])
+const rawSlots = computed(() => offeringsSlots.value?.slots || [])
 
 const { data: offeringPractitioners } = await useFetch(
 	`/api/business/studios/${slug}/offerings/${offeringSlug}/practitioners`,
@@ -238,8 +238,8 @@ groupSlots()
 							<SelectContent>
 								<SelectItem
 									v-for="practitioner in practitioners"
-									:key="practitioner.id"
-									:value="practitioner.id"
+									:key="practitioner.practitionerId"
+									:value="practitioner.practitionerId"
 								>
 									{{ practitioner.name }}
 								</SelectItem>
