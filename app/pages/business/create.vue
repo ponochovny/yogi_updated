@@ -118,9 +118,9 @@ const createStudio = async (values: CreateStudioInput) => {
 			navigateTo(`/business/${response.studio.slug}`)
 		}
 	} catch (error) {
-		toast.error(
-			(error as Error).message || 'Failed to create studio. Please try again.',
-		)
+		toast.error('Failed to create studio. Please try again.', {
+			description: (error as Error).message || 'Unknown error.',
+		})
 	} finally {
 		isProcessing.value = false
 	}

@@ -53,6 +53,6 @@ const signOutHandler = async () => {
 			</div>
 		</div>
 		<slot />
-		<Toaster />
+		<Toaster position="bottom-center" rich-colors />
 	</div>
 </template>

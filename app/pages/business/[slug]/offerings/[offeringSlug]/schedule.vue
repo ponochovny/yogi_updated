@@ -52,12 +52,14 @@ const generateSlots = async () => {
 		toast.success('Slots generated successfully!')
 		// Here we would typically refresh a list/calendar of existing slots below
 	} catch (err) {
-		toast.error((err as Error)?.message || 'Generation failed')
+		toast.error('Generation failed', {
+			description: (err as Error).message || 'Unknown error.',
+		})
 	}
 }
 
 const { data: offeringsSlots } = await useFetch(
-	`/api/offerings/${offeringSlug}/slots`,
+	`/api/business/studios/${slug}/offerings/${offeringSlug}/slots`,
 )
 const rawSlots = computed(() => offeringsSlots.value || [])
 
@@ -81,9 +83,11 @@ const updateSlot = async (slot: updateSlotsSchemaInput) => {
 				},
 			},
 		)
-		alert('Slot updated successfully!')
+		toast.success('Slot updated successfully!')
 	} catch (err) {
-		alert((err as Error)?.message || 'Update failed')
+		toast.error('Update failed', {
+			description: (err as Error)?.message || 'Unknown error.',
+		})
 	}
 }
 
@@ -263,7 +267,6 @@ groupSlots()
 						</Select>
 						<Button
 							variant="outline"
-							size="sm"
 							@click="
 								updateSlot({
 									id: slot.id,

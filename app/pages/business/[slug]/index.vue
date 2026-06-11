@@ -42,7 +42,7 @@ useHead({
 			<div class="flex items-center gap-4">
 				<NuxtImg
 					:src="
-						studio?.logo?.url.replace(
+						studio?.logo?.url?.replace(
 							'/upload/',
 							'/upload/w_100,h_100,c_fill/',
 						) || placeholderImageUrl

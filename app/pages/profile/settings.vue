@@ -63,10 +63,9 @@ const saveProfile = async (values: UpdateProfileInput) => {
 		})
 		toast.success('Profile updated successfully!')
 	} catch (error) {
-		toast.error(
-			'Failed to update profile: ' +
-				(error instanceof Error ? error.message : 'Unknown error'),
-		)
+		toast.error('Failed to update profile.', {
+			description: (error as Error).message || 'Unknown error',
+		})
 		console.error('Error:', error)
 	} finally {
 		isProcessing.value = false
@@ -93,10 +92,9 @@ const uploadAvatar = () => {
 				await refresh() // Refresh session to get updated user data
 				toast.success('Avatar updated successfully!')
 			} catch (error) {
-				toast.error(
-					'Failed to upload avatar: ' +
-						(error instanceof Error ? error.message : 'Unknown error'),
-				)
+				toast.error('Failed to upload avatar.', {
+					description: (error as Error).message || 'Unknown error',
+				})
 				console.error('Error:', error)
 			}
 		},
