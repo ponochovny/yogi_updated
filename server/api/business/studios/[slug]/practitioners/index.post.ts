@@ -4,6 +4,7 @@ import { and, eq } from 'drizzle-orm'
 import { addPractitionerSchema } from '@/entities/practitioner/schema'
 import { v4 as uuidv4 } from 'uuid'
 import { FetchError } from 'ofetch'
+import { practitionerRoles } from '~~/server/auth/config'
 
 export default defineEventHandler(async (event) => {
 	const session = await auth.api.getSession({
@@ -60,7 +61,7 @@ export default defineEventHandler(async (event) => {
 						name: body.name,
 						emailVerified: false, // Important flag: the user has not yet confirmed their email
 						bio: body.bio || '',
-						role: ['practitioner'],
+						role: [practitionerRoles.PRACTITIONER],
 						createdAt: new Date(),
 						updatedAt: new Date(),
 					})
@@ -99,6 +100,15 @@ export default defineEventHandler(async (event) => {
 
 			return { practitionerLink: newPractitioner, user: targetUser }
 		})
+
+		const tokenResponse = await auth.api.requestPasswordReset({
+			body: { email: body.email, redirectTo: '/reset-password' },
+		})
+		console.log('Token Response', tokenResponse)
+
+		// 6. Construct the setup URL
+		// In production, you would trigger an email send here via Resend/Postmark
+		// const setupLink = `https://yourdomain.com/auth/setup-password?token=${tokenResponse.token}`
 
 		// TODO: In the background, send an email notification to targetUser.email
 		// "You have been added to studio X. Click the link to set your password."

@@ -16,6 +16,17 @@ export const auth = betterAuth({
 	}),
 	emailAndPassword: {
 		enabled: true,
+		sendResetPassword: async ({ user, url, token }, request) => {
+			console.log(request)
+			console.log({ user, url, token })
+			// Do not await sendEmail here to avoid timing attacks
+			// return {user, url, token}
+			// void sendEmail({
+			// 	to: user.email,
+			// 	subject: 'Reset your password',
+			// 	html: `Click here to reset your password: <a href="${url}">${url}</a>`,
+			// })
+		},
 	},
 	advanced: {
 		useSecureCookies: process.env.NODE_ENV === 'production',
