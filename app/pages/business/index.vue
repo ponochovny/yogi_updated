@@ -8,6 +8,10 @@ definePageMeta({
 
 const { data: studiosData, pending } = useFetch(`/api/business/studios`)
 const studios = computed(() => studiosData.value?.studios)
+
+useHead({
+	title: 'Main Dashboard',
+})
 </script>
 
 <template>

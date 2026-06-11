@@ -20,6 +20,7 @@ definePageMeta({
 })
 
 useHead({
+	title: 'Offering Creation',
 	script: [
 		{
 			src: 'https://upload-widget.cloudinary.com/global/all.js',
@@ -81,10 +82,9 @@ const createOffering = async (values: CreateOfferingInput) => {
 			navigateTo(`/business/${slug}`)
 		}
 	} catch (error) {
-		toast.error(
-			(error as Error).message ||
-				'Failed to create offering. Please try again.',
-		)
+		toast.error('Failed to create offering. Please try again.', {
+			description: (error as Error).message || 'Unknown error.',
+		})
 	} finally {
 		isProcessing.value = false
 	}
@@ -194,7 +194,7 @@ const removeFromGallery = (index: number) => {
 									<SelectTrigger class="w-full">
 										<SelectValue placeholder="Select activity type" />
 									</SelectTrigger>
-									<SelectContent>
+									<SelectContent position="item-aligned">
 										<SelectGroup>
 											<SelectLabel>Activity Types</SelectLabel>
 											<SelectItem
@@ -235,7 +235,7 @@ const removeFromGallery = (index: number) => {
 									<SelectTrigger class="w-full">
 										<SelectValue placeholder="Select location" />
 									</SelectTrigger>
-									<SelectContent>
+									<SelectContent position="item-aligned">
 										<SelectItem :value="null"> Online (Zoom/Meet) </SelectItem>
 										<SelectGroup>
 											<SelectLabel>Locations</SelectLabel>

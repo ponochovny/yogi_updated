@@ -1,5 +1,6 @@
 <script lang="ts" setup>
 import {
+	CalendarCogIcon,
 	PencilIcon,
 	PlusIcon,
 	Settings2Icon,
@@ -27,6 +28,10 @@ const { data: offeringsData, pending } = await useFetch(
 	`/api/business/studios/${route.params.slug}/offerings`,
 )
 const offerings = computed(() => offeringsData.value?.offerings)
+
+useHead({
+	title: () => studio.value?.name || 'Loading Studio...',
+})
 </script>
 
 <template>
@@ -36,7 +41,12 @@ const offerings = computed(() => offeringsData.value?.offerings)
 		>
 			<div class="flex items-center gap-4">
 				<NuxtImg
-					:src="studio?.logo?.url || placeholderImageUrl"
+					:src="
+						studio?.logo?.url?.replace(
+							'/upload/',
+							'/upload/w_100,h_100,c_fill/',
+						) || placeholderImageUrl
+					"
 					class="w-16 h-16 rounded-full object-cover"
 				/>
 				<div>
@@ -163,6 +173,18 @@ const offerings = computed(() => offeringsData.value?.offerings)
 											>
 												<PencilIcon />
 												Edit
+											</DropdownMenuItem>
+											<DropdownMenuItem
+												v-if="!$route.path.startsWith('/profile')"
+												class="flex items-center gap-2"
+												@click="
+													navigateTo(
+														`/business/${studio?.slug}/offerings/${offering.slug}/schedule`,
+													)
+												"
+											>
+												<CalendarCogIcon />
+												Schedule
 											</DropdownMenuItem>
 										</DropdownMenuGroup>
 									</DropdownMenuContent>

@@ -1,0 +1,1 @@
+ALTER TABLE "offerings" DROP CONSTRAINT "offerings_location_studio_match";
