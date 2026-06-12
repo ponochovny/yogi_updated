@@ -38,6 +38,7 @@ export default defineEventHandler(async () => {
 				location: {
 					name: studioLocations.name,
 					city: studioLocations.city,
+					country: studioLocations.country,
 					address: studioLocations.address,
 				},
 			})

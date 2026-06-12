@@ -58,8 +58,18 @@ export default defineNuxtConfig({
 	},
 
 	routeRules: {
-		'/business/**': { appLayout: 'business', appMiddleware: 'auth' },
-		'/profile/**': { appLayout: 'dashboard-user', appMiddleware: 'auth' },
+		'/business/**': {
+			appLayout: 'business',
+			appMiddleware: 'auth',
+			ssr: false,
+			isr: false,
+		},
+		'/profile/**': {
+			appLayout: 'dashboard-user',
+			appMiddleware: 'auth',
+			ssr: false,
+			isr: false,
+		},
 	},
 
 	runtimeConfig: {

@@ -43,13 +43,13 @@ export default defineEventHandler(async (event) => {
 				.limit(1)
 
 			if (!slotData) {
-				throw createError({ statusCode: 404, message: 'Slot not found' })
+				throw createError({ statusCode: 404, statusMessage: 'Slot not found' })
 			}
 
 			if (slotData.slotStatus !== 'ACTIVE') {
 				throw createError({
 					statusCode: 400,
-					message: 'This session is not available for booking',
+					statusMessage: 'This session is not available for booking',
 				})
 			}
 
@@ -68,7 +68,7 @@ export default defineEventHandler(async (event) => {
 			if (!bookingsCount) {
 				throw createError({
 					statusCode: 500,
-					message: 'Failed to retrieve booking count',
+					statusMessage: 'Failed to retrieve booking count',
 				})
 			}
 			// 4. Capacity Check
@@ -76,7 +76,7 @@ export default defineEventHandler(async (event) => {
 			if (maxCapacity && bookingsCount.count >= maxCapacity) {
 				throw createError({
 					statusCode: 400,
-					message: 'This session is fully booked',
+					statusMessage: 'This session is fully booked',
 				})
 			}
 
@@ -96,7 +96,7 @@ export default defineEventHandler(async (event) => {
 			if (existingBooking) {
 				throw createError({
 					statusCode: 400,
-					message: 'You have already booked this session',
+					statusMessage: 'You have already booked this session',
 				})
 			}
 
@@ -113,14 +113,13 @@ export default defineEventHandler(async (event) => {
 			if (!newBooking) {
 				throw createError({
 					statusCode: 500,
-					message: 'Failed to create booking',
+					statusMessage: 'Failed to create booking',
 				})
 			}
 
 			return {
 				success: true,
 				bookingId: newBooking.id,
-				message: 'Successfully booked',
 			}
 		})
 	} catch (error) {

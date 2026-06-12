@@ -1,4 +1,3 @@
-import { useDb } from '~~/server/utils/db'
 import { user } from '~~/server/db/schema/auth-schema'
 import { updateProfileSchema } from '~/entities/profile/schema'
 import { eq } from 'drizzle-orm'

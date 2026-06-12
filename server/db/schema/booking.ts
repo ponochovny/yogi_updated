@@ -1,6 +1,13 @@
-import { pgTable, text, timestamp, uuid, varchar } from 'drizzle-orm/pg-core'
+import { pgEnum, pgTable, text, timestamp, uuid } from 'drizzle-orm/pg-core'
 import { offeringSlots } from './offering'
 import { user } from './auth-schema'
+import { BookingStatus } from '@/entities/booking/schema'
+
+export const bookingStatusEnum = pgEnum('booking_status', [
+	BookingStatus.CONFIRMED,
+	BookingStatus.CANCELLED,
+	BookingStatus.ATTENDED,
+])
 
 export const bookings = pgTable('bookings', {
 	id: uuid('id').defaultRandom().primaryKey(),
@@ -16,7 +23,9 @@ export const bookings = pgTable('bookings', {
 		.references(() => user.id, { onDelete: 'cascade' }),
 
 	// Status of the booking
-	status: varchar('status').default('CONFIRMED').notNull(), // CONFIRMED, CANCELLED, ATTENDED
+	status: bookingStatusEnum('status')
+		.default(BookingStatus.CONFIRMED)
+		.notNull(),
 
 	createdAt: timestamp('created_at').defaultNow().notNull(),
 	updatedAt: timestamp('updated_at').defaultNow().notNull(),

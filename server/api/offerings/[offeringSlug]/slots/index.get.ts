@@ -48,7 +48,7 @@ export default defineEventHandler(async (event) => {
 			.where(eq(offeringSlots.offeringId, offering.id))
 			.orderBy(offeringSlots.startTime)
 
-		return slots
+		return { success: true, slots }
 	} catch (error) {
 		if (error && typeof error === 'object' && 'statusCode' in error) {
 			throw error

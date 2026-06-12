@@ -31,32 +31,35 @@ defineProps<{
 			<p class="flex-1 text-muted-foreground line-clamp-3">
 				{{ offering.description }}
 			</p>
-			<div class="pt-2 flex items-center justify-between text-xs text-gray-500">
+			<div class="pt-4 flex items-center justify-between text-xs text-gray-300">
 				<div class="flex items-center gap-1">
 					<span>⏱️ {{ offering.duration }} min</span>
 					<span v-if="offering.capacity"
 						>• 👥 up to {{ offering.capacity }} spots</span
 					>
-				</div>
-				<div class="text-right">
-					<span class="font-medium text-gray-300 block">
-						{{ offering.location?.name || '🌐 Online' }}
-					</span>
 					<span
-						v-if="offering.location?.city"
-						class="text-[10px] text-gray-400"
+						v-if="!offering.location?.name"
+						class="font-medium text-gray-300"
 					>
-						{{ offering.location.city }}
+						🌐 Online
+					</span>
+					<span v-else-if="offering.location?.city">
+						• {{ offering.location.city + ', ' + offering.location.country }}
 					</span>
 				</div>
 			</div>
 			<NuxtLink
 				:to="`/studios/${offering.studio.slug}`"
-				class="mt-4 inline-flex items-center space-x-2 group justify-self-end"
+				class="mt-2 inline-flex items-center space-x-2 group justify-self-end"
 			>
 				<Avatar>
 					<AvatarImage
-						:src="offering.studio.logo || placeholderImageUrl"
+						:src="
+							offering.studio.logo?.replace(
+								'/upload/',
+								'/upload/w_64,h_64,c_fill/',
+							) || placeholderImageUrl
+						"
 						alt="Avatar"
 					/>
 					<AvatarFallback>{{ offering.studio.name[0] }}</AvatarFallback>

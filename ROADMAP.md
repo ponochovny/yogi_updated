@@ -23,6 +23,9 @@
 - ✅ Auth
 - ✅ User roles
 - ✅ Auth middleware
+
+#### Other
+
 - [ ] Change to Neon Auth
 - [ ] User role robust
 
@@ -30,10 +33,15 @@
 
 - ✅ UI, Layout
 - ✅ Profile settings
+- [ ] Email verification
+- [ ] Reset password
+- [ ] Google Authentication
 
 ### Main Dashboard
 
 - ✅ Main Dashboard
+- ✅ Main Dashboard with studios list
+- ✅ Main Dashboard with practitioners list
 
 ### Studio
 
@@ -50,8 +58,10 @@
 
 ### Offerings
 
-- [ ] Offering creation
-- [ ] Offering edit / duplicate
+- ✅ Offering creation
+- ✅ Offering edit
+- [ ] Offering duplicate
+- ✅ Offering with booking slots
 
 ### Memberships
 
@@ -67,7 +77,3 @@
 
 - [ ] Promo code creation
 - [ ] Promo code edit / duplicate
-
-### Booking service
-
-- [ ] Offering creation with booking feature

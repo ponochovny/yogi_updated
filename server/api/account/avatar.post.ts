@@ -41,7 +41,12 @@ export default defineEventHandler(async (event) => {
 
 		return { success: true, url: body.url }
 	} catch (error) {
-		console.error('Avatar upload failed:', error)
-		throw createError({ statusCode: 500, message: 'Failed to update avatar' })
+		if (error && typeof error === 'object' && 'statusCode' in error) {
+			throw error
+		}
+		throw createError({
+			statusCode: 500,
+			statusMessage: 'Failed to update avatar',
+		})
 	}
 })

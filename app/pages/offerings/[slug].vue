@@ -14,7 +14,7 @@ const [{ data: offeringsData }, { data: offeringsSlots }] = await Promise.all([
 
 const offering = computed(() => offeringsData.value?.offering || null)
 
-const rawSlots = computed(() => offeringsSlots.value || [])
+const rawSlots = computed(() => offeringsSlots.value?.slots || [])
 
 // Group slots by date for UI presentation
 const groupedSlots = computed(() => {

@@ -1,5 +1,9 @@
 import { studios, studioLocations } from '~~/server/db/schema/studio'
-import { mediaFiles } from '~~/server/db/schema/_other'
+import {
+	MediaEntityTypeEnum,
+	mediaFiles,
+	MediaTypeEnum,
+} from '~~/server/db/schema/_other'
 import { and, eq } from 'drizzle-orm'
 
 export default defineEventHandler(async (event) => {
@@ -39,14 +43,14 @@ export default defineEventHandler(async (event) => {
 				.where(
 					and(
 						eq(mediaFiles.entityId, studio.id),
-						eq(mediaFiles.entityType, 'STUDIO'),
+						eq(mediaFiles.entityType, MediaEntityTypeEnum.STUDIO),
 					),
 				)
 				.orderBy(mediaFiles.order),
 		])
 
-		const logo = media.find((file) => file.type === 'LOGO') || null
-		const gallery = media.filter((file) => file.type === 'GALLERY')
+		const logo = media.find((file) => file.type === MediaTypeEnum.LOGO) || null
+		const gallery = media.filter((file) => file.type === MediaTypeEnum.GALLERY)
 
 		return {
 			success: true,

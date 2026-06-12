@@ -19,7 +19,7 @@ const sidebarProps = {
 			icon: MapPinIcon,
 		},
 		{
-			name: 'Purchase History',
+			name: 'My Bookings',
 			url: PagesConfig.PROFILE_BOOKINGS,
 			icon: ShoppingCartIcon,
 		},

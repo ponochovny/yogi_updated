@@ -13,7 +13,6 @@ export default defineEventHandler(async (event) => {
 	const session = await auth.api.getSession({
 		headers: event.headers,
 	})
-
 	if (!session || !session.user) {
 		throw createError({
 			statusCode: 401,
@@ -22,7 +21,6 @@ export default defineEventHandler(async (event) => {
 	}
 
 	const body = await readValidatedBody(event, createStudioSchema.parse)
-
 	const currentUserId = session.user.id
 
 	const studioSlug = `${slugify(body.name, { lower: true })}-${Math.floor(1000 + Math.random() * 9000)}`
@@ -95,9 +93,12 @@ export default defineEventHandler(async (event) => {
 
 		return { success: true, studio: result }
 	} catch (error) {
+		if (error && typeof error === 'object' && 'statusCode' in error) {
+			throw error
+		}
 		throw createError({
 			statusCode: 500,
-			message: (error as Error).message ?? 'Unknown error',
+			statusMessage: 'Failed to create studio',
 		})
 	}
 })

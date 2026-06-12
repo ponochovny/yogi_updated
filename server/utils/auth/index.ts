@@ -1,6 +1,5 @@
 import { betterAuth } from 'better-auth'
 import { drizzleAdapter } from 'better-auth/adapters/drizzle'
-import { useDb } from '../db'
 import { userRoles } from '../../auth/config'
 import { customSession } from 'better-auth/plugins'
 import { and, eq } from 'drizzle-orm'
