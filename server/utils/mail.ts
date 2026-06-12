@@ -16,6 +16,23 @@ interface SendPasswordResetParams {
 	resetLink: string
 }
 
+function resolveRecipient(
+	to: string,
+): { recipient: string } | { error: Error } {
+	const isDev = process.env.NODE_ENV === 'development'
+	if (isDev && !process.env.TEST_EMAIL_OVERRIDE) {
+		return {
+			error: new Error('TEST_EMAIL_OVERRIDE must be set in development'),
+		}
+	}
+	return {
+		recipient:
+			isDev && process.env.TEST_EMAIL_OVERRIDE
+				? process.env.TEST_EMAIL_OVERRIDE
+				: to,
+	}
+}
+
 export const sendPractitionerInvite = async ({
 	to,
 	name,
@@ -23,19 +40,11 @@ export const sendPractitionerInvite = async ({
 	inviteLink,
 }: SendInviteParams) => {
 	// If we are on localhost (no production domain), intercept the email to our own inbox
-	const isDev = process.env.NODE_ENV === 'development'
-
-	if (isDev && !process.env.TEST_EMAIL_OVERRIDE) {
-		return {
-			success: false,
-			error: new Error('TEST_EMAIL_OVERRIDE must be set in development'),
-		}
+	const result = resolveRecipient(to)
+	if ('error' in result) {
+		return { success: false, error: result.error }
 	}
-
-	const recipient =
-		isDev && process.env.TEST_EMAIL_OVERRIDE
-			? process.env.TEST_EMAIL_OVERRIDE
-			: to
+	const { recipient } = result
 
 	try {
 		const data = await resend.emails.send({
@@ -72,19 +81,11 @@ export const sendPasswordReset = async ({
 	resetLink,
 }: SendPasswordResetParams) => {
 	// If we are on localhost (no production domain), intercept the email to our own inbox
-	const isDev = process.env.NODE_ENV === 'development'
-
-	if (isDev && !process.env.TEST_EMAIL_OVERRIDE) {
-		return {
-			success: false,
-			error: new Error('TEST_EMAIL_OVERRIDE must be set in development'),
-		}
+	const result = resolveRecipient(to)
+	if ('error' in result) {
+		return { success: false, error: result.error }
 	}
-
-	const recipient =
-		isDev && process.env.TEST_EMAIL_OVERRIDE
-			? process.env.TEST_EMAIL_OVERRIDE
-			: to
+	const { recipient } = result
 
 	try {
 		const data = await resend.emails.send({
