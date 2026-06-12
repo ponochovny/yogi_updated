@@ -34,6 +34,7 @@ export default defineNuxtConfig({
 				'better-auth/vue',
 				'class-variance-authority',
 				'clsx',
+				'date-fns',
 				'reka-ui',
 				'tailwind-merge',
 				'vee-validate',

@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { format } from 'date-fns'
-
+import { toast } from 'vue-sonner'
 const route = useRoute()
 const offeringSlug = route.params.slug
 
@@ -32,6 +32,35 @@ const groupedSlots = computed(() => {
 		{},
 	)
 })
+
+// TODO: Set slot type properly instead of current type
+const bookSlot = async (slot: { id: string }) => {
+	try {
+		const { error } = await useFetch(`/api/slots/${slot.id}/book`, {
+			method: 'POST',
+			body: {
+				...slot,
+			},
+		})
+
+		if (error.value) {
+			toast.error(error.value.data.message || 'Failed to book slot')
+			return
+		}
+
+		toast.success('Slot booked successfully!', {
+			description:
+				'Your session has been booked. Check your dashboard for details.',
+			duration: 5000,
+			action: {
+				label: 'View Bookings',
+				onClick: () => navigateTo('/profile/bookings'),
+			},
+		})
+	} catch (err) {
+		toast.error(`Error booking slot: ${(err as Error).message}`)
+	}
+}
 </script>
 
 <template>
@@ -70,7 +99,9 @@ const groupedSlots = computed(() => {
 									Coach: {{ slot.practitioner.name }}
 								</div>
 							</div>
-							<Button variant="outline" size="sm"> Book Now </Button>
+							<Button variant="outline" size="sm" @click="() => bookSlot(slot)">
+								Book Now
+							</Button>
 						</div>
 					</div>
 				</div>

@@ -20,8 +20,7 @@ const sidebarProps = {
 		},
 		{
 			name: 'Purchase History',
-			// url: PagesConfig.PROFILE_VENUES,
-			url: '#',
+			url: PagesConfig.PROFILE_BOOKINGS,
 			icon: ShoppingCartIcon,
 		},
 	],

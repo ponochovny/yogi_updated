@@ -4,6 +4,7 @@ import * as _other from '~~/server/db/schema/_other'
 import * as authSchema from '~~/server/db/schema/auth-schema'
 import * as studio from '~~/server/db/schema/studio'
 import * as offering from '~~/server/db/schema/offering'
+import * as booking from '~~/server/db/schema/booking'
 
 import ws from 'ws'
 
@@ -11,6 +12,7 @@ const schema = {
 	...studio,
 	...authSchema,
 	...offering,
+	...booking,
 	..._other,
 }
 

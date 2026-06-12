@@ -13,7 +13,8 @@ export const PagesConfig = {
 
 	PROFILE_SETTINGS: '/profile/settings',
 	PROFILE_ADDITIONAL: '/profile/additional',
-	PROFILE_VENUES: '/profile/venues',
+	// PROFILE_VENUES: '/profile/venues',
+	PROFILE_BOOKINGS: '/profile/bookings',
 
 	SEARCH: '/search',
 

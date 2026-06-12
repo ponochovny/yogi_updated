@@ -1,9 +1,8 @@
 import { studios, studioPractitioners } from '~~/server/db/schema/studio'
 import { user } from '~~/server/db/schema/auth-schema'
-import { aliasedTable, and, eq, sql } from 'drizzle-orm'
+import { and, eq, sql } from 'drizzle-orm'
 import {
 	MediaEntityTypeEnum,
-	mediaFiles,
 	MediaTypeEnum,
 } from '~~/server/db/schema/_other'
 
@@ -30,7 +29,15 @@ export default defineEventHandler(async (event) => {
 
 	const currentUserId = session.user.id
 	const db = useDb()
-	const practitionerImg = aliasedTable(mediaFiles, 'practitioner_img')
+	const practitionerImg = sql`(
+		SELECT url
+		FROM media_files
+		WHERE entity_id = ${user.id}::text
+			AND entity_type = ${MediaEntityTypeEnum.USER}
+			AND type = ${MediaTypeEnum.AVATAR}
+		ORDER BY created_at DESC
+		LIMIT 1
+	) practitioner_img`
 
 	// Checking if the studio exists and belongs to the current user (owner)
 	const [studio] = await db
@@ -51,27 +58,13 @@ export default defineEventHandler(async (event) => {
 				id: user.id,
 				name: user.name,
 				email: user.email,
-				image: practitionerImg.url, // If there is an avatar
+				image: sql<string>`practitioner_img.url`,
 				emailVerified: user.emailVerified, // Useful to display a "Not Verified" badge in the UI
 			},
 		})
 		.from(studioPractitioners)
 		.innerJoin(user, eq(studioPractitioners.userId, user.id))
-		.leftJoin(
-			practitionerImg,
-			eq(
-				practitionerImg.id,
-				sql`(
-            SELECT id
-            FROM media_files
-            WHERE entity_id = ${user.id}::text
-                AND entity_type = ${MediaEntityTypeEnum.USER}
-                AND type = ${MediaTypeEnum.AVATAR}
-            ORDER BY created_at DESC
-            LIMIT 1
-        )`,
-			),
-		)
+		.leftJoinLateral(practitionerImg, sql`TRUE`)
 		.where(eq(studioPractitioners.studioId, studio.id))
 
 	return { success: true, team }
