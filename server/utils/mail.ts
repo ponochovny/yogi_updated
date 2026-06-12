@@ -10,6 +10,11 @@ interface SendInviteParams {
 	studioName: string | null
 	inviteLink: string
 }
+interface SendPasswordResetParams {
+	to: string
+	name: string
+	resetLink: string
+}
 
 export const sendPractitionerInvite = async ({
 	to,
@@ -57,6 +62,54 @@ export const sendPractitionerInvite = async ({
 		return { success: true, data }
 	} catch (error) {
 		console.error('Error sending invite email:', error)
+		return { success: false, error }
+	}
+}
+
+export const sendPasswordReset = async ({
+	to,
+	name,
+	resetLink,
+}: SendPasswordResetParams) => {
+	// If we are on localhost (no production domain), intercept the email to our own inbox
+	const isDev = process.env.NODE_ENV === 'development'
+
+	if (isDev && !process.env.TEST_EMAIL_OVERRIDE) {
+		return {
+			success: false,
+			error: new Error('TEST_EMAIL_OVERRIDE must be set in development'),
+		}
+	}
+
+	const recipient =
+		isDev && process.env.TEST_EMAIL_OVERRIDE
+			? process.env.TEST_EMAIL_OVERRIDE
+			: to
+
+	try {
+		const data = await resend.emails.send({
+			from: `Yogi <onboarding@resend.dev>`, // On production this will be no-reply@your-studio.com
+			to: recipient,
+			subject: `Password Reset Request. Click the link to set your password.`,
+			// Simple HTML template for now. Then it's possible to use libs like Vue Email
+			html: `
+        <div style="font-family: sans-serif; max-width: 600px; margin: 0 auto;">
+          <h2>Hello, ${name}!</h2>
+          <p>To reset your password, click the button below:</p>
+          <a href="${resetLink}" style="display: inline-block; padding: 12px 24px; background-color: #000; color: #fff; text-decoration: none; border-radius: 6px; margin-top: 16px;">
+            Reset Password
+          </a>
+          <p style="margin-top: 32px; color: #666; font-size: 12px;">
+            If the button doesn't work, copy this link into your browser: <br/>
+            ${resetLink}
+          </p>
+        </div>
+      `,
+		})
+
+		return { success: true, data }
+	} catch (error) {
+		console.error('Error sending password reset email:', error)
 		return { success: false, error }
 	}
 }

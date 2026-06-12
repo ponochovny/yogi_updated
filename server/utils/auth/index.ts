@@ -34,11 +34,11 @@ export const auth = betterAuth({
 					inviteLink: url,
 				})
 			} else {
-				// void sendPasswordReset({
-				// 	to: user.email,
-				// 	name: user.name,
-				// 	inviteLink: url,
-				// })
+				void sendPasswordReset({
+					to: user.email,
+					name: user.name,
+					resetLink: url,
+				})
 			}
 		},
 		onPasswordReset: async ({ user }) => {
@@ -46,9 +46,9 @@ export const auth = betterAuth({
 			await db
 				.update(userSchema)
 				.set({ emailVerified: true })
-				.where(eq(userSchema.email, user.email))
+				.where(eq(userSchema.id, user.id))
 
-			console.log(`Email verified for user: ${user.email} post-reset.`)
+			console.log(`Email verified for user: ${user.id} post-reset.`)
 		},
 	},
 	advanced: {
