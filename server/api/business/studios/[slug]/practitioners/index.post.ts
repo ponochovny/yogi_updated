@@ -4,6 +4,7 @@ import { and, eq } from 'drizzle-orm'
 import { addPractitionerSchema } from '@/entities/practitioner/schema'
 import { v4 as uuidv4 } from 'uuid'
 import { FetchError } from 'ofetch'
+import { practitionerRoles } from '~~/server/auth/config'
 
 export default defineEventHandler(async (event) => {
 	const session = await auth.api.getSession({
@@ -29,11 +30,12 @@ export default defineEventHandler(async (event) => {
 	const currentUserId = session.user.id
 	const body = await readValidatedBody(event, addPractitionerSchema.parse)
 	const db = useDb()
+	let studio: { id: string; name: string } | undefined
 
 	try {
 		const result = await db.transaction(async (tx) => {
 			// 1. Checking if the studio exists and belongs to the current user (owner)
-			const [studio] = await tx
+			;[studio] = await tx
 				.select()
 				.from(studios)
 				.where(and(eq(studios.slug, slug), eq(studios.ownerId, currentUserId)))
@@ -60,7 +62,7 @@ export default defineEventHandler(async (event) => {
 						name: body.name,
 						emailVerified: false, // Important flag: the user has not yet confirmed their email
 						bio: body.bio || '',
-						role: ['practitioner'],
+						role: [practitionerRoles.PRACTITIONER],
 						createdAt: new Date(),
 						updatedAt: new Date(),
 					})
@@ -100,8 +102,32 @@ export default defineEventHandler(async (event) => {
 			return { practitionerLink: newPractitioner, user: targetUser }
 		})
 
+		// 6. Construct the setup URL
+		// In production, you would trigger an email send here via Resend/Postmark
+		// const setupLink = `https://yourdomain.com/auth/setup-password?token=${tokenResponse.token}`
+
 		// TODO: In the background, send an email notification to targetUser.email
 		// "You have been added to studio X. Click the link to set your password."
+
+		try {
+			await auth.api.requestPasswordReset({
+				body: {
+					email: body.email,
+					redirectTo:
+						'/reset-password?flow=invite&studioName=' +
+						encodeURIComponent(studio?.name || ''), // Pass studio name and invite flow for email context
+				},
+			})
+		} catch (error) {
+			console.error('Failed to request password reset for new practitioner', {
+				studioSlug: slug,
+				error:
+					error instanceof Error
+						? { name: error.name, message: error.message }
+						: { message: 'Unknown error' },
+			})
+			// TODO: Queue retry or alert for manual follow-up
+		}
 
 		return { success: true, data: result }
 	} catch (error: unknown) {

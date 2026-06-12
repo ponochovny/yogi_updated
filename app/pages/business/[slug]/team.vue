@@ -111,8 +111,13 @@ useHead({
 					<tr v-for="member in team" :key="member.linkId">
 						<td class="px-6 py-4 flex items-center gap-3">
 							<NuxtImg
-								:src="member.user.image || placeholderImageUrl"
-								class="w-10 h-10 rounded-full bg-gray-100"
+								:src="
+									member.user.image?.replace(
+										'/upload/',
+										'/upload/w_100,h_100,c_thumb,g_custom/',
+									) || placeholderImageUrl
+								"
+								class="w-10 h-10 rounded-full bg-gray-100 object-cover"
 							/>
 							<div>
 								<div class="font-medium text-gray-200">

@@ -9,6 +9,7 @@ export const updateSlotsSchema = z.object({
 		offeringSlotStatus.COMPLETED,
 		offeringSlotStatus.CANCELLED,
 	]),
+	capacityOverride: z.number().int().nullable().optional(),
 })
 
 export type updateSlotsSchemaInput = z.infer<typeof updateSlotsSchema>
