@@ -30,11 +30,12 @@ export default defineEventHandler(async (event) => {
 	const currentUserId = session.user.id
 	const body = await readValidatedBody(event, addPractitionerSchema.parse)
 	const db = useDb()
+	let studio: { id: string; name: string } | undefined
 
 	try {
 		const result = await db.transaction(async (tx) => {
 			// 1. Checking if the studio exists and belongs to the current user (owner)
-			const [studio] = await tx
+			;[studio] = await tx
 				.select()
 				.from(studios)
 				.where(and(eq(studios.slug, slug), eq(studios.ownerId, currentUserId)))
@@ -101,17 +102,30 @@ export default defineEventHandler(async (event) => {
 			return { practitionerLink: newPractitioner, user: targetUser }
 		})
 
-		const tokenResponse = await auth.api.requestPasswordReset({
-			body: { email: body.email, redirectTo: '/reset-password' },
-		})
-		console.log('Token Response', tokenResponse)
-
 		// 6. Construct the setup URL
 		// In production, you would trigger an email send here via Resend/Postmark
 		// const setupLink = `https://yourdomain.com/auth/setup-password?token=${tokenResponse.token}`
 
 		// TODO: In the background, send an email notification to targetUser.email
 		// "You have been added to studio X. Click the link to set your password."
+
+		try {
+			await auth.api.requestPasswordReset({
+				body: {
+					email: body.email,
+					redirectTo:
+						'/reset-password?flow=invite&studioName=' +
+						encodeURIComponent(studio?.name || ''), // Pass studio name and invite flow for email context
+				},
+			})
+		} catch (error) {
+			console.log(error)
+			console.error(
+				'Failed to request password reset for new practitioner:',
+				body.email,
+			)
+			// TODO: Queue retry or alert for manual follow-up
+		}
 
 		return { success: true, data: result }
 	} catch (error: unknown) {
