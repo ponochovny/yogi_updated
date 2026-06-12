@@ -19,6 +19,14 @@ export const sendPractitionerInvite = async ({
 }: SendInviteParams) => {
 	// If we are on localhost (no production domain), intercept the email to our own inbox
 	const isDev = process.env.NODE_ENV === 'development'
+
+	if (isDev && !process.env.TEST_EMAIL_OVERRIDE) {
+		return {
+			success: false,
+			error: new Error('TEST_EMAIL_OVERRIDE must be set in development'),
+		}
+	}
+
 	const recipient =
 		isDev && process.env.TEST_EMAIL_OVERRIDE
 			? process.env.TEST_EMAIL_OVERRIDE
@@ -26,7 +34,7 @@ export const sendPractitionerInvite = async ({
 
 	try {
 		const data = await resend.emails.send({
-			from: `${studioName || ''} <onboarding@resend.dev>`, // On production this will be no-reply@your-studio.com
+			from: `${studioName || 'Yogi'} <onboarding@resend.dev>`, // On production this will be no-reply@your-studio.com
 			to: recipient,
 			subject: `Welcome to ${studioName || 'a studio'} team. Click the link to set your password.`,
 			// Simple HTML template for now. Then it's possible to use libs like Vue Email

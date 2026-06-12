@@ -9,6 +9,7 @@ import {
 	mediaFiles,
 	MediaTypeEnum,
 } from '../../db/schema/_other'
+import { user as userSchema } from '~~/server/db/schema/auth-schema'
 
 export const auth = betterAuth({
 	database: drizzleAdapter(useDb(), {
@@ -16,16 +17,38 @@ export const auth = betterAuth({
 	}),
 	emailAndPassword: {
 		enabled: true,
-		sendResetPassword: async ({ user, url, token }, request) => {
-			console.log(request)
-			console.log({ user, url, token })
-			// Do not await sendEmail here to avoid timing attacks
-			// return {user, url, token}
-			// void sendEmail({
-			// 	to: user.email,
-			// 	subject: 'Reset your password',
-			// 	html: `Click here to reset your password: <a href="${url}">${url}</a>`,
-			// })
+		sendResetPassword: async ({ user, url }) => {
+			const parsedUrl = new URL(url)
+			const callbackURL = parsedUrl.searchParams.get('callbackURL') || ''
+
+			const isInvite = callbackURL.includes('flow=invite')
+			const studioName = new URLSearchParams(callbackURL.split('?')[1]).get(
+				'studioName',
+			)
+
+			if (isInvite) {
+				void sendPractitionerInvite({
+					to: user.email,
+					name: user.name,
+					studioName: studioName,
+					inviteLink: url,
+				})
+			} else {
+				// void sendPasswordReset({
+				// 	to: user.email,
+				// 	name: user.name,
+				// 	inviteLink: url,
+				// })
+			}
+		},
+		onPasswordReset: async ({ user }) => {
+			const db = useDb()
+			await db
+				.update(userSchema)
+				.set({ emailVerified: true })
+				.where(eq(userSchema.email, user.email))
+
+			console.log(`Email verified for user: ${user.email} post-reset.`)
 		},
 	},
 	advanced: {

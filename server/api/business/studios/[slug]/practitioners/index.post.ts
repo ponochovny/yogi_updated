@@ -119,11 +119,13 @@ export default defineEventHandler(async (event) => {
 				},
 			})
 		} catch (error) {
-			console.log(error)
-			console.error(
-				'Failed to request password reset for new practitioner:',
-				body.email,
-			)
+			console.error('Failed to request password reset for new practitioner', {
+				studioSlug: slug,
+				error:
+					error instanceof Error
+						? { name: error.name, message: error.message }
+						: { message: 'Unknown error' },
+			})
 			// TODO: Queue retry or alert for manual follow-up
 		}
 
