@@ -59,22 +59,17 @@ export default defineEventHandler(async (event) => {
 		.innerJoin(user, eq(studioPractitioners.userId, user.id))
 		.leftJoin(
 			practitionerImg,
-			and(
-				eq(
-					practitionerImg.id,
-					sql`(
-						SELECT id
-						FROM media_files
-						WHERE entity_id = ${user.id}::text
-							AND entity_type = ${MediaEntityTypeEnum.USER}
-							AND type = ${MediaTypeEnum.AVATAR}
-						ORDER BY created_at DESC
-						LIMIT 1
-					)`,
-				),
-				eq(practitionerImg.entityId, sql`${user.id}::text`),
-				eq(practitionerImg.entityType, MediaEntityTypeEnum.USER),
-				eq(practitionerImg.type, MediaTypeEnum.AVATAR),
+			eq(
+				practitionerImg.id,
+				sql`(
+            SELECT id
+            FROM media_files
+            WHERE entity_id = ${user.id}::text
+                AND entity_type = ${MediaEntityTypeEnum.USER}
+                AND type = ${MediaTypeEnum.AVATAR}
+            ORDER BY created_at DESC
+            LIMIT 1
+        )`,
 			),
 		)
 		.where(eq(studioPractitioners.studioId, studio.id))

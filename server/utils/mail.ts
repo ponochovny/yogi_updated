@@ -2,6 +2,9 @@ import { Resend } from 'resend'
 
 // Initialize client (Nuxt automatically will pick up NUXT_RESEND_API_KEY from runtimeConfig if you set it up,
 // or you can just use process.env for simplicity)
+if (!process.env.RESEND_API_KEY) {
+	throw new Error('RESEND_API_KEY environment variable is required')
+}
 const resend = new Resend(process.env.RESEND_API_KEY)
 
 interface SendInviteParams {
@@ -69,7 +72,7 @@ export const sendPractitionerInvite = async ({
 		})
 
 		return { success: true, data }
-	} catch (error) {
+	} catch (error: unknown) {
 		console.error('Error sending invite email:', error)
 		return { success: false, error }
 	}
@@ -109,7 +112,7 @@ export const sendPasswordReset = async ({
 		})
 
 		return { success: true, data }
-	} catch (error) {
+	} catch (error: unknown) {
 		console.error('Error sending password reset email:', error)
 		return { success: false, error }
 	}
