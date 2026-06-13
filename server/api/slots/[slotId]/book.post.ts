@@ -99,29 +99,27 @@ export default defineEventHandler(async (event) => {
 						bookingId: newBooking.id,
 					}
 				})
-			} catch (e: { code?: string; message?: string } | unknown) {
+			} catch (e: unknown) {
 				// Retry on serialization failure or deadlock
-				// @ts-expect-error - Not all errors will have a code, but we want to check if it does
-				const code = (e && e.code) || ''
+				const code =
+					typeof e === 'object' && e !== null && 'code' in e
+						? String((e as { code?: unknown }).code ?? '')
+						: ''
+				const message =
+					typeof e === 'object' && e !== null && 'message' in e
+						? String((e as { message?: unknown }).message ?? '')
+						: ''
 				if ((code === '40001' || code === '40P01') && attempt < maxAttempts) {
 					// backoff a bit and retry
 					await new Promise((r) => setTimeout(r, 50 * attempt))
 					continue
 				}
 				// Unique constraint: user already has a confirmed booking
-				if (
-					code === '23505' ||
-					// @ts-expect-error - Not all errors will have a message, but we want to check if it does
-					(e && String(e.message).includes('duplicate key'))
-				) {
+				if (message.includes('duplicate key')) {
 					throwApiError(400, 'You have already booked this session')
 				}
 				// Capacity enforcement from DB trigger
-				if (
-					e &&
-					// @ts-expect-error - Not all errors will have a message, but we want to check if it does
-					String(e.message).toLowerCase().includes('capacity exceeded')
-				) {
+				if (message.toLowerCase().includes('capacity exceeded')) {
 					throwApiError(400, 'This session is fully booked')
 				}
 				throw e

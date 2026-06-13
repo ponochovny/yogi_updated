@@ -18,9 +18,9 @@ useHead({
 const groupedBookingsByOffering = computed(() => {
 	const groups: Record<string, typeof bookings.value> = {}
 	bookings.value.forEach((booking) => {
-		const offeringName = booking.offering.name
-		if (!groups[offeringName]) groups[offeringName] = []
-		groups[offeringName].push(booking)
+		const offeringKey = booking.offering.slug
+		if (!groups[offeringKey]) groups[offeringKey] = []
+		groups[offeringKey].push(booking)
 	})
 	return groups
 })
@@ -51,17 +51,17 @@ const cancelBooking = async (bookingId: string) => {
 		</div>
 		<div v-else class="flex flex-col gap-4">
 			<div
-				v-for="(group, offeringName) in groupedBookingsByOffering"
-				:key="offeringName"
+				v-for="(group, offeringSlug) in groupedBookingsByOffering"
+				:key="offeringSlug"
 			>
 				<div class="rounded-2xl border p-2 flex gap-2 items-center">
 					<NuxtImg
 						:src="group[0]?.offering.coverImage || placeholderImageUrl"
-						:alt="offeringName"
+						:alt="group[0]?.offering.name || 'Offering Cover Image'"
 						class="aspect-video h-20 object-cover rounded-md"
 					/>
-					<NuxtLink :to="`/offerings/${group[0]?.offering.slug}`">
-						<h2 class="text-xl font-semibold">{{ offeringName }}</h2>
+					<NuxtLink :to="`/offerings/${offeringSlug}`">
+						<h2 class="text-xl font-semibold">{{ group[0]?.offering.name }}</h2>
 					</NuxtLink>
 				</div>
 				<div class="flex flex-col gap-4 mt-2 pl-4">

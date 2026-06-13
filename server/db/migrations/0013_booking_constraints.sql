@@ -37,6 +37,34 @@ BEGIN
     END IF;
     RETURN NEW;
   ELSIF (TG_OP = 'UPDATE') THEN
+	    -- Move between slots while staying CONFIRMED:
+    -- decrement old slot, then capacity-check+increment new slot
+    IF (
+      OLD.status = 'CONFIRMED'
+      AND NEW.status = 'CONFIRMED'
+      AND OLD.slot_id <> NEW.slot_id
+    ) THEN
+      UPDATE offering_slots
+      SET bookings_count = GREATEST(bookings_count - 1, 0)
+      WHERE id = OLD.slot_id;
+
+      SELECT * INTO slot_rec
+      FROM offering_slots
+      WHERE id = NEW.slot_id
+      FOR UPDATE;
+      SELECT capacity INTO offering_capacity
+      FROM offerings
+      WHERE id = slot_rec.offering_id;
+      slot_capacity := slot_rec.capacity_override;
+      max_capacity := COALESCE(NULLIF(slot_capacity,0), offering_capacity);
+      IF (max_capacity IS NOT NULL AND max_capacity <> 0 AND slot_rec.bookings_count + 1 > max_capacity) THEN
+        RAISE EXCEPTION 'capacity exceeded for slot %', NEW.slot_id;
+      END IF;
+      UPDATE offering_slots
+      SET bookings_count = bookings_count + 1
+      WHERE id = NEW.slot_id;
+      RETURN NEW;
+    END IF;
     -- Transition into CONFIRMED: increment (and check capacity)
     IF (OLD.status <> 'CONFIRMED' AND NEW.status = 'CONFIRMED') THEN
       SELECT * INTO slot_rec FROM offering_slots WHERE id = NEW.slot_id FOR UPDATE;

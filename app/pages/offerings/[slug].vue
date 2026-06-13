@@ -36,17 +36,12 @@ const groupedSlots = computed(() => {
 // TODO: Set slot type properly instead of current type
 const bookSlot = async (slot: { id: string }) => {
 	try {
-		const { error } = await useFetch(`/api/slots/${slot.id}/book`, {
+		await $fetch(`/api/slots/${slot.id}/book`, {
 			method: 'POST',
 			body: {
 				...slot,
 			},
 		})
-
-		if (error.value) {
-			toast.error(error.value.data.message || 'Failed to book slot')
-			return
-		}
 
 		toast.success('Slot booked successfully!', {
 			description:

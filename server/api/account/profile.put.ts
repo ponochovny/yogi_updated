@@ -30,7 +30,7 @@ export default defineEventHandler(async (event) => {
 		}
 	} catch (error: unknown) {
 		if (isApiError(error)) throw error
-		console.error('Failed to updating profile', error)
-		throwApiError(500, 'Failed to updating profile')
+		console.error('Failed to update profile', error)
+		throwApiError(500, 'Failed to update profile')
 	}
 })

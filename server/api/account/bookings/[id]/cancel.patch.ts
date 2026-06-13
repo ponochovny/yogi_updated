@@ -5,7 +5,7 @@ import { BookingStatus } from '~/entities/booking/schema'
 
 export default defineEventHandler(async (event) => {
 	const user = await requireAuthenticatedUser(event)
-	const bookingId = requireRouteParam(event, 'bookingId')
+	const bookingId = requireRouteParam(event, 'id')
 	const db = useDb()
 	const userId = user.id
 

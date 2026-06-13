@@ -53,7 +53,7 @@ export default defineEventHandler(async (event) => {
 		}
 	} catch (error: unknown) {
 		if (isApiError(error)) throw error
-		console.error('Failed to fetch offering', error)
-		throwApiError(500, 'Failed to fetch offering')
+		console.error('Failed to fetch offering practitioners', error)
+		throwApiError(500, 'Failed to fetch offering practitioners')
 	}
 })
