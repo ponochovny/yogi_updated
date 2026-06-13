@@ -58,8 +58,7 @@ export default defineEventHandler(async (event) => {
 		}
 	} catch (error) {
 		if (isApiError(error)) throw error
-		throwApiError(500, 'Failed to fetch studio', {
-			detail: getErrorMessage(error),
-		})
+		console.error('Failed to fetch studio', error)
+		throwApiError(500, 'Failed to fetch studio')
 	}
 })

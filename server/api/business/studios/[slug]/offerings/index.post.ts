@@ -120,8 +120,7 @@ export default defineEventHandler(async (event) => {
 		return { success: true, offering: result }
 	} catch (error: unknown) {
 		if (isApiError(error)) throw error
-		throwApiError(500, 'Failed to create offering', {
-			detail: getErrorMessage(error),
-		})
+		console.error('Failed to create offering', error)
+		throwApiError(500, 'Failed to create offering')
 	}
 })

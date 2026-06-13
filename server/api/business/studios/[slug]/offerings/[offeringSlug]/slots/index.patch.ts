@@ -19,7 +19,7 @@ export default defineEventHandler(async (event) => {
 	if (!studio) {
 		throwApiError(
 			404,
-			'Studio not found or you do not have permission to edit this offering',
+			'Studio not found or you do not have permission to this offering',
 		)
 	}
 
@@ -67,8 +67,7 @@ export default defineEventHandler(async (event) => {
 		return { success: true, updatedSlot }
 	} catch (error) {
 		if (isApiError(error)) throw error
-		throwApiError(500, 'Failed to update slot', {
-			detail: getErrorMessage(error),
-		})
+		console.error('Failed to update slot', error)
+		throwApiError(500, 'Failed to update slot')
 	}
 })

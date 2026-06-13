@@ -57,8 +57,7 @@ export default defineEventHandler(async (event) => {
 		}
 	} catch (error) {
 		if (isApiError(error)) throw error
-		throwApiError(500, 'Failed to fetch studio details', {
-			detail: getErrorMessage(error),
-		})
+		console.error('Failed to fetch studio details', error)
+		throwApiError(500, 'Failed to fetch studio details')
 	}
 })

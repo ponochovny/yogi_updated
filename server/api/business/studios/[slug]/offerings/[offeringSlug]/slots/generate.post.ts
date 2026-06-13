@@ -24,7 +24,7 @@ export default defineEventHandler(async (event) => {
 	if (!studio) {
 		throwApiError(
 			404,
-			'Studio not found or you do not have permission to edit this offering',
+			'Studio not found or you do not have permission to this offering',
 		)
 	}
 
@@ -123,8 +123,7 @@ export default defineEventHandler(async (event) => {
 		}
 	} catch (error) {
 		if (isApiError(error)) throw error
-		throwApiError(500, 'Failed to generate slots', {
-			detail: getErrorMessage(error),
-		})
+		console.error('Failed to generate slots', error)
+		throwApiError(500, 'Failed to generate slots')
 	}
 })

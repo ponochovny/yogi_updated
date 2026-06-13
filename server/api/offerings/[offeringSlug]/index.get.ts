@@ -120,8 +120,7 @@ export default defineEventHandler(async (event) => {
 		}
 	} catch (error) {
 		if (isApiError(error)) throw error
-		throwApiError(500, 'Failed to fetch offering', {
-			detail: getErrorMessage(error),
-		})
+		console.error('Failed to fetch offering', error)
+		throwApiError(500, 'Failed to fetch offering')
 	}
 })

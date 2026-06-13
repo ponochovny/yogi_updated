@@ -38,8 +38,7 @@ export default defineEventHandler(async (event) => {
 		return { success: true, url: body.url }
 	} catch (error) {
 		if (isApiError(error)) throw error
-		throwApiError(500, 'Failed to update avatar', {
-			detail: getErrorMessage(error),
-		})
+		console.error('Failed to update avatar', error)
+		throwApiError(500, 'Failed to update avatar')
 	}
 })

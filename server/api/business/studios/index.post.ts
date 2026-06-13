@@ -84,8 +84,7 @@ export default defineEventHandler(async (event) => {
 		return { success: true, studio: result }
 	} catch (error) {
 		if (isApiError(error)) throw error
-		throwApiError(500, 'Failed to create studio', {
-			detail: getErrorMessage(error),
-		})
+		console.error('Failed to create studio', error)
+		throwApiError(500, 'Failed to create studio')
 	}
 })

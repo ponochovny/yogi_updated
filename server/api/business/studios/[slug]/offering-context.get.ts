@@ -57,8 +57,7 @@ export default defineEventHandler(async (event) => {
 		}
 	} catch (error: unknown) {
 		if (isApiError(error)) throw error
-		throwApiError(500, 'Failed to fetch offering context', {
-			detail: getErrorMessage(error),
-		})
+		console.error('Failed to fetch offering context', error)
+		throwApiError(500, 'Failed to fetch offering context')
 	}
 })

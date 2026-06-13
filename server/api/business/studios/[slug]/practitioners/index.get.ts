@@ -54,8 +54,7 @@ export default defineEventHandler(async (event) => {
 		return { success: true, team }
 	} catch (error: unknown) {
 		if (isApiError(error)) throw error
-		throwApiError(500, 'Failed to fetch practitioners', {
-			detail: getErrorMessage(error),
-		})
+		console.error('Failed to fetch practitioners', error)
+		throwApiError(500, 'Failed to fetch practitioners')
 	}
 })
