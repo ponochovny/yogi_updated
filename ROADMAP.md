@@ -80,5 +80,8 @@
 
 ### Bookings
 
+- ✅ Bookings table & migrations
+- ✅ Booking API endpoint
+- ✅ User bookings profile page
 - [ ] Allow cancel but not in last hour
 - [ ] Cancel booking with refund
