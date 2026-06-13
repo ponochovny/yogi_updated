@@ -4,29 +4,21 @@ import { studioPractitioners } from '~~/server/db/schema/studio'
 import { and, eq } from 'drizzle-orm'
 
 export default defineEventHandler(async (event) => {
-	const offeringSlug = getRouterParam(event, 'offeringSlug')
-	if (!offeringSlug) {
-		throw createError({
-			statusCode: 400,
-			statusMessage: 'Offering slug is required',
-		})
-	}
+	const offeringSlug = requireRouteParam(event, 'offeringSlug')
 
 	const db = useDb()
 
+	// 1. Find the offering by slug
+	const [offering] = await db
+		.select({ id: offerings.id })
+		.from(offerings)
+		.where(
+			and(eq(offerings.slug, offeringSlug), eq(offerings.isPublished, true)),
+		)
+		.limit(1)
+	if (!offering) throwApiError(404, 'Offering not found')
+
 	try {
-		// 1. Find the offering by slug
-		const [offering] = await db
-			.select({ id: offerings.id })
-			.from(offerings)
-			.where(
-				and(eq(offerings.slug, offeringSlug), eq(offerings.isPublished, true)),
-			)
-			.limit(1)
-
-		if (!offering)
-			throw createError({ statusCode: 404, message: 'Offering not found' })
-
 		// 2. Fetch slots with coach info
 		const slots = await db
 			.select({
@@ -50,12 +42,9 @@ export default defineEventHandler(async (event) => {
 
 		return { success: true, slots }
 	} catch (error) {
-		if (error && typeof error === 'object' && 'statusCode' in error) {
-			throw error
-		}
-		throw createError({
-			statusCode: 500,
-			statusMessage: 'Failed to fetch offering slots',
+		if (isApiError(error)) throw error
+		throwApiError(500, 'Failed to fetch offering slots', {
+			detail: getErrorMessage(error),
 		})
 	}
 })

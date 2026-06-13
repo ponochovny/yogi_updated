@@ -73,12 +73,9 @@ export default defineEventHandler(async () => {
 
 		return { success: true, studios: studiosWithDetails }
 	} catch (error) {
-		if (error && typeof error === 'object' && 'statusCode' in error) {
-			throw error
-		}
-		throw createError({
-			statusCode: 500,
-			statusMessage: 'Failed to fetch studios',
+		if (isApiError(error)) throw error
+		throwApiError(500, 'Failed to fetch studios', {
+			detail: getErrorMessage(error),
 		})
 	}
 })

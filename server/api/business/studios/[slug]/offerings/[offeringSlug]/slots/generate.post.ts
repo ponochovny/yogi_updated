@@ -9,30 +9,10 @@ import {
 import { studios } from '~~/server/db/schema/studio'
 
 export default defineEventHandler(async (event) => {
-	const session = await auth.api.getSession({
-		headers: event.headers,
-	})
-
-	// Check for authenticated user
-	if (!session || !session.user) {
-		throw createError({
-			statusCode: 401,
-			statusMessage: 'Unauthorized access',
-		})
-	}
-
-	const slug = getRouterParam(event, 'slug')
-	const offeringSlug = getRouterParam(event, 'offeringSlug')
-
-	// Validate required parameters
-	if (!slug || !offeringSlug) {
-		throw createError({
-			statusCode: 400,
-			statusMessage: 'Studio slug and offering slug are required',
-		})
-	}
-
-	const currentUserId = session.user.id
+	const userData = await requireAuthenticatedUser(event)
+	const slug = requireRouteParam(event, 'slug')
+	const offeringSlug = requireRouteParam(event, 'offeringSlug')
+	const currentUserId = userData.id
 	const db = useDb()
 
 	// Verify the studio exists and belongs to the current user
@@ -42,11 +22,10 @@ export default defineEventHandler(async (event) => {
 		.where(and(eq(studios.slug, slug), eq(studios.ownerId, currentUserId)))
 		.limit(1)
 	if (!studio) {
-		throw createError({
-			statusCode: 404,
-			statusMessage:
-				'Studio not found or you do not have permission to edit this offering',
-		})
+		throwApiError(
+			404,
+			'Studio not found or you do not have permission to edit this offering',
+		)
 	}
 
 	// Verify the offering exists and belongs to the studio
@@ -58,13 +37,8 @@ export default defineEventHandler(async (event) => {
 		)
 		.limit(1)
 	if (!offering) {
-		throw createError({
-			statusCode: 404,
-			statusMessage: 'Offering not found',
-		})
+		throwApiError(404, 'Offering not found')
 	}
-
-	const body = await readValidatedBody(event, createSlotSchema.parse)
 
 	// Expected structure from the frontend:
 	// {
@@ -76,6 +50,7 @@ export default defineEventHandler(async (event) => {
 	//   ]
 	// }
 
+	const body = await readValidatedBody(event, createSlotSchema.parse)
 	const { startDate, endDate, rules } = body
 
 	try {
@@ -147,10 +122,9 @@ export default defineEventHandler(async (event) => {
 			count: slotsToInsert.length,
 		}
 	} catch (error) {
-		console.log('Generate slots error:', error)
-		throw createError({
-			statusCode: 500,
-			statusMessage: (error as Error).message,
+		if (isApiError(error)) throw error
+		throwApiError(500, 'Failed to generate slots', {
+			detail: getErrorMessage(error),
 		})
 	}
 })

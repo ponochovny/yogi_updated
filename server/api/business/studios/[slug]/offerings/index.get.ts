@@ -3,27 +3,9 @@ import { studios, studioLocations } from '~~/server/db/schema/studio'
 import { and, eq } from 'drizzle-orm'
 
 export default defineEventHandler(async (event) => {
-	const session = await auth.api.getSession({
-		headers: event.headers,
-	})
-
-	if (!session || !session.user) {
-		throw createError({
-			statusCode: 401,
-			statusMessage: 'Unauthorized access',
-		})
-	}
-
-	// VALIDATING SLUG PARAMETER
-	const slug = getRouterParam(event, 'slug')
-	if (!slug) {
-		throw createError({
-			statusCode: 400,
-			statusMessage: 'Studio slug is required',
-		})
-	}
-
-	const currentUserId = session.user.id
+	const userData = await requireAuthenticatedUser(event)
+	const slug = requireRouteParam(event, 'slug')
+	const currentUserId = userData.id
 	const db = useDb()
 
 	const [studio] = await db
@@ -31,13 +13,11 @@ export default defineEventHandler(async (event) => {
 		.from(studios)
 		.where(and(eq(studios.slug, slug), eq(studios.ownerId, currentUserId)))
 		.limit(1)
-
 	if (!studio) {
-		throw createError({
-			statusCode: 404,
-			statusMessage:
-				'Studio not found or you do not have permission to view it',
-		})
+		throwApiError(
+			404,
+			'Studio not found or you do not have permission to view it',
+		)
 	}
 
 	try {
@@ -62,10 +42,9 @@ export default defineEventHandler(async (event) => {
 
 		return { success: true, offerings: data }
 	} catch (error) {
-		console.error('Offerings fetch failed:', error)
-		throw createError({
-			statusCode: 500,
-			statusMessage: 'Failed to fetch offerings',
+		if (isApiError(error)) throw error
+		throwApiError(500, 'Failed to fetch offerings', {
+			detail: getErrorMessage(error),
 		})
 	}
 })

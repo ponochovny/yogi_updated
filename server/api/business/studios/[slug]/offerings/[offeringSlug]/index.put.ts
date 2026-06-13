@@ -13,30 +13,10 @@ import { and, eq, inArray } from 'drizzle-orm'
 import { createOfferingSchema } from '~/entities/offering/schema'
 
 export default defineEventHandler(async (event) => {
-	const session = await auth.api.getSession({
-		headers: event.headers,
-	})
-
-	// Check for authenticated user
-	if (!session || !session.user) {
-		throw createError({
-			statusCode: 401,
-			statusMessage: 'Unauthorized access',
-		})
-	}
-
-	const slug = getRouterParam(event, 'slug')
-	const offeringSlug = getRouterParam(event, 'offeringSlug')
-
-	// Validate required parameters
-	if (!slug || !offeringSlug) {
-		throw createError({
-			statusCode: 400,
-			statusMessage: 'Studio slug and offering slug are required',
-		})
-	}
-
-	const currentUserId = session.user.id
+	const userData = await requireAuthenticatedUser(event)
+	const slug = requireRouteParam(event, 'slug')
+	const offeringSlug = requireRouteParam(event, 'offeringSlug')
+	const currentUserId = userData.id
 	const db = useDb()
 
 	// Verify the studio exists and belongs to the current user
@@ -46,11 +26,10 @@ export default defineEventHandler(async (event) => {
 		.where(and(eq(studios.slug, slug), eq(studios.ownerId, currentUserId)))
 		.limit(1)
 	if (!studio) {
-		throw createError({
-			statusCode: 404,
-			statusMessage:
-				'Studio not found or you do not have permission to edit this offering',
-		})
+		throwApiError(
+			404,
+			'Studio not found or you do not have permission to edit this offering',
+		)
 	}
 
 	// Verify the offering exists and belongs to the studio
@@ -62,10 +41,7 @@ export default defineEventHandler(async (event) => {
 		)
 		.limit(1)
 	if (!offering) {
-		throw createError({
-			statusCode: 404,
-			statusMessage: 'Offering not found',
-		})
+		throwApiError(404, 'Offering not found in this studio')
 	}
 
 	const body = await readValidatedBody(event, createOfferingSchema.parse)
@@ -83,10 +59,7 @@ export default defineEventHandler(async (event) => {
 			)
 			.limit(1)
 		if (!location) {
-			throw createError({
-				statusCode: 400,
-				statusMessage: 'Invalid location for this studio',
-			})
+			throwApiError(400, 'Invalid location for this studio')
 		}
 	}
 
@@ -101,10 +74,7 @@ export default defineEventHandler(async (event) => {
 			),
 		)
 	if (validPractitioners.length !== body.practitionerIds.length) {
-		throw createError({
-			statusCode: 400,
-			statusMessage: 'One or more practitioners are invalid for this studio',
-		})
+		throwApiError(400, 'One or more practitioners are invalid for this studio')
 	}
 
 	try {
@@ -188,10 +158,9 @@ export default defineEventHandler(async (event) => {
 
 		return { success: true, offering: result }
 	} catch (error: unknown) {
-		console.error('Offering update failed:', error)
-		throw createError({
-			statusCode: 500,
-			statusMessage: 'Failed to update offering',
+		if (isApiError(error)) throw error
+		throwApiError(500, 'Failed to update offering', {
+			detail: getErrorMessage(error),
 		})
 	}
 })

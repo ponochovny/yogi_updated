@@ -77,3 +77,8 @@
 
 - [ ] Promo code creation
 - [ ] Promo code edit / duplicate
+
+### Bookings
+
+- [ ] Allow cancel but not in last hour
+- [ ] Cancel booking with refund

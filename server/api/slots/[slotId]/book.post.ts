@@ -3,27 +3,10 @@ import { offeringSlots, offerings } from '~~/server/db/schema/offering'
 import { eq, and, sql } from 'drizzle-orm'
 
 export default defineEventHandler(async (event) => {
+	const userData = await requireAuthenticatedUser(event)
+	const slotId = requireRouteParam(event, 'slotId')
+	const clientId = userData.id
 	const db = useDb()
-
-	const session = await auth.api.getSession({
-		headers: event.headers,
-	})
-	if (!session || !session.user) {
-		throw createError({
-			statusCode: 401,
-			statusMessage: 'Unauthorized access',
-		})
-	}
-
-	const slotId = getRouterParam(event, 'slotId')
-	if (!slotId) {
-		throw createError({
-			statusCode: 400,
-			statusMessage: 'Slot ID is required',
-		})
-	}
-
-	const clientId = session.user.id
 
 	try {
 		// 2. Open a database transaction to prevent double-booking (Race Condition)
@@ -43,14 +26,11 @@ export default defineEventHandler(async (event) => {
 				.limit(1)
 
 			if (!slotData) {
-				throw createError({ statusCode: 404, statusMessage: 'Slot not found' })
+				throwApiError(404, 'Slot not found')
 			}
 
 			if (slotData.slotStatus !== 'ACTIVE') {
-				throw createError({
-					statusCode: 400,
-					statusMessage: 'This session is not available for booking',
-				})
+				throwApiError(400, 'This session is not active for booking')
 			}
 
 			// Determine actual capacity
@@ -66,18 +46,12 @@ export default defineEventHandler(async (event) => {
 				)
 
 			if (!bookingsCount) {
-				throw createError({
-					statusCode: 500,
-					statusMessage: 'Failed to retrieve booking count',
-				})
+				throwApiError(500, 'Failed to retrieve booking count')
 			}
 			// 4. Capacity Check
 			// If capacity is null/0, we assume unlimited. Otherwise, check limits.
 			if (maxCapacity && bookingsCount.count >= maxCapacity) {
-				throw createError({
-					statusCode: 400,
-					statusMessage: 'This session is fully booked',
-				})
+				throwApiError(400, 'This session is fully booked')
 			}
 
 			// 5. Prevent double booking by the same user
@@ -94,10 +68,7 @@ export default defineEventHandler(async (event) => {
 				.limit(1)
 
 			if (existingBooking) {
-				throw createError({
-					statusCode: 400,
-					statusMessage: 'You have already booked this session',
-				})
+				throwApiError(400, 'You have already booked this session')
 			}
 
 			// 6. Create the booking
@@ -111,10 +82,7 @@ export default defineEventHandler(async (event) => {
 				.returning({ id: bookings.id })
 
 			if (!newBooking) {
-				throw createError({
-					statusCode: 500,
-					statusMessage: 'Failed to create booking',
-				})
+				throwApiError(500, 'Failed to create booking')
 			}
 
 			return {
@@ -123,12 +91,9 @@ export default defineEventHandler(async (event) => {
 			}
 		})
 	} catch (error) {
-		if (error && typeof error === 'object' && 'statusCode' in error) {
-			throw error
-		}
-		throw createError({
-			statusCode: 500,
-			statusMessage: 'Failed to book the session',
+		if (isApiError(error)) throw error
+		throwApiError(500, 'Failed to book the session', {
+			detail: getErrorMessage(error),
 		})
 	}
 })

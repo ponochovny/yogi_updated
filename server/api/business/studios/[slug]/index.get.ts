@@ -3,44 +3,24 @@ import { mediaFiles, MediaTypeEnum } from '~~/server/db/schema/_other'
 import { and, eq } from 'drizzle-orm'
 
 export default defineEventHandler(async (event) => {
-	const session = await auth.api.getSession({
-		headers: event.headers,
-	})
-	// AUTHENTICATION CHECK
-	if (!session || !session.user) {
-		throw createError({
-			statusCode: 401,
-			statusMessage: 'Unauthorized access',
-		})
-	}
-
-	const slug = getRouterParam(event, 'slug')
-	// VALIDATING SLUG PARAMETER
-	if (!slug) {
-		throw createError({
-			statusCode: 400,
-			statusMessage: 'Slug is required',
-		})
-	}
-
-	const currentUserId = session.user.id
+	const userData = await requireAuthenticatedUser(event)
+	const slug = requireRouteParam(event, 'slug')
+	const currentUserId = userData.id
 	const db = useDb()
 
+	const [studio] = await db
+		.select()
+		.from(studios)
+		.where(and(eq(studios.slug, slug), eq(studios.ownerId, currentUserId)))
+		.limit(1)
+	if (!studio) {
+		throwApiError(
+			404,
+			'Studio not found or you do not have permission to view it',
+		)
+	}
+
 	try {
-		const [studio] = await db
-			.select()
-			.from(studios)
-			.where(and(eq(studios.slug, slug), eq(studios.ownerId, currentUserId)))
-			.limit(1)
-
-		if (!studio) {
-			throw createError({
-				statusCode: 404,
-				statusMessage:
-					'Studio not found or you do not have permission to view it',
-			})
-		}
-
 		const [locations, media] = await Promise.all([
 			db
 				.select()
@@ -76,12 +56,9 @@ export default defineEventHandler(async (event) => {
 			},
 		}
 	} catch (error) {
-		if (error && typeof error === 'object' && 'statusCode' in error) {
-			throw error
-		}
-		throw createError({
-			statusCode: 500,
-			statusMessage: 'Failed to get studio details',
+		if (isApiError(error)) throw error
+		throwApiError(500, 'Failed to fetch studio details', {
+			detail: getErrorMessage(error),
 		})
 	}
 })

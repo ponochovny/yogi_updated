@@ -7,14 +7,7 @@ import {
 import { and, eq } from 'drizzle-orm'
 
 export default defineEventHandler(async (event) => {
-	// VALIDATING SLUG PARAMETER
-	const slug = getRouterParam(event, 'slug')
-	if (!slug) {
-		throw createError({
-			statusCode: 400,
-			statusMessage: 'Slug is required',
-		})
-	}
+	const slug = requireRouteParam(event, 'slug')
 
 	const db = useDb()
 
@@ -26,10 +19,7 @@ export default defineEventHandler(async (event) => {
 			.limit(1)
 
 		if (!studio) {
-			throw createError({
-				statusCode: 404,
-				statusMessage: 'Studio not found',
-			})
+			throwApiError(404, 'Studio not found')
 		}
 
 		const [locations, media] = await Promise.all([
@@ -67,12 +57,9 @@ export default defineEventHandler(async (event) => {
 			},
 		}
 	} catch (error) {
-		if (error && typeof error === 'object' && 'statusCode' in error) {
-			throw error
-		}
-		throw createError({
-			statusCode: 500,
-			statusMessage: 'Failed to fetch studio',
+		if (isApiError(error)) throw error
+		throwApiError(500, 'Failed to fetch studio', {
+			detail: getErrorMessage(error),
 		})
 	}
 })

@@ -12,12 +12,14 @@ export const MediaEntityTypeEnum = {
 	STUDIO: 'STUDIO',
 	USER: 'USER',
 } as const
+// export type MediaEntityTypeEnum = (typeof mediaEntityTypeEnum.enumValues)[number]
 
 export const MediaTypeEnum = {
 	GALLERY: 'GALLERY',
 	LOGO: 'LOGO',
 	AVATAR: 'AVATAR',
 } as const
+// export type MediaTypeEnum = (typeof mediaTypeEnum.enumValues)[number]
 
 export const mediaEntityTypeEnum = pgEnum('media_entity_type', [
 	MediaEntityTypeEnum.OFFERING,

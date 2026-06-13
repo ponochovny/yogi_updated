@@ -8,31 +8,12 @@ import {
 import { aliasedTable, and, eq, sql } from 'drizzle-orm'
 
 export default defineEventHandler(async (event) => {
-	const session = await auth.api.getSession({
-		headers: event.headers,
-	})
-
-	// Check for authenticated user
-	if (!session || !session.user) {
-		throw createError({
-			statusCode: 401,
-			statusMessage: 'Unauthorized access',
-		})
-	}
-
-	const slug = getRouterParam(event, 'slug')
-	const offeringSlug = getRouterParam(event, 'offeringSlug')
-
-	// Validate required parameters
-	if (!slug || !offeringSlug) {
-		throw createError({
-			statusCode: 400,
-			statusMessage: 'Studio slug and offering slug are required',
-		})
-	}
-
-	const currentUserId = session.user.id
+	const userData = await requireAuthenticatedUser(event)
+	const slug = requireRouteParam(event, 'slug')
+	const offeringSlug = requireRouteParam(event, 'offeringSlug')
+	const currentUserId = userData.id
 	const db = useDb()
+
 	const studioLogo = aliasedTable(mediaFiles, 'studio_logo')
 
 	// Verify the studio exists and belongs to the current user
@@ -42,11 +23,10 @@ export default defineEventHandler(async (event) => {
 		.where(and(eq(studios.slug, slug), eq(studios.ownerId, currentUserId)))
 		.limit(1)
 	if (!studio) {
-		throw createError({
-			statusCode: 404,
-			statusMessage:
-				'Studio not found or you do not have permission to view it',
-		})
+		throwApiError(
+			404,
+			'Studio not found or you do not have permission to view it',
+		)
 	}
 
 	// Verify the offering exists and belongs to the studio
@@ -83,40 +63,44 @@ export default defineEventHandler(async (event) => {
 		)
 		.limit(1)
 	if (!offering) {
-		throw createError({
-			statusCode: 404,
-			statusMessage: 'Offering not found',
-		})
+		throwApiError(404, 'Offering not found in this studio')
 	}
 
-	// Fetch associated practitioners and gallery media files in parallel
-	const [practitionerRows, galleryRows] = await Promise.all([
-		db
-			.select({ practitionerId: offeringPractitioners.practitionerId })
-			.from(offeringPractitioners)
-			.where(eq(offeringPractitioners.offeringId, offering.id)),
-		db
-			.select({
-				url: mediaFiles.url,
-				providerPublicId: mediaFiles.providerPublicId,
-			})
-			.from(mediaFiles)
-			.where(
-				and(
-					eq(mediaFiles.entityId, offering.id),
-					eq(mediaFiles.entityType, MediaEntityTypeEnum.OFFERING),
-					eq(mediaFiles.type, MediaTypeEnum.GALLERY),
-				),
-			)
-			.orderBy(mediaFiles.order),
-	])
+	try {
+		// Fetch associated practitioners and gallery media files in parallel
+		const [practitionerRows, galleryRows] = await Promise.all([
+			db
+				.select({ practitionerId: offeringPractitioners.practitionerId })
+				.from(offeringPractitioners)
+				.where(eq(offeringPractitioners.offeringId, offering.id)),
+			db
+				.select({
+					url: mediaFiles.url,
+					providerPublicId: mediaFiles.providerPublicId,
+				})
+				.from(mediaFiles)
+				.where(
+					and(
+						eq(mediaFiles.entityId, offering.id),
+						eq(mediaFiles.entityType, MediaEntityTypeEnum.OFFERING),
+						eq(mediaFiles.type, MediaTypeEnum.GALLERY),
+					),
+				)
+				.orderBy(mediaFiles.order),
+		])
 
-	return {
-		success: true,
-		offering: {
-			...offering,
-			practitionerIds: practitionerRows.map((row) => row.practitionerId),
-			gallery: galleryRows,
-		},
+		return {
+			success: true,
+			offering: {
+				...offering,
+				practitionerIds: practitionerRows.map((row) => row.practitionerId),
+				gallery: galleryRows,
+			},
+		}
+	} catch (error: unknown) {
+		if (isApiError(error)) throw error
+		throwApiError(500, 'Failed to fetch offering', {
+			detail: getErrorMessage(error),
+		})
 	}
 })

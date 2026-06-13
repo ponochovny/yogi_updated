@@ -7,16 +7,12 @@ import { and, eq } from 'drizzle-orm'
 import { updateAvatarSchema } from '~/entities/profile/schema'
 
 export default defineEventHandler(async (event) => {
-	const session = await auth.api.getSession({ headers: event.headers })
-	if (!session || !session.user)
-		throw createError({ statusCode: 401, message: 'Not authorized' })
-
-	const userId = session.user.id
+	const user = await requireAuthenticatedUser(event)
+	const userId = user.id
 	const body = await readValidatedBody(event, updateAvatarSchema.parse)
 	const db = useDb()
 
-	if (!body.url)
-		throw createError({ statusCode: 400, message: 'Avatar URL is required' })
+	if (!body.url) throwApiError(400, 'Avatar URL is required')
 
 	try {
 		await db.transaction(async (tx) => {
@@ -41,12 +37,9 @@ export default defineEventHandler(async (event) => {
 
 		return { success: true, url: body.url }
 	} catch (error) {
-		if (error && typeof error === 'object' && 'statusCode' in error) {
-			throw error
-		}
-		throw createError({
-			statusCode: 500,
-			statusMessage: 'Failed to update avatar',
+		if (isApiError(error)) throw error
+		throwApiError(500, 'Failed to update avatar', {
+			detail: getErrorMessage(error),
 		})
 	}
 })

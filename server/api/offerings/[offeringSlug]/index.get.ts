@@ -13,15 +13,7 @@ import { aliasedTable, and, eq, sql } from 'drizzle-orm'
 import { user } from '~~/server/db/schema/auth-schema'
 
 export default defineEventHandler(async (event) => {
-	const offeringSlug = getRouterParam(event, 'offeringSlug')
-
-	// Validate required parameters
-	if (!offeringSlug) {
-		throw createError({
-			statusCode: 400,
-			statusMessage: 'Offering slug is required',
-		})
-	}
+	const offeringSlug = requireRouteParam(event, 'offeringSlug')
 
 	const db = useDb()
 	const studioLogo = aliasedTable(mediaFiles, 'studio_logo')
@@ -69,10 +61,7 @@ export default defineEventHandler(async (event) => {
 			.limit(1)
 
 		if (!offering) {
-			throw createError({
-				statusCode: 404,
-				statusMessage: 'Offering not found',
-			})
+			throwApiError(404, 'Offering not found')
 		}
 
 		// Fetch associated practitioners and gallery media files in parallel
@@ -130,12 +119,9 @@ export default defineEventHandler(async (event) => {
 			},
 		}
 	} catch (error) {
-		if (error && typeof error === 'object' && 'statusCode' in error) {
-			throw error
-		}
-		throw createError({
-			statusCode: 500,
-			statusMessage: 'Failed to fetch offering',
+		if (isApiError(error)) throw error
+		throwApiError(500, 'Failed to fetch offering', {
+			detail: getErrorMessage(error),
 		})
 	}
 })

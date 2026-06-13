@@ -1,4 +1,3 @@
-import { auth } from '~~/server/utils/auth'
 import { studios, studioLocations } from '~~/server/db/schema/studio'
 import {
 	mediaFiles,
@@ -9,19 +8,10 @@ import { createStudioSchema } from '~/entities/studio/schema'
 import slugify from 'slugify'
 
 export default defineEventHandler(async (event) => {
-	const db = useDb()
-	const session = await auth.api.getSession({
-		headers: event.headers,
-	})
-	if (!session || !session.user) {
-		throw createError({
-			statusCode: 401,
-			statusMessage: 'Unauthorized access',
-		})
-	}
-
+	const userData = await requireAuthenticatedUser(event)
 	const body = await readValidatedBody(event, createStudioSchema.parse)
-	const currentUserId = session.user.id
+	const currentUserId = userData.id
+	const db = useDb()
 
 	const studioSlug = `${slugify(body.name, { lower: true })}-${Math.floor(1000 + Math.random() * 9000)}`
 
@@ -93,12 +83,9 @@ export default defineEventHandler(async (event) => {
 
 		return { success: true, studio: result }
 	} catch (error) {
-		if (error && typeof error === 'object' && 'statusCode' in error) {
-			throw error
-		}
-		throw createError({
-			statusCode: 500,
-			statusMessage: 'Failed to create studio',
+		if (isApiError(error)) throw error
+		throwApiError(500, 'Failed to create studio', {
+			detail: getErrorMessage(error),
 		})
 	}
 })

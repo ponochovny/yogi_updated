@@ -3,33 +3,15 @@ import { user } from '~~/server/db/schema/auth-schema'
 import { and, eq } from 'drizzle-orm'
 import { addPractitionerSchema } from '@/entities/practitioner/schema'
 import { v4 as uuidv4 } from 'uuid'
-import { FetchError } from 'ofetch'
 import { practitionerRoles } from '~~/server/auth/config'
 
 export default defineEventHandler(async (event) => {
-	const session = await auth.api.getSession({
-		headers: event.headers,
-	})
-
-	if (!session || !session.user) {
-		throw createError({
-			statusCode: 401,
-			statusMessage: 'Unauthorized access',
-		})
-	}
-
-	// VALIDATING SLUG PARAMETER
-	const slug = getRouterParam(event, 'slug')
-	if (!slug) {
-		throw createError({
-			statusCode: 400,
-			statusMessage: 'Slug is required',
-		})
-	}
-
-	const currentUserId = session.user.id
-	const body = await readValidatedBody(event, addPractitionerSchema.parse)
+	const userData = await requireAuthenticatedUser(event)
+	const slug = requireRouteParam(event, 'slug')
+	const currentUserId = userData.id
 	const db = useDb()
+
+	const body = await readValidatedBody(event, addPractitionerSchema.parse)
 	let studio: { id: string; name: string } | undefined
 
 	try {
@@ -42,7 +24,10 @@ export default defineEventHandler(async (event) => {
 				.limit(1)
 
 			if (!studio) {
-				throw createError({ statusCode: 404, message: 'Studio not found' })
+				throwApiError(
+					404,
+					'Studio not found or you do not have permission to add practitioners',
+				)
 			}
 
 			// 2. Searching for the user by email in the global table
@@ -70,10 +55,7 @@ export default defineEventHandler(async (event) => {
 			}
 
 			if (!targetUser) {
-				throw createError({
-					statusCode: 500,
-					message: 'Failed to create or find the user',
-				})
+				throwApiError(500, 'Failed to create or find the user')
 			}
 
 			// 4. Linking the user to the studio; map DB unique conflict to 409
@@ -91,10 +73,7 @@ export default defineEventHandler(async (event) => {
 					.returning()
 			} catch (e) {
 				if ((e as { code?: string }).code === '23505') {
-					throw createError({
-						statusCode: 409,
-						message: 'Practitioner is already added to this studio',
-					})
+					throwApiError(409, 'Practitioner is already added to this studio')
 				}
 				throw e
 			}
@@ -131,12 +110,9 @@ export default defineEventHandler(async (event) => {
 
 		return { success: true, data: result }
 	} catch (error: unknown) {
-		if (error instanceof FetchError) {
-			throw createError({
-				statusCode: error.statusCode || 500,
-				message: error.message,
-			})
-		}
-		throw error
+		if (isApiError(error)) throw error
+		throwApiError(500, 'Failed to fetch offering', {
+			detail: getErrorMessage(error),
+		})
 	}
 })

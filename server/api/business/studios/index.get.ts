@@ -7,19 +7,9 @@ import {
 import { and, eq, inArray, sql } from 'drizzle-orm'
 
 export default defineEventHandler(async (event) => {
+	const userData = await requireAuthenticatedUser(event)
+	const currentUserId = userData.id
 	const db = useDb()
-	const session = await auth.api.getSession({
-		headers: event.headers,
-	})
-
-	if (!session || !session.user) {
-		throw createError({
-			statusCode: 401,
-			statusMessage: 'Unauthorized access',
-		})
-	}
-
-	const currentUserId = session.user.id
 
 	try {
 		const userStudios = await db
@@ -75,12 +65,9 @@ export default defineEventHandler(async (event) => {
 
 		return { success: true, studios: studiosWithDetails }
 	} catch (error) {
-		if (error && typeof error === 'object' && 'statusCode' in error) {
-			throw error
-		}
-		throw createError({
-			statusCode: 500,
-			statusMessage: 'Failed to create studio',
+		if (isApiError(error)) throw error
+		throwApiError(500, 'Failed to fetch studios', {
+			detail: getErrorMessage(error),
 		})
 	}
 })

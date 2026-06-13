@@ -4,28 +4,10 @@ import { and, eq } from 'drizzle-orm'
 import { updateSlotsSchema } from '~/entities/slots/schema'
 
 export default defineEventHandler(async (event) => {
-	const session = await auth.api.getSession({
-		headers: event.headers,
-	})
-
-	if (!session || !session.user) {
-		throw createError({
-			statusCode: 401,
-			statusMessage: 'Unauthorized access',
-		})
-	}
-
-	// VALIDATING SLUG PARAMETER
-	const slug = getRouterParam(event, 'slug')
-	const offeringSlug = getRouterParam(event, 'offeringSlug')
-	if (!slug || !offeringSlug) {
-		throw createError({
-			statusCode: 400,
-			statusMessage: 'Studio slug and offering slug are required',
-		})
-	}
-
-	const currentUserId = session.user.id
+	const userData = await requireAuthenticatedUser(event)
+	const slug = requireRouteParam(event, 'slug')
+	const offeringSlug = requireRouteParam(event, 'offeringSlug')
+	const currentUserId = userData.id
 	const db = useDb()
 
 	// Check if studio exists and the user is it's owner
@@ -35,10 +17,10 @@ export default defineEventHandler(async (event) => {
 		.where(and(eq(studios.slug, slug), eq(studios.ownerId, currentUserId)))
 		.limit(1)
 	if (!studio) {
-		throw createError({
-			statusCode: 404,
-			statusMessage: "Studio is not found or you don't have permissions",
-		})
+		throwApiError(
+			404,
+			'Studio not found or you do not have permission to edit this offering',
+		)
 	}
 
 	// Verify the offering exists and belongs to the studio
@@ -50,10 +32,7 @@ export default defineEventHandler(async (event) => {
 		)
 		.limit(1)
 	if (!offering) {
-		throw createError({
-			statusCode: 404,
-			statusMessage: 'Offering not found',
-		})
+		throwApiError(404, 'Offering not found')
 	}
 
 	const body = await readValidatedBody(event, updateSlotsSchema.parse)
@@ -82,18 +61,14 @@ export default defineEventHandler(async (event) => {
 			})
 
 		if (!updatedSlot) {
-			throw createError({
-				statusCode: 404,
-				statusMessage: 'Time slot not found',
-			})
+			throwApiError(404, 'Time slot not found')
 		}
 
 		return { success: true, updatedSlot }
 	} catch (error) {
-		console.error('Offering update failed:', error)
-		throw createError({
-			statusCode: 500,
-			statusMessage: 'Failed to update offering',
+		if (isApiError(error)) throw error
+		throwApiError(500, 'Failed to update slot', {
+			detail: getErrorMessage(error),
 		})
 	}
 })

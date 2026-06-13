@@ -14,27 +14,9 @@ import {
 } from '~~/server/db/schema/_other'
 
 export default defineEventHandler(async (event) => {
-	const session = await auth.api.getSession({
-		headers: event.headers,
-	})
-
-	if (!session || !session.user) {
-		throw createError({
-			statusCode: 401,
-			statusMessage: 'Unauthorized access',
-		})
-	}
-
-	// VALIDATING SLUG PARAMETER
-	const slug = getRouterParam(event, 'slug')
-	if (!slug) {
-		throw createError({
-			statusCode: 400,
-			statusMessage: 'Slug is required',
-		})
-	}
-
-	const currentUserId = session.user.id
+	const userData = await requireAuthenticatedUser(event)
+	const slug = requireRouteParam(event, 'slug')
+	const currentUserId = userData.id
 	const db = useDb()
 
 	const body = await readValidatedBody(event, createOfferingSchema.parse)
@@ -49,10 +31,7 @@ export default defineEventHandler(async (event) => {
 		.limit(1)
 
 	if (!studio) {
-		throw createError({
-			statusCode: 404,
-			statusMessage: "Studio is not found or you don't have permissions",
-		})
+		throwApiError(404, "Studio is not found or you don't have permissions")
 	}
 
 	try {
@@ -70,10 +49,7 @@ export default defineEventHandler(async (event) => {
 					)
 					.limit(1)
 				if (!location) {
-					throw createError({
-						statusCode: 400,
-						statusMessage: 'Invalid location for this studio',
-					})
+					throwApiError(400, 'Invalid location for this studio')
 				}
 			}
 			const validPractitioners = await tx
@@ -86,11 +62,10 @@ export default defineEventHandler(async (event) => {
 					),
 				)
 			if (validPractitioners.length !== body.practitionerIds.length) {
-				throw createError({
-					statusCode: 400,
-					statusMessage:
-						'One or more practitioners are invalid for this studio',
-				})
+				throwApiError(
+					400,
+					'One or more practitioners are invalid for this studio',
+				)
 			}
 
 			// 2. Offering creation
@@ -111,11 +86,7 @@ export default defineEventHandler(async (event) => {
 				})
 				.returning()
 
-			if (!newOffering)
-				throw createError({
-					statusCode: 500,
-					message: 'Offering creation error',
-				})
+			if (!newOffering) throwApiError(500, 'Offering creation error')
 
 			// 3. Add trainers
 			const practitionersToInsert = body.practitionerIds.map(
@@ -148,7 +119,9 @@ export default defineEventHandler(async (event) => {
 
 		return { success: true, offering: result }
 	} catch (error: unknown) {
-		console.error('Offering creation failed:', error)
-		throw createError({ statusCode: 500, message: 'Failed to create offering' })
+		if (isApiError(error)) throw error
+		throwApiError(500, 'Failed to create offering', {
+			detail: getErrorMessage(error),
+		})
 	}
 })
