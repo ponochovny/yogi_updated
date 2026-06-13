@@ -115,7 +115,10 @@ export default defineEventHandler(async (event) => {
 					continue
 				}
 				// Unique constraint: user already has a confirmed booking
-				if (message.includes('duplicate key')) {
+				if (
+					code === '23505' ||
+					message.toLowerCase().includes('duplicate key')
+				) {
 					throwApiError(400, 'You have already booked this session')
 				}
 				// Capacity enforcement from DB trigger

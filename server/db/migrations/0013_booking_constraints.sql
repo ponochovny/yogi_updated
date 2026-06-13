@@ -44,13 +44,17 @@ BEGIN
       AND NEW.status = 'CONFIRMED'
       AND OLD.slot_id <> NEW.slot_id
     ) THEN
+			PERFORM 1
+      FROM offering_slots
+      WHERE id IN (OLD.slot_id, NEW.slot_id)
+      ORDER BY id
+      FOR UPDATE;
       UPDATE offering_slots
       SET bookings_count = GREATEST(bookings_count - 1, 0)
       WHERE id = OLD.slot_id;
 
       SELECT * INTO slot_rec
-      FROM offering_slots
-      WHERE id = NEW.slot_id
+      FROM offering_slots;
       FOR UPDATE;
       SELECT capacity INTO offering_capacity
       FROM offerings
