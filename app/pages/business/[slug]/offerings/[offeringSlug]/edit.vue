@@ -154,7 +154,12 @@ const removeFromGallery = (index: number) => {
 	<div>
 		<div class="mb-6 flex items-center gap-6">
 			<NuxtImg
-				:src="offering?.studio?.logo || placeholderImageUrl"
+				:src="
+					offering?.studio?.logo?.replace(
+						'/upload/',
+						'/upload/w_180,h_180,c_fill/',
+					) || placeholderImageUrl
+				"
 				class="w-20 h-20 rounded-full object-cover border"
 			/>
 			<div>
@@ -207,7 +212,10 @@ const removeFromGallery = (index: number) => {
 								class="relative"
 							>
 								<NuxtImg
-									:src="image.url || placeholderImageUrl"
+									:src="
+										image.url.replace('/upload/', '/upload/w_280,c_fill/') ||
+										placeholderImageUrl
+									"
 									class="h-40 aspect-video rounded-2xl object-cover border"
 								/>
 								<Button
@@ -360,7 +368,12 @@ const removeFromGallery = (index: number) => {
 										</FormControl>
 
 										<NuxtImg
-											:src="prac.avatar || placeholderImageUrl"
+											:src="
+												prac.avatar?.replace(
+													'/upload/',
+													'/upload/w_44,h_44,c_fill/',
+												) || placeholderImageUrl
+											"
 											class="w-6 h-6 rounded-full m-0"
 										/>
 										<span class="text-sm font-medium">{{ prac.name }}</span>

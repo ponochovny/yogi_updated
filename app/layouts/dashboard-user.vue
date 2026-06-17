@@ -1,30 +1,26 @@
 <script lang="ts" setup>
 import 'vue-sonner/style.css'
 import SidebarDashboardLayout from '~/widgets/sidebar-dashboard/index.vue'
-import { InfoIcon, MapPinIcon, ShoppingCartIcon } from '@lucide/vue'
+import { ShoppingCartIcon, UserIcon } from '@lucide/vue'
 import { PagesConfig } from '~/config/pages.config'
 
-const sidebarProps = {
-	group: 'Platform',
-	menuLinks: [
-		{
-			name: 'Profile settings',
-			url: PagesConfig.PROFILE_SETTINGS,
-			icon: InfoIcon,
-		},
-		{
-			name: 'Location & Categories',
-			// url: PagesConfig.PROFILE_ADDITIONAL,
-			url: '#',
-			icon: MapPinIcon,
-		},
-		{
-			name: 'My Bookings',
-			url: PagesConfig.PROFILE_BOOKINGS,
-			icon: ShoppingCartIcon,
-		},
-	],
-}
+const sidebarProps = [
+	{
+		group: 'Platform',
+		menuLinks: [
+			{
+				name: 'Profile settings',
+				url: PagesConfig.PROFILE_SETTINGS,
+				icon: UserIcon,
+			},
+			{
+				name: 'My Bookings',
+				url: PagesConfig.PROFILE_BOOKINGS,
+				icon: ShoppingCartIcon,
+			},
+		],
+	},
+]
 provide('sidebarProps', sidebarProps)
 </script>
 

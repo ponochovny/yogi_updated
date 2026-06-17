@@ -1,4 +1,8 @@
-import { studios, studioLocations } from '~~/server/db/schema/studio'
+import {
+	studios,
+	studioLocations,
+	studioMembers,
+} from '~~/server/db/schema/studio'
 import {
 	mediaFiles,
 	MediaEntityTypeEnum,
@@ -6,6 +10,7 @@ import {
 } from '~~/server/db/schema/_other'
 import { createStudioSchema } from '~/entities/studio/schema'
 import slugify from 'slugify'
+import { userRoles } from '~~/server/auth/config'
 
 export default defineEventHandler(async (event) => {
 	const userData = await requireAuthenticatedUser(event)
@@ -76,6 +81,13 @@ export default defineEventHandler(async (event) => {
 					)
 					await tx.insert(mediaFiles).values(galleryInserts)
 				}
+
+				// Assign the current user as a BUSINESS member of the newly created studio
+				await tx.insert(studioMembers).values({
+					studioId: newStudio.id,
+					userId: userData.id,
+					role: userRoles.BUSINESS,
+				})
 			}
 
 			return newStudio

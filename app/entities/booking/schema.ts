@@ -4,6 +4,7 @@ export const BookingStatus = {
 	CONFIRMED: 'CONFIRMED',
 	CANCELLED: 'CANCELLED',
 	ATTENDED: 'ATTENDED',
+	NO_SHOW: 'NO_SHOW',
 } as const
 
 export type BookingItem =

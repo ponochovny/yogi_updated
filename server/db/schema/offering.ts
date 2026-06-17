@@ -141,26 +141,15 @@ export const pricingOptionsRelations = relations(pricingOptions, ({ one }) => ({
 // This table will store specific time slots for each offering (e.g., a Yoga class on Mondays at 6 PM). It allows for exceptions like cancellations or capacity overrides.
 export const offeringSlots = pgTable('offering_slots', {
 	id: uuid('id').defaultRandom().primaryKey(),
-
-	// Binding to the lesson template (cascade deletion: deleting the offering - deleting the slots)
 	offeringId: uuid('offering_id')
 		.notNull()
 		.references(() => offerings.id, { onDelete: 'cascade' }),
-
-	// Who leads this class (by default, we take it from the generation form)
 	practitionerId: uuid('practitioner_id')
 		.notNull()
 		.references(() => studioPractitioners.id),
-
-	// Start and end times. withTimezone: true - Postgres will store everything in UTC
 	startTime: timestamp('start_time', { withTimezone: true }).notNull(),
 	endTime: timestamp('end_time', { withTimezone: true }).notNull(),
-
-	// Slot status
 	status: offeringSlotStatusEnum('status').default('ACTIVE').notNull(),
-
-	// Specific capacity override (if the venue is smaller on this day)
 	capacityOverride: integer('capacity_override'),
-
 	createdAt: timestamp('created_at').defaultNow().notNull(),
 })

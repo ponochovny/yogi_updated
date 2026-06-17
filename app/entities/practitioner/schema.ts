@@ -1,5 +1,5 @@
 import { z } from 'zod'
-import { practitionerRoles } from '~~/server/auth/config'
+import { userRoles } from '~~/server/auth/config'
 
 export const addPractitionerSchema = z.object({
 	email: z.email('Email is not valid'),
@@ -10,12 +10,8 @@ export const addPractitionerSchema = z.object({
 		.max(500, 'Bio must be at most 500 characters')
 		.optional(),
 	role: z
-		.enum([
-			practitionerRoles.MANAGER,
-			practitionerRoles.PRACTITIONER,
-			practitionerRoles.OWNER,
-		])
-		.default(practitionerRoles.PRACTITIONER),
+		.enum([userRoles.MANAGER, userRoles.PRACTITIONER, userRoles.BUSINESS])
+		.default(userRoles.PRACTITIONER),
 	salaryActive: z.boolean().default(true),
 })
 

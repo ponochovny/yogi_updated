@@ -3,20 +3,15 @@ export const PagesConfig = {
 
 	LOGIN: '/login',
 	REGISTER: '/register',
-
-	OFFERINGS: '/offerings',
-	STUDIOS: '/studios',
-	PRACTITIONERS: '/practitioners',
-	CAUSES: '/causes',
-
-	BUSINESS: '/business',
-
-	PROFILE_SETTINGS: '/profile/settings',
-	PROFILE_ADDITIONAL: '/profile/additional',
-	// PROFILE_VENUES: '/profile/venues',
-	PROFILE_BOOKINGS: '/profile/bookings',
+	RESET_PASSWORD: '/reset-password',
 
 	SEARCH: '/search',
+
+	PROFILE_SETTINGS: '/profile/settings',
+	PROFILE_BOOKINGS: '/profile/bookings',
+
+	BUSINESS: '/business',
+	BUSINESS_CALENDAR: '/business/calendar',
 
 	CHECKOUT: '/checkout',
 	CHECKOUT_SUCCESS: '/checkout/success',

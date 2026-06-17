@@ -1,3 +1,4 @@
+import { useDb } from '../db'
 import { betterAuth } from 'better-auth'
 import { drizzleAdapter } from 'better-auth/adapters/drizzle'
 import { userRoles } from '../../auth/config'
@@ -9,6 +10,7 @@ import {
 	MediaTypeEnum,
 } from '../../db/schema/_other'
 import { user as userSchema } from '~~/server/db/schema/auth-schema'
+import { studioMembers, studios } from '~~/server/db/schema/studio'
 
 export const auth = betterAuth({
 	database: drizzleAdapter(useDb(), {
@@ -89,10 +91,24 @@ export const auth = betterAuth({
 				user.image = avatarFile.url
 			}
 
+			const workspaces = await db
+				.select({
+					role: studioMembers.role,
+					studio: {
+						id: studios.id,
+						slug: studios.slug,
+						name: studios.name,
+					},
+				})
+				.from(studioMembers)
+				.innerJoin(studios, eq(studios.id, studioMembers.studioId))
+				.where(eq(studioMembers.userId, user.id))
+
 			return {
 				...session,
 				user: {
 					...user,
+					workspaces,
 				},
 			}
 		}),

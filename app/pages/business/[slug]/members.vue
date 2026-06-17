@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { placeholderImageUrl } from '~/config/constants'
-import { practitionerRoles } from '~~/server/auth/config'
+import { userRoles } from '~~/server/auth/config'
 
 definePageMeta({
 	title: 'Team Management',
@@ -13,7 +13,7 @@ const slug = route.params.slug as string
 const form = ref({
 	name: '',
 	email: '',
-	role: practitionerRoles.PRACTITIONER,
+	role: userRoles.PRACTITIONER,
 })
 
 const isSubmitting = ref(false)
@@ -28,7 +28,7 @@ const addTeamMember = async () => {
 	isSubmitting.value = true
 
 	try {
-		await $fetch(`/api/business/studios/${slug}/practitioners`, {
+		await $fetch(`/api/business/studios/${slug}/members`, {
 			method: 'POST',
 			body: form.value,
 		})
@@ -79,10 +79,10 @@ useHead({
 					<label class="block text-sm font-medium mb-1">Role</label>
 					<div class="*:w-full">
 						<NativeSelect v-model="form.role">
-							<NativeSelectOption :value="practitionerRoles.PRACTITIONER">
+							<NativeSelectOption :value="userRoles.PRACTITIONER">
 								Trainer
 							</NativeSelectOption>
-							<NativeSelectOption :value="practitionerRoles.MANAGER">
+							<NativeSelectOption :value="userRoles.MANAGER">
 								Manager
 							</NativeSelectOption>
 						</NativeSelect>
@@ -128,9 +128,9 @@ useHead({
 						</td>
 						<td class="px-6 py-4 text-sm text-gray-200">
 							{{
-								member.role === 'MANAGER'
+								member.role === userRoles.MANAGER
 									? 'Manager'
-									: member.role === 'OWNER'
+									: member.role === userRoles.BUSINESS
 										? 'Owner'
 										: 'Trainer'
 							}}

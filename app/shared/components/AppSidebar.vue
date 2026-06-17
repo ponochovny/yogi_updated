@@ -2,7 +2,7 @@
 import type { SidebarProps } from '@/shared/ui/sidebar'
 import { useSession } from '@/utils/auth-client'
 
-import NavProjects from './NavProjects.vue'
+import NavMenu from './NavMenu.vue'
 import NavUser from './NavUser.vue'
 import {
 	Sidebar,
@@ -14,6 +14,7 @@ import {
 	SidebarMenuItem,
 } from '@/shared/ui/sidebar'
 import { placeholderImageUrl } from '~/config/constants.js'
+import { userRoles } from '~~/server/auth/config.js'
 
 const props = withDefaults(defineProps<SidebarProps>(), {
 	variant: 'inset',
@@ -30,13 +31,17 @@ const userData = computed(() => ({
 			'/upload/w_100,h_100,c_thumb,g_custom/',
 		) || placeholderImageUrl,
 	// @ts-expect-error: role is an array in the session, but we want to display a single role in the NavUser component. We can take the first role from the array for display purposes.
-	role: session.value?.data?.user?.role || ['user'],
+	role: session.value?.data?.user?.workspaces.map((el) => el.role) || [
+		userRoles.USER,
+	],
 }))
 
-const sidebarProps = inject('sidebarProps', {
-	group: '',
-	menuLinks: [],
-})
+const sidebarProps = inject('sidebarProps', [
+	{
+		group: '',
+		menuLinks: [],
+	},
+])
 </script>
 
 <template>
@@ -67,9 +72,11 @@ const sidebarProps = inject('sidebarProps', {
 			</SidebarMenu>
 		</SidebarHeader>
 		<SidebarContent>
-			<NavProjects
-				:group="sidebarProps?.group || ''"
-				:menu-items="sidebarProps?.menuLinks || []"
+			<NavMenu
+				v-for="(item, index) in sidebarProps || []"
+				:key="index"
+				:group="item?.group || ''"
+				:menu-items="item?.menuLinks || []"
 			/>
 		</SidebarContent>
 		<SidebarFooter>

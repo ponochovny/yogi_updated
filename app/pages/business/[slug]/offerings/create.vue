@@ -119,7 +119,23 @@ const removeFromGallery = (index: number) => {
 
 <template>
 	<div>
-		<h1 class="text-2xl font-bold mb-6">Offering Creation</h1>
+		<!-- <div class="mb-6 flex items-center gap-6">
+			<NuxtImg
+				:src="
+					offering?.studio?.logo?.replace(
+						'/upload/',
+						'/upload/w_180,h_180,c_fill/',
+					) || placeholderImageUrl
+				"
+				class="w-20 h-20 rounded-full object-cover border"
+			/>
+			<div>
+				<h1 class="text-2xl font-bold">Offering Creation</h1>
+				<p class="text-sm text-gray-300">
+					{{ offering?.studio?.name }} · {{ offering?.name }}
+				</p>
+			</div>
+		</div> -->
 
 		<div class="bg-white/10 rounded-xl shadow-sm border p-6">
 			<div v-if="pending" class="py-10 text-center">Loading data...</div>
@@ -310,7 +326,12 @@ const removeFromGallery = (index: number) => {
 										</FormControl>
 
 										<NuxtImg
-											:src="prac.avatar || placeholderImageUrl"
+											:src="
+												prac.avatar?.replace(
+													'/upload/',
+													'/upload/w_44,h_44,c_fill/',
+												) || placeholderImageUrl
+											"
 											class="w-6 h-6 rounded-full m-0"
 										/>
 										<span class="text-sm font-medium">{{ prac.name }}</span>

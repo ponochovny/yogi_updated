@@ -11,9 +11,6 @@ export default defineNuxtRouteMiddleware(async (to, _) => {
 		const headers = useRequestHeaders(['cookie']) as Record<string, string>
 		try {
 			session = await $fetch('/api/auth/get-session', { headers })
-			// const { auth } = await import('~~/server/utils/auth')
-			// const res = await $auth.api.getSession({ headers })
-			// session = res?.session ?? null
 		} catch {
 			session = null
 		}

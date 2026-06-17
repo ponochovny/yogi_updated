@@ -163,12 +163,42 @@ groupSlots()
 					<span class="text-gray-500">-</span>
 					<Input v-model="rule.endTime" type="time" class="text-sm w-30" />
 
-					<Input
-						v-model="rule.practitionerId"
-						type="text"
-						placeholder="Practitioner UUID"
-						class="w-50"
-					/>
+					<Select v-model="rule.practitionerId">
+						<SelectTrigger class="grow">
+							<div class="flex items-center gap-3">
+								<NuxtImg
+									v-if="
+										practitioners.find(
+											(p) => p.practitionerId === rule.practitionerId,
+										)
+									"
+									:src="
+										practitioners
+											.find((p) => p.practitionerId === rule.practitionerId)
+											?.avatar?.replace(
+												'/upload/',
+												'/upload/w_48,h_48,c_fill/',
+											) || placeholderImageUrl
+									"
+									class="w-6 h-6 rounded-full"
+								/>
+								<span>{{
+									practitioners.find(
+										(p) => p.practitionerId === rule.practitionerId,
+									)?.name || 'Select practitioner'
+								}}</span>
+							</div>
+						</SelectTrigger>
+						<SelectContent>
+							<SelectItem
+								v-for="practitioner in practitioners"
+								:key="practitioner.practitionerId"
+								:value="practitioner.practitionerId"
+							>
+								{{ practitioner.name }}
+							</SelectItem>
+						</SelectContent>
+					</Select>
 
 					<Button
 						v-if="form.rules.length > 1"
@@ -214,16 +244,21 @@ groupSlots()
 							<SelectTrigger class="w-full">
 								<!-- <SelectValue placeholder="Select location" /> -->
 								<NuxtImg
-									:src="placeholderImageUrl"
+									:src="
+										practitioners
+											.find((p) => p.practitionerId === slot.practitionerId)
+											?.avatar?.replace(
+												'/upload/',
+												'/upload/w_48,h_48,c_fill/',
+											) || placeholderImageUrl
+									"
 									class="w-6 h-6 rounded-full"
 								/>
-								<ClientOnly>
-									<span>{{
-										practitioners.find(
-											(p) => p.practitionerId === slot.practitionerId,
-										)?.name || 'Not found'
-									}}</span>
-								</ClientOnly>
+								<span>{{
+									practitioners.find(
+										(p) => p.practitionerId === slot.practitionerId,
+									)?.name || 'Not found'
+								}}</span>
 							</SelectTrigger>
 							<SelectContent>
 								<SelectItem

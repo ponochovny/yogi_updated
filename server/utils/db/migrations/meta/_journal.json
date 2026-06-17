@@ -36,6 +36,27 @@
       "when": 1781237192174,
       "tag": "0004_neat_thunderbolt_ross",
       "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "7",
+      "when": 1781396836389,
+      "tag": "0005_round_owl",
+      "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "7",
+      "when": 1781627969665,
+      "tag": "0006_lying_nomad",
+      "breakpoints": true
+    },
+    {
+      "idx": 7,
+      "version": "7",
+      "when": 1781653280146,
+      "tag": "0007_first_mikhail_rasputin",
+      "breakpoints": true
     }
   ]
 }

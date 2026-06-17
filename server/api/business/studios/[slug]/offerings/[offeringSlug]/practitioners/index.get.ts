@@ -1,7 +1,8 @@
 import { studios, studioPractitioners } from '~~/server/db/schema/studio'
 import { user } from '~~/server/db/schema/auth-schema'
-import { and, eq } from 'drizzle-orm'
+import { and, eq, sql } from 'drizzle-orm'
 import { offeringPractitioners, offerings } from '~~/server/db/schema/offering'
+import { MediaEntityTypeEnum, MediaTypeEnum } from '~~/server/db/schema/_other'
 
 export default defineEventHandler(async (event) => {
 	const userData = await requireAuthenticatedUser(event)
@@ -30,6 +31,16 @@ export default defineEventHandler(async (event) => {
 		throwApiError(404, 'Offering not found')
 	}
 
+	const practitionerImg = sql`(
+				SELECT url
+				FROM media_files
+				WHERE entity_id = ${user.id}::text
+					AND entity_type = ${MediaEntityTypeEnum.USER}
+					AND type = ${MediaTypeEnum.AVATAR}
+				ORDER BY created_at DESC
+				LIMIT 1
+			) practitioner_img`
+
 	try {
 		const practitioners = await db
 			.select({
@@ -37,7 +48,7 @@ export default defineEventHandler(async (event) => {
 				practitionerId: studioPractitioners.id,
 				name: user.name,
 				email: user.email,
-				avatar: user.image,
+				avatar: sql<string>`practitioner_img.url`,
 			})
 			.from(offeringPractitioners)
 			.innerJoin(
@@ -45,6 +56,7 @@ export default defineEventHandler(async (event) => {
 				eq(offeringPractitioners.practitionerId, studioPractitioners.id),
 			)
 			.innerJoin(user, eq(studioPractitioners.userId, user.id))
+			.leftJoinLateral(practitionerImg, sql`TRUE`)
 			.where(eq(offeringPractitioners.offeringId, offering.id))
 
 		return {

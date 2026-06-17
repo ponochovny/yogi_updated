@@ -63,7 +63,7 @@ const signOutHandler = async () => {
 					align="end"
 					:side-offset="4"
 				>
-					<template v-if="user.role.length > 1">
+					<template v-if="user.role.length">
 						<DropdownMenuGroup>
 							<DropdownMenuItem
 								v-if="!$route.path.startsWith('/profile')"
@@ -74,12 +74,19 @@ const signOutHandler = async () => {
 								User Profile
 							</DropdownMenuItem>
 							<DropdownMenuItem
-								v-if="user.role.includes(userRoles.PRACTITIONER)"
+								v-if="
+									user.role.includes(userRoles.PRACTITIONER) ||
+									user.role.includes(userRoles.MANAGER)
+								"
 								class="flex items-center gap-2"
-								@click="navigateTo('/')"
+								@click="navigateTo('/business')"
 							>
 								<Sparkles />
-								Practitioner
+								{{
+									user.role.includes(userRoles.PRACTITIONER)
+										? 'Practitioner dashboard'
+										: 'Manager dashboard'
+								}}
 							</DropdownMenuItem>
 							<DropdownMenuItem
 								v-if="user.role.includes(userRoles.BUSINESS)"
@@ -87,7 +94,7 @@ const signOutHandler = async () => {
 								@click="navigateTo('/business')"
 							>
 								<BadgeCheck />
-								Business owner
+								Business owner dashboard
 							</DropdownMenuItem>
 						</DropdownMenuGroup>
 						<DropdownMenuSeparator />

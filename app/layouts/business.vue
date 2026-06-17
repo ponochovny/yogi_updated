@@ -1,25 +1,10 @@
 <script lang="ts" setup>
 import 'vue-sonner/style.css'
 import SidebarDashboardLayout from '~/widgets/sidebar-dashboard/index.vue'
-import { ChartNoAxesCombinedIcon, PlusIcon } from '@lucide/vue'
-import { PagesConfig } from '~/config/pages.config'
 
-const sidebarProps = {
-	group: 'Business',
-	menuLinks: [
-		{
-			name: 'Main Dashboard',
-			url: PagesConfig.BUSINESS,
-			icon: ChartNoAxesCombinedIcon,
-		},
-		{
-			name: 'Create Studio',
-			url: PagesConfig.BUSINESS + '/create',
-			icon: PlusIcon,
-		},
-	],
-}
-provide('sidebarProps', sidebarProps)
+const { visibleMenu } = useBusinessMenu()
+
+provide('sidebarProps', visibleMenu)
 </script>
 
 <template>

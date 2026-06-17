@@ -8,12 +8,12 @@ import {
 	unique,
 } from 'drizzle-orm/pg-core'
 import { user } from './auth-schema'
-import { practitionerRoles } from '../../auth/config'
+import { userRoles } from '../../auth/config'
 
 export const studioRoleEnum = pgEnum('studio_role', [
-	practitionerRoles.MANAGER,
-	practitionerRoles.PRACTITIONER,
-	practitionerRoles.OWNER,
+	userRoles.MANAGER,
+	userRoles.PRACTITIONER,
+	userRoles.BUSINESS,
 ])
 
 // ==========================================
@@ -48,9 +48,7 @@ export const studioPractitioners = pgTable(
 			.notNull()
 			.references(() => user.id, { onDelete: 'cascade' }),
 
-		role: studioRoleEnum('role')
-			.default(practitionerRoles.PRACTITIONER)
-			.notNull(),
+		role: studioRoleEnum('role').default(userRoles.PRACTITIONER).notNull(),
 
 		salaryActive: boolean('salary_active').default(true).notNull(),
 		isActive: boolean('is_active').default(true).notNull(),
@@ -75,3 +73,15 @@ export const studioLocations = pgTable(
 	},
 	(table) => [unique().on(table.id, table.studioId)],
 )
+
+export const studioMembers = pgTable('studio_members', {
+	id: uuid('id').defaultRandom().primaryKey(),
+	studioId: uuid('studio_id')
+		.notNull()
+		.references(() => studios.id, { onDelete: 'cascade' }),
+	userId: text('user_id')
+		.notNull()
+		.references(() => user.id, { onDelete: 'cascade' }),
+	role: studioRoleEnum('role').notNull(), // OWNER, MANAGER, PRACTITIONER
+	createdAt: timestamp('created_at').defaultNow().notNull(),
+})
