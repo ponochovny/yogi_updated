@@ -74,14 +74,18 @@ export const studioLocations = pgTable(
 	(table) => [unique().on(table.id, table.studioId)],
 )
 
-export const studioMembers = pgTable('studio_members', {
-	id: uuid('id').defaultRandom().primaryKey(),
-	studioId: uuid('studio_id')
-		.notNull()
-		.references(() => studios.id, { onDelete: 'cascade' }),
-	userId: text('user_id')
-		.notNull()
-		.references(() => user.id, { onDelete: 'cascade' }),
-	role: studioRoleEnum('role').notNull(), // OWNER, MANAGER, PRACTITIONER
-	createdAt: timestamp('created_at').defaultNow().notNull(),
-})
+export const studioMembers = pgTable(
+	'studio_members',
+	{
+		id: uuid('id').defaultRandom().primaryKey(),
+		studioId: uuid('studio_id')
+			.notNull()
+			.references(() => studios.id, { onDelete: 'cascade' }),
+		userId: text('user_id')
+			.notNull()
+			.references(() => user.id, { onDelete: 'cascade' }),
+		role: studioRoleEnum('role').notNull(), // OWNER, MANAGER, PRACTITIONER
+		createdAt: timestamp('created_at').defaultNow().notNull(),
+	},
+	(table) => [unique().on(table.studioId, table.userId)],
+)

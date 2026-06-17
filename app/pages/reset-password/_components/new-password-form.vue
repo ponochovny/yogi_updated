@@ -35,24 +35,34 @@ const newPasswordForm = useForm({
 const errorMsg = ref('')
 
 const submitReset = newPasswordForm.handleSubmit(async (values) => {
-	const res = await authClient.resetPassword({
-		token: props.token,
-		newPassword: values.newPassword,
-	})
-
-	if (res.error) {
-		errorMsg.value =
-			(res.error.message || 'Failed to reset password') +
-			'. You have to request a new password reset link.'
-		toast.error('Failed to reset password: ', {
-			description: res.error.message || 'An unexpected error occurred.',
+	errorMsg.value = ''
+	try {
+		const res = await authClient.resetPassword({
+			token: props.token,
+			newPassword: values.newPassword,
 		})
-	} else {
+
+		if (res.error) {
+			errorMsg.value =
+				(res.error.message || 'Failed to reset password') +
+				'. You have to request a new password reset link.'
+			toast.error('Failed to reset password: ', {
+				description: res.error.message || 'An unexpected error occurred.',
+			})
+			return
+		}
+
 		toast.success(
 			'Password reset successful! You can now log in with your new password.',
 		)
 		newPasswordForm.handleReset()
-		navigateTo('/login')
+		await navigateTo('/login')
+	} catch (error) {
+		errorMsg.value =
+			'Failed to reset password. You have to request a new password reset link.'
+		toast.error('Failed to reset password', {
+			description: (error as Error).message || 'An unexpected error occurred.',
+		})
 	}
 })
 </script>

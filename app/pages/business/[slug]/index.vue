@@ -16,10 +16,12 @@ definePageMeta({
 const route = useRoute()
 const session = useSession()
 
-// @ts-expect-error: workspaces field
-const { getRolesInStudio } = useWorkspaces(session.value?.data?.user.workspaces)
-
-const roles = computed(() => getRolesInStudio(route.params.slug as string))
+const roles = computed(() => {
+	// @ts-expect-error: workspaces field
+	const workspaces = session.value?.data?.user.workspaces ?? []
+	const { getRolesInStudio } = useWorkspaces(workspaces)
+	return getRolesInStudio(route.params.slug as string)
+})
 </script>
 
 <template>

@@ -25,7 +25,7 @@ defineProps<{
 		<SidebarMenu>
 			<SidebarMenuItem v-for="item in menuItems" :key="item.name">
 				<SidebarMenuButton as-child>
-					<NuxtLink :href="item.url">
+					<NuxtLink :to="item.url">
 						<component :is="item.icon" />
 						<span>{{ item.name }}</span>
 					</NuxtLink>

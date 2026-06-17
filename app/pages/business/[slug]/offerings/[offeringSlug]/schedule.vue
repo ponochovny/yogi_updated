@@ -69,6 +69,9 @@ const { data: offeringPractitioners } = await useFetch(
 const practitioners = computed(
 	() => offeringPractitioners.value?.practitioners || [],
 )
+const practitionerById = computed(
+	() => new Map(practitioners.value.map((p) => [p.practitionerId, p])),
+)
 
 const updateSlot = async (slot: updateSlotsSchemaInput) => {
 	try {
@@ -115,7 +118,7 @@ const groupSlots = () => {
 			...slot,
 			startTime: format(new Date(slot.startTime), 'HH:mm'), // Format for time input
 			endTime: format(new Date(slot.endTime), 'HH:mm'), // Format for time input
-			practitionerId: slot.practitioner.id, // Assuming practitioner object has an id field
+			practitionerId: slot.practitioner?.id, // Assuming practitioner object has an id field
 		})
 		return acc
 	}, {})
@@ -167,14 +170,10 @@ groupSlots()
 						<SelectTrigger class="grow">
 							<div class="flex items-center gap-3">
 								<NuxtImg
-									v-if="
-										practitioners.find(
-											(p) => p.practitionerId === rule.practitionerId,
-										)
-									"
+									v-if="practitionerById.get(rule.practitionerId)"
 									:src="
-										practitioners
-											.find((p) => p.practitionerId === rule.practitionerId)
+										practitionerById
+											.get(rule.practitionerId)
 											?.avatar?.replace(
 												'/upload/',
 												'/upload/w_48,h_48,c_fill/',
@@ -183,9 +182,8 @@ groupSlots()
 									class="w-6 h-6 rounded-full"
 								/>
 								<span>{{
-									practitioners.find(
-										(p) => p.practitionerId === rule.practitionerId,
-									)?.name || 'Select practitioner'
+									practitionerById.get(rule.practitionerId)?.name ||
+									'Select practitioner'
 								}}</span>
 							</div>
 						</SelectTrigger>
@@ -245,8 +243,8 @@ groupSlots()
 								<!-- <SelectValue placeholder="Select location" /> -->
 								<NuxtImg
 									:src="
-										practitioners
-											.find((p) => p.practitionerId === slot.practitionerId)
+										practitionerById
+											.get(slot.practitionerId)
 											?.avatar?.replace(
 												'/upload/',
 												'/upload/w_48,h_48,c_fill/',
@@ -255,9 +253,7 @@ groupSlots()
 									class="w-6 h-6 rounded-full"
 								/>
 								<span>{{
-									practitioners.find(
-										(p) => p.practitionerId === slot.practitionerId,
-									)?.name || 'Not found'
+									practitionerById.get(slot.practitionerId)?.name || 'Not found'
 								}}</span>
 							</SelectTrigger>
 							<SelectContent>

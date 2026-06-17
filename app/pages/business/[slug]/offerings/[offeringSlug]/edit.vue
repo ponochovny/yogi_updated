@@ -213,7 +213,7 @@ const removeFromGallery = (index: number) => {
 							>
 								<NuxtImg
 									:src="
-										image.url.replace('/upload/', '/upload/w_280,c_fill/') ||
+										image.url?.replace('/upload/', '/upload/w_280,c_fill/') ||
 										placeholderImageUrl
 									"
 									class="h-40 aspect-video rounded-2xl object-cover border"

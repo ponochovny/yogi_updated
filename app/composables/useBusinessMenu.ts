@@ -16,7 +16,7 @@ interface Menu {
 		name: string
 		url: string
 		icon: LucideIcon
-		roles: string[]
+		roles: Array<(typeof userRoles)[keyof typeof userRoles]>
 	}[]
 }
 
@@ -88,20 +88,20 @@ export const useBusinessMenu = () => {
 	}))
 
 	const visibleMenu = computed<Menu[]>(() => {
-		const roles =
-			// @ts-expect-error: workspaces field error
-			(user.value?.workspaces.map(
-				(w: { role: typeof userRoles }) => w.role,
-			) as (typeof userRoles)[keyof typeof userRoles][]) || []
-
-		// If there no user or we're not on the studio page then return an empty array
-		if (!roles.length) return []
+		type WorkspaceRole = {
+			slug: string
+			role: (typeof userRoles)[keyof typeof userRoles]
+		}
+		// @ts-expect-error: workspaces field error
+		const workspaceRoles = (user.value?.workspaces ?? []) as WorkspaceRole[]
+		const roles = slug.value
+			? workspaceRoles.filter((w) => w.slug === slug.value).map((w) => w.role)
+			: workspaceRoles.map((w) => w.role)
 
 		const filteredMenu = (menu: Menu) => {
 			return {
 				...menu,
 				menuLinks: menu.menuLinks.filter((item) =>
-					// @ts-expect-error: role field error
 					item.roles.some((el) => roles.includes(el)),
 				),
 			}

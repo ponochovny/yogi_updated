@@ -48,4 +48,13 @@ const isManager = computed(() =>
 const isBusiness = computed(() =>
 	user.value?.workspaces?.some((w) => [userRoles.BUSINESS].includes(w.role)),
 )
+
+// OR
+
+const roles = computed(() => {
+	// @ts-expect-error: workspaces field
+	const workspaces = session.value?.data?.user.workspaces ?? []
+	const { getRolesInStudio } = useWorkspaces(workspaces)
+	return getRolesInStudio(route.params.slug as string)
+})
 ```

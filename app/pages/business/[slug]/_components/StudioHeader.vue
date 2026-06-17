@@ -30,7 +30,11 @@ defineProps<{
 			</div>
 		</div>
 
-		<NuxtLink :to="`/business/${studio?.slug}/settings`" as-child>
+		<NuxtLink
+			v-if="studio?.slug"
+			:to="`/business/${studio.slug}/settings`"
+			as-child
+		>
 			<Button variant="outline" size="sm">
 				<Settings2Icon /> Studio Settings
 			</Button>

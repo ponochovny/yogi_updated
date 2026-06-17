@@ -6,6 +6,13 @@ import { BookingStatus } from '~/entities/booking/schema'
 export default defineEventHandler(async (event) => {
 	const userData = await requireAuthenticatedUser(event)
 	const slotId = requireRouteParam(event, 'slotId')
+	if (
+		!/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(
+			slotId,
+		)
+	) {
+		throwApiError(400, 'Invalid slot id')
+	}
 	const clientId = userData.id
 	const db = useDb()
 

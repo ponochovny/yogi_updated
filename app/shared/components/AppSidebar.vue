@@ -31,7 +31,7 @@ const userData = computed(() => ({
 			'/upload/w_100,h_100,c_thumb,g_custom/',
 		) || placeholderImageUrl,
 	// @ts-expect-error: role is an array in the session, but we want to display a single role in the NavUser component. We can take the first role from the array for display purposes.
-	role: session.value?.data?.user?.workspaces.map((el) => el.role) || [
+	role: session.value?.data?.user?.workspaces?.map((el) => el.role) ?? [
 		userRoles.USER,
 	],
 }))

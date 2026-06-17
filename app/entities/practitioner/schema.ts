@@ -10,7 +10,7 @@ export const addPractitionerSchema = z.object({
 		.max(500, 'Bio must be at most 500 characters')
 		.optional(),
 	role: z
-		.enum([userRoles.MANAGER, userRoles.PRACTITIONER, userRoles.BUSINESS])
+		.enum([userRoles.MANAGER, userRoles.PRACTITIONER])
 		.default(userRoles.PRACTITIONER),
 	salaryActive: z.boolean().default(true),
 })

@@ -55,7 +55,7 @@ export default defineEventHandler(async (event) => {
 						name: body.name,
 						emailVerified: false, // Important flag: the user has not yet confirmed their email
 						bio: body.bio || '',
-						role: [userRoles.PRACTITIONER],
+						role: [body.role], // Assign the role directly to the user
 						createdAt: new Date(),
 						updatedAt: new Date(),
 					})
@@ -150,7 +150,14 @@ export default defineEventHandler(async (event) => {
 		return { success: true, data: result }
 	} catch (error: unknown) {
 		if (isApiError(error)) throw error
-		console.error('Failed to add practitioner', error)
-		throwApiError(500, 'Failed to add practitioner')
+		const code =
+			typeof error === 'object' && error !== null && 'code' in error
+				? String((error as { code?: unknown }).code ?? '')
+				: ''
+		if (code === '23505') {
+			throwApiError(409, 'This user is already a member of the studio')
+		}
+		console.error('Failed to add a member', error)
+		throwApiError(500, 'Failed to add a member')
 	}
 })

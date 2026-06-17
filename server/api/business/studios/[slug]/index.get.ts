@@ -10,7 +10,7 @@ export default defineEventHandler(async (event) => {
 	const currentUserId = userData.id
 	const db = useDb()
 
-	await checkStudioAccess(currentUserId, slug, [
+	const access = await checkStudioAccess(currentUserId, slug, [
 		userRoles.BUSINESS,
 		userRoles.MANAGER,
 		userRoles.PRACTITIONER,
@@ -19,7 +19,7 @@ export default defineEventHandler(async (event) => {
 	const [studio] = await db
 		.select()
 		.from(studios)
-		.where(and(eq(studios.slug, slug), eq(studios.ownerId, currentUserId)))
+		.where(eq(studios.id, access.studioId))
 		.limit(1)
 	if (!studio) {
 		throwApiError(

@@ -17,24 +17,32 @@ const errorMsg = ref('')
 const requestResetLoading = ref(false)
 const submitRequestReset = requestResetForm.handleSubmit(async (values) => {
 	requestResetLoading.value = true
-
-	const res = await authClient.requestPasswordReset({
-		email: values.email,
-		redirectTo: `${window.location.origin}/reset-password`,
-	})
-
-	requestResetLoading.value = false
-
-	if (res.error) {
-		errorMsg.value = res.error.message || 'An unexpected error occurred.'
-		toast.error('Failed to send reset link: ', {
-			description: res.error.message || 'An unexpected error occurred.',
+	errorMsg.value = ''
+	try {
+		const res = await authClient.requestPasswordReset({
+			email: values.email,
+			redirectTo: `${window.location.origin}/reset-password`,
 		})
-	} else {
+
+		if (res.error) {
+			errorMsg.value = res.error.message || 'An unexpected error occurred.'
+			toast.error('Failed to send reset link: ', {
+				description: res.error.message || 'An unexpected error occurred.',
+			})
+			return
+		}
+
 		toast.success(
 			'If an account with that email exists, a password reset link has been sent.',
 		)
 		requestResetForm.handleReset()
+	} catch (error) {
+		errorMsg.value = 'An unexpected error occurred.'
+		toast.error('Failed to send reset link', {
+			description: (error as Error).message || 'An unexpected error occurred.',
+		})
+	} finally {
+		requestResetLoading.value = false
 	}
 })
 </script>

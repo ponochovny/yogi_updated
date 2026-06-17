@@ -1,4 +1,6 @@
 <script lang="ts" setup>
+import { format } from 'date-fns'
+
 const route = useRoute()
 const slug = route.params.slug
 
@@ -27,10 +29,13 @@ const { data: mySlots } = await useFetch('/api/manager/slots', {
 								<p class="text-sm font-medium">
 									{{ slot.offering.name }} - {{ slot.studio.name }}
 								</p>
-								<p class="text-xs text-gray-500">
-									{{ new Date(slot.startTime).toLocaleString() }} -
-									{{ new Date(slot.endTime).toLocaleTimeString() }}
-								</p>
+								<ClientOnly>
+									<p class="text-xs text-gray-500">
+										{{ format(new Date(slot.startTime), 'MMM dd, yyyy HH:mm') }}
+										-
+										{{ format(new Date(slot.endTime), 'HH:mm') }}
+									</p>
+								</ClientOnly>
 							</div>
 							<div>
 								<Badge class="text-sm">

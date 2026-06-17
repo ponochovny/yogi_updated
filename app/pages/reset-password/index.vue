@@ -3,10 +3,10 @@ import ResetForm from './_components/reset-form.vue'
 import NewPasswordForm from './_components/new-password-form.vue'
 
 const route = useRoute()
-const { token } = route.query
+const token = computed(() => route.query.token)
 
 const isValidToken = computed(() => {
-	return typeof token === 'string' && token.length > 0
+	return typeof token.value === 'string' && token.value.length > 0
 })
 
 useHead({

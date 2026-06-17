@@ -13,15 +13,10 @@ export const useWorkspaces = (workspaces: IWorkSpaces[]) => {
 	const hasBusinessAccess = computed(() => workspaces && workspaces.length > 0)
 
 	const getRolesInStudio = (slug: string) => {
-		const ws = workspaces
-			?.map((w) => {
-				if (w.studio.slug === slug) {
-					return w.role
-				}
-				return null
-			})
-			.filter(Boolean)
-		return ws ? ws : null
+		const roles = workspaces
+			.filter((w) => w.studio.slug === slug)
+			.map((w) => w.role)
+		return roles.length > 0 ? roles : null
 	}
 
 	return { hasBusinessAccess, getRolesInStudio }

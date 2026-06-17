@@ -9,7 +9,7 @@ export default defineEventHandler(async (event) => {
 	const currentUserId = userData.id
 	const db = useDb()
 
-	const practitionerImg = sql`(
+	const memberImg = sql`(
 		SELECT url
 		FROM media_files
 		WHERE entity_id = ${user.id}::text
@@ -17,7 +17,7 @@ export default defineEventHandler(async (event) => {
 			AND type = ${MediaTypeEnum.AVATAR}
 		ORDER BY created_at DESC
 		LIMIT 1
-	) practitioner_img`
+	) member_img`
 
 	const [studio] = await db
 		.select()
@@ -42,13 +42,13 @@ export default defineEventHandler(async (event) => {
 					id: user.id,
 					name: user.name,
 					email: user.email,
-					image: sql<string>`practitioner_img.url`,
+					image: sql<string>`member_img.url`,
 					emailVerified: user.emailVerified, // Useful to display a "Not Verified" badge in the UI
 				},
 			})
 			.from(studioPractitioners)
 			.innerJoin(user, eq(studioPractitioners.userId, user.id))
-			.leftJoinLateral(practitionerImg, sql`TRUE`)
+			.leftJoinLateral(memberImg, sql`TRUE`)
 			.where(eq(studioPractitioners.studioId, studio.id))
 
 		return { success: true, team }

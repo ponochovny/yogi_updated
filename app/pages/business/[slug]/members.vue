@@ -19,7 +19,7 @@ const form = ref({
 const isSubmitting = ref(false)
 
 const { data, refresh, pending } = await useFetch(
-	`/api/business/studios/${slug}/practitioners`,
+	`/api/business/studios/${slug}/members`,
 )
 const team = computed(() => data.value?.team || [])
 

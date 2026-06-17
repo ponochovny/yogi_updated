@@ -27,7 +27,9 @@ export default defineEventHandler(async (event) => {
 			startTime: offeringSlots.startTime,
 			endTime: offeringSlots.endTime,
 			status: offeringSlots.status,
-			capacity: sql<number>`COALESCE(${offeringSlots.capacityOverride}, ${offerings.capacity})`, // If capacityOverride is set, use it; otherwise, fall back to the offering's default capacity.
+			capacity: sql<
+				number | null
+			>`NULLIF(COALESCE(${offeringSlots.capacityOverride}, ${offerings.capacity}), 0)`,
 			bookedCount: sql<number>`(
 				SELECT count(${bookings.id})::int
 				FROM ${bookings}
@@ -43,6 +45,7 @@ export default defineEventHandler(async (event) => {
 				id: offerings.id,
 				name: offerings.name,
 				slug: offerings.slug,
+				timezone: offerings.timezone,
 			},
 			// We are collecting information about the studio
 			studio: {

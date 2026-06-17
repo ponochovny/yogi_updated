@@ -24,10 +24,13 @@ const { data: allMySlots } = await useFetch('/api/practitioner/slots')
 								<p class="text-sm font-medium">
 									{{ slot.offering.name }} - {{ slot.studio.name }}
 								</p>
-								<p class="text-xs text-gray-500">
-									{{ format(new Date(slot.startTime), 'MMM dd, yyyy HH:mm') }} -
-									{{ format(new Date(slot.endTime), 'HH:mm') }}
-								</p>
+								<ClientOnly>
+									<p class="text-xs text-gray-500">
+										{{ format(new Date(slot.startTime), 'MMM dd, yyyy HH:mm') }}
+										-
+										{{ format(new Date(slot.endTime), 'HH:mm') }}
+									</p>
+								</ClientOnly>
 							</div>
 							<div class="text-sm text-gray-700">
 								{{ slot.bookedCount }} / {{ slot.capacity }} booked
