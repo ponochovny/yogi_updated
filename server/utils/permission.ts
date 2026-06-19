@@ -20,21 +20,29 @@ export const checkStudioAccess = async (
 		.where(and(eq(studioMembers.userId, userId), eq(studios.slug, slug)))
 
 	const memberRoles = membership.map((member) => member.role)
-	const hasAccess = memberRoles.some((role) => allowedRoles.includes(role))
+	const grantedRoles = memberRoles.filter((role) => allowedRoles.includes(role))
+	const hasAccess = grantedRoles.length > 0
 
 	if (!membership.length || !hasAccess) {
 		throw createError({ statusCode: 403, message: 'Forbidden' })
 	}
 
 	let practitionerId: string | null = null
-	if (memberRoles.includes(userRoles.PRACTITIONER)) {
+	const hasNonPractitionerAccess = grantedRoles.some(
+		(role) => role !== userRoles.PRACTITIONER,
+	)
+	if (
+		grantedRoles.includes(userRoles.PRACTITIONER) &&
+		!hasNonPractitionerAccess
+	) {
+		const studioId = membership[0]!.studioId
 		const [practitioner] = await db
 			.select({ id: studioPractitioners.id })
 			.from(studioPractitioners)
 			.where(
 				and(
 					eq(studioPractitioners.userId, userId),
-					eq(studioPractitioners.studioId, membership[0]?.studioId || ''),
+					eq(studioPractitioners.studioId, studioId),
 				),
 			)
 			.limit(1)

@@ -50,6 +50,7 @@ export default defineEventHandler(async (event) => {
 
 	// If the COACH is editing, we check that this is his/her activity.
 	if (
+		access.roles.length === 1 &&
 		access.roles.includes(userRoles.PRACTITIONER) &&
 		currentBooking.practitionerId !== access.practitionerId
 	) {

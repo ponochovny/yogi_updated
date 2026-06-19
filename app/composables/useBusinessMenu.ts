@@ -89,13 +89,17 @@ export const useBusinessMenu = () => {
 
 	const visibleMenu = computed<Menu[]>(() => {
 		type WorkspaceRole = {
-			slug: string
+			studio: {
+				slug: string
+			}
 			role: (typeof userRoles)[keyof typeof userRoles]
 		}
 		// @ts-expect-error: workspaces field error
 		const workspaceRoles = (user.value?.workspaces ?? []) as WorkspaceRole[]
 		const roles = slug.value
-			? workspaceRoles.filter((w) => w.slug === slug.value).map((w) => w.role)
+			? workspaceRoles
+					.filter((w) => w.studio.slug === slug.value)
+					.map((w) => w.role)
 			: workspaceRoles.map((w) => w.role)
 
 		const filteredMenu = (menu: Menu) => {

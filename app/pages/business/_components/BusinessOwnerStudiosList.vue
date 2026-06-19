@@ -19,7 +19,7 @@ const studios = computed(() => studiosData.value?.studios)
 				Create your first studio to start add offerings, practitioners and
 				schedules
 			</p>
-			<Button variant="outline" size="lg">
+			<Button as-child variant="outline" size="lg">
 				<NuxtLink to="/business/create" class="inline-flex gap-1 items-center">
 					<PlusIcon />
 					Create Studio
@@ -86,7 +86,7 @@ const studios = computed(() => studiosData.value?.studios)
 				</NuxtLink>
 			</div>
 
-			<Button variant="outline" size="lg" class="w-full mt-6">
+			<Button as-child variant="outline" size="lg" class="w-full mt-6">
 				<NuxtLink to="/business/create" class="flex gap-1 items-center">
 					<PlusIcon />
 					Create Studio

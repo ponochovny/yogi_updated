@@ -8,12 +8,14 @@ export const BookingStatus = {
 	NO_SHOW: 'NO_SHOW',
 } as const
 
+export const updatableBookingStatuses = [
+	BookingStatus.ATTENDED,
+	BookingStatus.NO_SHOW,
+	BookingStatus.CONFIRMED,
+] as const
+
 export const updateBookingStatusSchema = z.object({
-	status: z.enum([
-		BookingStatus.ATTENDED,
-		BookingStatus.NO_SHOW,
-		BookingStatus.CONFIRMED,
-	]),
+	status: z.enum(updatableBookingStatuses),
 })
 
 export type BookingItem =

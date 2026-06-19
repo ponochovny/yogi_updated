@@ -1,5 +1,6 @@
 <script lang="ts" setup>
 import { format } from 'date-fns'
+import { toast } from 'vue-sonner'
 
 const route = useRoute()
 const slug = computed(() => route.params.slug as string)
@@ -9,16 +10,22 @@ const { data: bookings, refresh } = await useFetch(
 	`/api/business/studios/${slug.value}/slots/${slotId.value}/bookings`,
 )
 const updateBookingStatus = async (bookingId: string, status: string) => {
-	await $fetch(
-		`/api/business/studios/${slug.value}/bookings/${bookingId}/status`,
-		{
-			method: 'PATCH',
-			body: { status },
-		},
-	)
+	try {
+		await $fetch(
+			`/api/business/studios/${slug.value}/bookings/${bookingId}/status`,
+			{
+				method: 'PATCH',
+				body: { status },
+			},
+		)
 
-	// Refresh the bookings list to reflect the updated status
-	await refresh()
+		toast.success('Booking status updated!')
+
+		await refresh()
+	} catch (error) {
+		// keep UX consistent with other pages using toast
+		console.error('Failed to update booking status', error)
+	}
 }
 </script>
 
@@ -90,5 +97,6 @@ const updateBookingStatus = async (bookingId: string, status: string) => {
 				</li>
 			</ul>
 		</div>
+		<div v-else class="text-gray-500">No bookings found for this slot.</div>
 	</div>
 </template>

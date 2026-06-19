@@ -118,7 +118,11 @@ const groupSlots = () => {
 			...slot,
 			startTime: format(new Date(slot.startTime), 'HH:mm'), // Format for time input
 			endTime: format(new Date(slot.endTime), 'HH:mm'), // Format for time input
-			practitionerId: slot.practitioner?.id, // Assuming practitioner object has an id field
+			practitionerId:
+				slot.practitioner?.id ??
+				// keep compatibility if API includes flat practitionerId
+				(slot as { practitionerId?: string }).practitionerId ??
+				'', // Assuming practitioner object has an id field
 		})
 		return acc
 	}, {})
