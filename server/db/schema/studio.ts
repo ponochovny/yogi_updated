@@ -87,5 +87,5 @@ export const studioMembers = pgTable(
 		role: studioRoleEnum('role').notNull(), // OWNER, MANAGER, PRACTITIONER
 		createdAt: timestamp('created_at').defaultNow().notNull(),
 	},
-	(table) => [unique().on(table.studioId, table.userId)],
+	(table) => [unique().on(table.studioId, table.userId, table.role)],
 )

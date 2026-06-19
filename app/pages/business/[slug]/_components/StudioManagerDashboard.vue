@@ -27,7 +27,8 @@ const { data: mySlots } = await useFetch('/api/manager/slots', {
 						<div class="flex items-center justify-between">
 							<div>
 								<p class="text-sm font-medium">
-									{{ slot.offering.name }} - {{ slot.studio.name }}
+									{{ slot.offering.name }} - {{ slot.studio.name }} by
+									{{ slot.practitioner.name }}
 								</p>
 								<ClientOnly>
 									<p class="text-xs text-gray-500">
