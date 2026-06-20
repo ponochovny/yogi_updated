@@ -84,7 +84,7 @@ export const studioMembers = pgTable(
 		userId: text('user_id')
 			.notNull()
 			.references(() => user.id, { onDelete: 'cascade' }),
-		role: studioRoleEnum('role').notNull(), // OWNER, MANAGER, PRACTITIONER
+		role: studioRoleEnum('role').notNull(),
 		createdAt: timestamp('created_at').defaultNow().notNull(),
 	},
 	(table) => [unique().on(table.studioId, table.userId, table.role)],

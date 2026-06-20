@@ -11,11 +11,13 @@ definePageMeta({
 const session = useSession()
 
 const isBusinessOwner = computed(() => {
-	const roles =
-		// @ts-expect-error: workspaces field error
-		session.value?.data?.user?.workspaces.map(
-			(w: { role: typeof userRoles }) => w.role,
-		) as (typeof userRoles)[keyof typeof userRoles][]
+	const roles = (
+		(
+			session.value?.data?.user as
+				| { workspaces?: Array<{ role: string }> }
+				| undefined
+		)?.workspaces ?? []
+	).map((w) => w.role)
 
 	return roles?.includes(userRoles.BUSINESS)
 })

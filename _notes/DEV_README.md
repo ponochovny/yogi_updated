@@ -70,5 +70,5 @@ server/utils/auth/index.ts
 ### Generated auth schema path
 
 ```
-server/utils/db/schema/auth-schema.ts
+server/db/schema/auth-schema.ts
 ```
