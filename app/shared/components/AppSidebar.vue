@@ -36,7 +36,7 @@ const userData = computed(() => ({
 			'/upload/w_100,h_100,c_thumb,g_custom/',
 		) || placeholderImageUrl,
 
-	role: workspaceRoles[0] ?? userRoles.USER,
+	role: workspaceRoles ?? [userRoles.USER],
 }))
 
 const sidebarProps = inject('sidebarProps', [

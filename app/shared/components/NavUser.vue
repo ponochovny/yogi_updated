@@ -71,7 +71,7 @@ const signOutHandler = async () => {
 								@click="navigateTo('/profile/settings')"
 							>
 								<UserIcon />
-								User Profile
+								User dashboard
 							</DropdownMenuItem>
 							<DropdownMenuItem
 								v-if="
@@ -94,7 +94,7 @@ const signOutHandler = async () => {
 								@click="navigateTo('/business')"
 							>
 								<BadgeCheck />
-								Business owner dashboard
+								Business dashboard
 							</DropdownMenuItem>
 						</DropdownMenuGroup>
 						<DropdownMenuSeparator />

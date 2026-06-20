@@ -148,7 +148,7 @@ const uploadAvatar = () => {
 			</Badge>
 		</div>
 
-		<form class="space-y-4" @submit.prevent="submitProfileUpdate">
+		<form class="space-y-6" @submit.prevent="submitProfileUpdate">
 			<FormField v-slot="{ componentField }" name="name">
 				<FormItem>
 					<FormLabel>Name</FormLabel>

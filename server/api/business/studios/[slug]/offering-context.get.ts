@@ -6,6 +6,7 @@ import {
 import { user } from '~~/server/db/schema/auth-schema'
 import { and, eq, sql } from 'drizzle-orm'
 import { MediaEntityTypeEnum, MediaTypeEnum } from '~~/server/db/schema/_other'
+import { userRoles } from '~~/server/auth/config'
 
 export default defineEventHandler(async (event) => {
 	const userData = await requireAuthenticatedUser(event)
@@ -50,6 +51,7 @@ export default defineEventHandler(async (event) => {
 					and(
 						eq(studioPractitioners.studioId, studio.id),
 						eq(studioPractitioners.salaryActive, true),
+						eq(studioPractitioners.role, userRoles.PRACTITIONER),
 					),
 				),
 
