@@ -21,6 +21,7 @@ export const bookings = pgTable('bookings', {
 	status: bookingStatusEnum('status')
 		.default(BookingStatus.CONFIRMED)
 		.notNull(),
+	googleEventId: text('google_event_id'),
 	createdAt: timestamp('created_at').defaultNow().notNull(),
 	updatedAt: timestamp('updated_at').defaultNow().notNull(),
 })
