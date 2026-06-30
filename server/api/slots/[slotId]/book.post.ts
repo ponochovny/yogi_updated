@@ -1,7 +1,16 @@
 import { bookings } from '~~/server/db/schema/booking'
-import { offeringSlots, offerings } from '~~/server/db/schema/offering'
+import {
+	offeringSlots,
+	offerings,
+	pricingOptions,
+} from '~~/server/db/schema/offering'
 import { eq, and, sql } from 'drizzle-orm'
-import { BookingStatus } from '~/entities/booking/schema'
+import { BookingStatus, updateBookingSchema } from '~/entities/booking/schema'
+import {
+	TransactionProvider,
+	transactions,
+	TransactionStatus,
+} from '~~/server/db/schema/payment'
 
 export default defineEventHandler(async (event) => {
 	const userData = await requireAuthenticatedUser(event)
@@ -13,6 +22,11 @@ export default defineEventHandler(async (event) => {
 	) {
 		throwApiError(400, 'Invalid slot id')
 	}
+	const { pricingOptionId } = await readValidatedBody(
+		event,
+		updateBookingSchema.parse,
+	)
+
 	const clientId = userData.id
 	const db = useDb()
 
@@ -87,6 +101,30 @@ export default defineEventHandler(async (event) => {
 						throwApiError(400, 'You have already booked this session')
 					}
 
+					const [pricing] = await tx
+						.select()
+						.from(pricingOptions)
+						.where(eq(pricingOptions.id, pricingOptionId))
+						.limit(1)
+
+					if (!pricing) throw new Error('Pricing option not found')
+
+					const [newTransaction] = await tx
+						.insert(transactions)
+						.values({
+							userId: clientId,
+							studioId: slotData.slotId,
+							amount: 0, // Assuming free booking; adjust as needed
+							currency: 'USD',
+							provider: TransactionProvider.FREE,
+							status: TransactionStatus.PENDING,
+						})
+						.returning({ id: transactions.id })
+
+					if (!newTransaction) {
+						throwApiError(500, 'Failed to create transaction')
+					}
+
 					// 6. Create the booking
 					const [newBooking] = await tx
 						.insert(bookings)
@@ -94,6 +132,7 @@ export default defineEventHandler(async (event) => {
 							slotId: slotId,
 							userId: clientId,
 							status: BookingStatus.CONFIRMED,
+							transactionId: newTransaction.id,
 						})
 						.returning({ id: bookings.id })
 

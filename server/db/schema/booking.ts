@@ -2,6 +2,7 @@ import { pgEnum, pgTable, text, timestamp, uuid } from 'drizzle-orm/pg-core'
 import { offeringSlots } from './offering'
 import { user } from './auth-schema'
 import { BookingStatus } from '../../../app/entities/booking/schema'
+import { transactions, userPasses } from './payment'
 
 export const bookingStatusEnum = pgEnum('booking_status', [
 	BookingStatus.CONFIRMED,
@@ -22,6 +23,11 @@ export const bookings = pgTable('bookings', {
 		.default(BookingStatus.CONFIRMED)
 		.notNull(),
 	googleEventId: text('google_event_id'),
+
+	/** Payment Information */
+	userPassId: uuid('user_pass_id').references(() => userPasses.id), // If the customer used a pass
+	transactionId: uuid('transaction_id').references(() => transactions.id), // If the customer chose single payment (cash/Stripe)
+
 	createdAt: timestamp('created_at').defaultNow().notNull(),
 	updatedAt: timestamp('updated_at').defaultNow().notNull(),
 })
