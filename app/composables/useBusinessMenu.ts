@@ -2,13 +2,17 @@ import {
 	BoxesIcon,
 	CalendarClockIcon,
 	ChartNoAxesCombinedIcon,
+	CrownIcon,
 	LayersIcon,
+	PlusIcon,
+	ShoppingCartIcon,
 	SlidersVerticalIcon,
+	UserIcon,
 	UsersIcon,
 	type LucideIcon,
 } from '@lucide/vue'
 import { PagesConfig } from '~/config/pages.config'
-import { userRoles } from '~~/server/auth/config'
+import { userRoles, type UserRole } from '~~/server/auth/config'
 
 interface Menu {
 	group: string
@@ -27,7 +31,38 @@ export const useBusinessMenu = () => {
 	const session = useSession()
 	const user = computed(() => session.value?.data?.user || null)
 
-	const businessMenu = ref({
+	const notMemberMenu = reactive<Menu[]>([
+		{
+			group: 'Platform',
+			menuLinks: [
+				{
+					name: 'Profile settings',
+					url: PagesConfig.PROFILE_SETTINGS,
+					icon: UserIcon,
+					roles: [userRoles.BUSINESS],
+				},
+				{
+					name: 'My Bookings',
+					url: PagesConfig.PROFILE_BOOKINGS,
+					icon: ShoppingCartIcon,
+					roles: [userRoles.BUSINESS],
+				},
+			],
+		},
+		{
+			group: 'Business',
+			menuLinks: [
+				{
+					name: 'Create studio',
+					url: PagesConfig.BUSINESS,
+					icon: PlusIcon,
+					roles: [userRoles.BUSINESS],
+				},
+			],
+		},
+	])
+
+	const businessMenu = ref<Menu>({
 		group: 'Business',
 		menuLinks: [
 			{
@@ -51,7 +86,7 @@ export const useBusinessMenu = () => {
 		],
 	})
 
-	const studioMenu = computed(() => ({
+	const studioMenu = computed<Menu>(() => ({
 		group: 'Business',
 		menuLinks: [
 			{
@@ -79,6 +114,12 @@ export const useBusinessMenu = () => {
 				roles: [userRoles.BUSINESS],
 			},
 			{
+				name: 'Memberships',
+				url: `${PagesConfig.BUSINESS}/${slug.value}/memberships`,
+				icon: CrownIcon,
+				roles: [userRoles.BUSINESS],
+			},
+			{
 				name: 'Settings',
 				url: `${PagesConfig.BUSINESS}/${slug.value}/settings`,
 				icon: SlidersVerticalIcon,
@@ -88,19 +129,29 @@ export const useBusinessMenu = () => {
 	}))
 
 	const visibleMenu = computed<Menu[]>(() => {
-		type WorkspaceRole = {
-			studio: {
-				slug: string
-			}
-			role: (typeof userRoles)[keyof typeof userRoles]
-		}
-		// @ts-expect-error: workspaces field error
-		const workspaceRoles = (user.value?.workspaces ?? []) as WorkspaceRole[]
-		const roles = slug.value
-			? workspaceRoles
-					.filter((w) => w.studio.slug === slug.value)
-					.map((w) => w.role)
-			: workspaceRoles.map((w) => w.role)
+		// type WorkspaceRole = {
+		// 	studio: {
+		// 		slug: string
+		// 	}
+		// 	role: (typeof userRoles)[keyof typeof userRoles]
+		// }
+
+		const workspaceRoles =
+			(user.value?.workspaces as { role: UserRole }[])?.map((el) => el.role) ??
+			[]
+		const uRoles = (user.value?.role as UserRole[]) ?? []
+
+		const roles = [...new Set([...workspaceRoles, ...uRoles])]
+
+		// const workspaceRoles = (user.value?.workspaces ?? []) as WorkspaceRole[]
+		// const roles = slug.value
+		// 	? workspaceRoles
+		// 			.filter((w) => w.studio.slug === slug.value)
+		// 			.map((w) => w.role)
+		// 	: workspaceRoles.map((w) => w.role)
+
+		const isJustUser = roles.length === 1 && roles.includes(userRoles.USER)
+		if (isJustUser) return notMemberMenu
 
 		const filteredMenu = (menu: Menu) => {
 			return {

@@ -217,7 +217,10 @@ groupSlots()
 			<Button class="w-full" @click="generateSlots"> Generate Slots </Button>
 		</div>
 
-		<div class="p-6 bg-white/10 border rounded-xl shadow-sm">
+		<div
+			v-if="groupedSlots.length"
+			class="p-6 bg-white/10 border rounded-xl shadow-sm"
+		>
 			<h2 class="text-lg font-semibold mb-4">Edit Slots</h2>
 			<div class="flex flex-col gap-4">
 				<div

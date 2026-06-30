@@ -1,7 +1,7 @@
 <script lang="ts" setup>
 import 'vue-sonner/style.css'
 import SidebarDashboardLayout from '~/widgets/sidebar-dashboard/index.vue'
-import { ShoppingCartIcon, UserIcon } from '@lucide/vue'
+import { PlusIcon, ShoppingCartIcon, UserIcon } from '@lucide/vue'
 import { PagesConfig } from '~/config/pages.config'
 
 const sidebarProps = [
@@ -17,6 +17,16 @@ const sidebarProps = [
 				name: 'My Bookings',
 				url: PagesConfig.PROFILE_BOOKINGS,
 				icon: ShoppingCartIcon,
+			},
+		],
+	},
+	{
+		group: 'Business',
+		menuLinks: [
+			{
+				name: 'Create studio',
+				url: PagesConfig.BUSINESS,
+				icon: PlusIcon,
 			},
 		],
 	},

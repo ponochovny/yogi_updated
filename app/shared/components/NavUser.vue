@@ -22,14 +22,14 @@ import {
 	SidebarMenuItem,
 } from '@/shared/ui/sidebar'
 import { signOut } from '@/utils/auth-client'
-import { userRoles } from '~~/server/auth/config'
+import { userRoles, type UserRole } from '~~/server/auth/config'
 
 defineProps<{
 	user: {
 		name: string
 		email: string
 		avatar: string
-		role: string[] | string
+		roles: UserRole[]
 	}
 }>()
 
@@ -48,7 +48,13 @@ const signOutHandler = async () => {
 						class="data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground"
 					>
 						<Avatar class="h-8 w-8 rounded-lg">
-							<AvatarImage :src="user.avatar" :alt="user.name" />
+							<AvatarImage :src="user.avatar" :alt="user.name" as-child>
+								<NuxtImg
+									:src="user.avatar"
+									:alt="user.name"
+									class="object-cover"
+								/>
+							</AvatarImage>
 							<AvatarFallback class="rounded-lg"> CN </AvatarFallback>
 						</Avatar>
 						<div class="grid flex-1 text-left text-sm leading-tight">
@@ -63,7 +69,9 @@ const signOutHandler = async () => {
 					align="end"
 					:side-offset="4"
 				>
-					<template v-if="user.role.length">
+					<template
+						v-if="user.roles.includes(userRoles.USER) && user.roles.length > 1"
+					>
 						<DropdownMenuGroup>
 							<DropdownMenuItem
 								v-if="!$route.path.startsWith('/profile')"
@@ -75,21 +83,21 @@ const signOutHandler = async () => {
 							</DropdownMenuItem>
 							<DropdownMenuItem
 								v-if="
-									user.role.includes(userRoles.PRACTITIONER) ||
-									user.role.includes(userRoles.MANAGER)
+									user.roles.includes(userRoles.PRACTITIONER) ||
+									user.roles.includes(userRoles.MANAGER)
 								"
 								class="flex items-center gap-2"
 								@click="navigateTo('/business')"
 							>
 								<Sparkles />
 								{{
-									user.role.includes(userRoles.PRACTITIONER)
+									user.roles.includes(userRoles.PRACTITIONER)
 										? 'Practitioner dashboard'
 										: 'Manager dashboard'
 								}}
 							</DropdownMenuItem>
 							<DropdownMenuItem
-								v-if="user.role.includes(userRoles.BUSINESS)"
+								v-if="user.roles.includes(userRoles.BUSINESS)"
 								class="flex items-center gap-2"
 								@click="navigateTo('/business')"
 							>

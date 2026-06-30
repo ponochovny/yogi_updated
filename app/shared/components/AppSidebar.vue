@@ -1,6 +1,5 @@
 <script setup lang="ts">
 import type { SidebarProps } from '@/shared/ui/sidebar'
-import { useSession } from '@/utils/auth-client'
 
 import NavMenu from './NavMenu.vue'
 import NavUser from './NavUser.vue'
@@ -13,31 +12,12 @@ import {
 	SidebarMenuButton,
 	SidebarMenuItem,
 } from '@/shared/ui/sidebar'
-import { placeholderImageUrl } from '~/config/constants.js'
-import { userRoles } from '~~/server/auth/config.js'
 
 const props = withDefaults(defineProps<SidebarProps>(), {
 	variant: 'inset',
 })
 
-const session = useSession()
-
-const workspaceRoles =
-	// @ts-expect-error: role is an array in the session, but we want to display a single role in the NavUser component. We can take the first role from the array for display purposes.
-	session.value?.data?.user?.workspaces?.map((el) => el.role) ?? []
-
-// TODO: prevent flickery when session gets updated
-const userData = computed(() => ({
-	name: session.value?.data?.user?.name || 'John Doe',
-	email: session.value?.data?.user?.email || 'john@example.com',
-	avatar:
-		session.value?.data?.user?.image?.replace(
-			'/upload/',
-			'/upload/w_100,h_100,c_thumb,g_custom/',
-		) || placeholderImageUrl,
-
-	role: workspaceRoles ?? [userRoles.USER],
-}))
+const { userData, session } = useUserData()
 
 const sidebarProps = inject('sidebarProps', [
 	{
@@ -84,7 +64,11 @@ const sidebarProps = inject('sidebarProps', [
 		</SidebarContent>
 		<SidebarFooter>
 			<ClientOnly>
-				<NavUser :user="userData" />
+				<NavUser
+					:user="userData"
+					:class="{ 'opacity-70': session.isPending }"
+					class="transition-opacity"
+				/>
 			</ClientOnly>
 		</SidebarFooter>
 	</Sidebar>

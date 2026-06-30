@@ -205,12 +205,14 @@ const handleSignOut = async () => {
 					{{ errorMsg }}
 				</p>
 			</form>
-			<NuxtLink
-				to="/reset-password"
-				class="mt-4 block text-center text-sm text-gray-400 hover:underline"
-			>
-				Reset password
-			</NuxtLink>
+			<div class="mt-4 text-center">
+				<NuxtLink
+					to="/reset-password"
+					class="text-sm text-gray-400 hover:underline"
+				>
+					Reset password
+				</NuxtLink>
+			</div>
 		</div>
 	</div>
 </template>

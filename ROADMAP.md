@@ -1,6 +1,15 @@
 ## Release notes
 
-### 06.05.2026 - v0.0.1-alpha
+### Jun 20 2026 - v0.0.2-alpha
+
+- Offering creation
+- Slots creation with generator
+- Booking cancel
+- Booking status change by manager/practitioner (attended/no show)
+- Public with studios & offerings
+- Public offering page with slots for booking
+
+### Jun 05 2026 - v0.0.1-alpha
 
 - Authentication
 - User Roles
@@ -34,7 +43,7 @@
 - ✅ UI, Layout
 - ✅ Profile settings
 - [ ] Email verification
-- [ ] Reset password
+- ✅ Reset password
 - [ ] Google Authentication
 
 ### Main Dashboard
@@ -47,14 +56,14 @@
 
 - ✅ Studio creation
 - [ ] Studio edit
-- [ ] Studio offerings
+- ✅ Studio offerings
 - [ ] Studio memberships
 - [ ] Studio causes
 - [ ] Studio promocodes
 
 ### Practitioner
 
-- [ ] Practitioner creation
+- ✅ Practitioner creation
 
 ### Offerings
 
@@ -83,5 +92,6 @@
 - ✅ Bookings table & migrations
 - ✅ Booking API endpoint
 - ✅ User bookings profile page
+- ✅ Cancel booking
 - [ ] Allow cancel but not in last hour
 - [ ] Cancel booking with refund

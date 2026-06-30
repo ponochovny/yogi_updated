@@ -11,7 +11,7 @@ const studios = computed(() => studiosData.value?.studios)
 			<div class="animate-spin rounded-full h-8 w-8 border-b-2 border-white" />
 		</div>
 		<div
-			v-else-if="studios?.length === 0"
+			v-else-if="!pending && !studios?.length"
 			class="size-full rounded-4xl bg-white/10 flex items-center justify-center p-24 flex-col gap-4 text-center"
 		>
 			<h2 class="text-4xl">Create your studio</h2>
@@ -26,7 +26,7 @@ const studios = computed(() => studiosData.value?.studios)
 				</NuxtLink>
 			</Button>
 		</div>
-		<div v-else>
+		<div v-else-if="studios?.length">
 			<div class="grid grid-cols-1 gap-6">
 				<NuxtLink
 					v-for="studio in studios"

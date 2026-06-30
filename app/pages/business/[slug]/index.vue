@@ -13,27 +13,21 @@ definePageMeta({
 	],
 })
 
-const route = useRoute()
-const session = useSession()
-
-const roles = computed(() => {
-	// @ts-expect-error: workspaces field
-	const workspaces = session.value?.data?.user.workspaces ?? []
-	const { getRolesInStudio } = useWorkspaces(workspaces)
-	return getRolesInStudio(route.params.slug as string)
-})
+const { userData } = useUserData()
 </script>
 
 <template>
 	<div>
-		<StudioOwnerDashboard v-if="roles?.includes(userRoles.BUSINESS)" />
+		<StudioOwnerDashboard v-if="userData.roles?.includes(userRoles.BUSINESS)" />
 
-		<StudioManagerDashboard v-if="roles?.includes(userRoles.MANAGER)" />
-
-		<StudioPractitionerDashboard
-			v-if="roles?.includes(userRoles.PRACTITIONER)"
+		<StudioManagerDashboard
+			v-if="userData.roles?.includes(userRoles.MANAGER)"
 		/>
 
-		<StudioPartnerOnboarding v-if="!roles?.length" />
+		<StudioPractitionerDashboard
+			v-if="userData.roles?.includes(userRoles.PRACTITIONER)"
+		/>
+
+		<StudioPartnerOnboarding v-if="!userData.roles?.length" />
 	</div>
 </template>
