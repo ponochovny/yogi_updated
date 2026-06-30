@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { XIcon } from '@lucide/vue'
 import { toTypedSchema } from '@vee-validate/zod'
-import { useForm } from 'vee-validate'
+import { useFieldArray, useForm } from 'vee-validate'
 import { toast } from 'vue-sonner'
 import { placeholderImageUrl } from '~/config/constants'
 import {
@@ -57,8 +57,18 @@ const {
 		duration: 60,
 		capacity: 20 as number,
 		practitionerIds: [],
+		tickets: [
+			{
+				name: '',
+				description: '',
+				price: 0,
+			},
+		],
 	},
 })
+
+const { fields, push, remove } = useFieldArray('tickets')
+
 const errorMsg = ref('')
 const isProcessing = ref(false)
 const submitDisabled = computed(
@@ -297,6 +307,96 @@ const removeFromGallery = (index: number) => {
 						</FormItem>
 					</FormField>
 
+					<div class="flex flex-col gap-4 col-span-2">
+						<div class="mb-2">
+							<label
+								class="text-base font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+								>Tickets (drop-in)</label
+							>
+							<p class="text-[0.8rem] text-muted-foreground mt-2">
+								Создайте разовые билеты для этого занятия (например: Стандарт,
+								Студенческий, VIP)
+							</p>
+						</div>
+
+						<div class="flex flex-col gap-3">
+							<div
+								v-for="(field, idx) in fields"
+								:key="field.key"
+								class="flex flex-col gap-3 p-4 border rounded-lg bg-white/5 hover:bg-white/10 relative"
+							>
+								<button
+									v-if="fields.length > 1"
+									type="button"
+									class="absolute top-2 right-2 text-sm text-red-500 hover:text-red-700"
+									@click="remove(idx)"
+								>
+									Удалить
+								</button>
+
+								<div class="grid grid-cols-3 gap-4 mt-2">
+									<FormField
+										v-slot="{ componentField }"
+										:name="`tickets[${idx}].name`"
+									>
+										<FormItem>
+											<FormControl>
+												<Input
+													placeholder="Title"
+													v-bind="componentField"
+													autocomplete="off"
+												/>
+											</FormControl>
+											<FormMessage />
+										</FormItem>
+									</FormField>
+
+									<FormField
+										v-slot="{ componentField }"
+										:name="`tickets[${idx}].description`"
+									>
+										<FormItem>
+											<FormControl>
+												<Input
+													placeholder="Description"
+													v-bind="componentField"
+													autocomplete="off"
+												/>
+											</FormControl>
+											<FormMessage />
+										</FormItem>
+									</FormField>
+
+									<FormField
+										v-slot="{ componentField }"
+										:name="`tickets[${idx}].price`"
+									>
+										<FormItem>
+											<FormControl>
+												<Input
+													placeholder="Price"
+													v-bind="componentField"
+													autocomplete="off"
+													type="number"
+												/>
+											</FormControl>
+											<FormMessage />
+										</FormItem>
+									</FormField>
+								</div>
+							</div>
+						</div>
+
+						<Button
+							type="button"
+							variant="outline"
+							class="w-fit mt-2"
+							@click="push({ name: '', description: '', price: 0 })"
+						>
+							+ Добавить билет
+						</Button>
+					</div>
+
 					<div class="col-span-2">
 						<FormField name="practitionerIds">
 							<FormItem class="flex flex-col gap-2">
@@ -305,6 +405,23 @@ const removeFromGallery = (index: number) => {
 									<FormDescription>
 										Choose at least one practitioner
 									</FormDescription>
+								</div>
+
+								<div v-if="!contextData?.studio.practitioners.length">
+									<p class="text-sm text-muted-foreground">
+										No practitioners found. Please add practitioners to your
+										studio first.
+									</p>
+									<NuxtLink :to="`/business/${slug}/members`" as-child>
+										<Button
+											type="button"
+											variant="outline"
+											size="sm"
+											class="mt-2"
+										>
+											Add Practitioners
+										</Button>
+									</NuxtLink>
 								</div>
 
 								<div class="grid grid-cols-3 gap-2">

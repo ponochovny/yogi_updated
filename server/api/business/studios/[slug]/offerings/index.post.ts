@@ -1,4 +1,8 @@
-import { offerings, offeringPractitioners } from '~~/server/db/schema/offering'
+import {
+	offerings,
+	offeringPractitioners,
+	pricingOptions,
+} from '~~/server/db/schema/offering'
 import {
 	studioLocations,
 	studioPractitioners,
@@ -12,6 +16,7 @@ import {
 	mediaFiles,
 	MediaTypeEnum,
 } from '~~/server/db/schema/_other'
+import { priceOptionsType } from '~/entities/membership/schema'
 
 export default defineEventHandler(async (event) => {
 	const userData = await requireAuthenticatedUser(event)
@@ -112,6 +117,20 @@ export default defineEventHandler(async (event) => {
 					}),
 				)
 				await tx.insert(mediaFiles).values(galleryInserts)
+			}
+
+			// 4. Add tickets (drop-in)
+			if (body.tickets && body.tickets.length > 0) {
+				const ticketsInserts = body.tickets.map((ticket) => ({
+					studioId: studio.id,
+					offeringId: newOffering.id,
+					name: ticket.name,
+					price: ticket.price * 100, // Convert to cents
+					description: ticket.description,
+					type: priceOptionsType.DROP_IN,
+					durationDays: 1, // Drop-in tickets are valid for 1 day
+				}))
+				await tx.insert(pricingOptions).values(ticketsInserts)
 			}
 
 			return newOffering

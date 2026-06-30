@@ -52,6 +52,14 @@ export const createOfferingSchema = z.object({
 			}),
 		)
 		.optional(),
+	// type: 'DROP_IN', offeringId: 'id', applicableCategoryIds: null
+	tickets: z.array(
+		z.object({
+			name: z.string().min(1, 'Ticket name is required'),
+			price: z.number().min(0, 'Ticket price must be a positive number'),
+			description: z.string().optional(),
+		}),
+	),
 })
 
 export type CreateOfferingInput = z.infer<typeof createOfferingSchema>
