@@ -31,8 +31,8 @@ export const studios = pgTable('studios', {
 	ownerId: text('owner_id')
 		.notNull()
 		.references(() => user.id, { onDelete: 'cascade' }),
-	categories: text('categories').array(),
-	types: text('types').array(),
+	categories: uuid('categories').array(),
+	types: uuid('types').array(),
 	createdAt: timestamp('created_at').defaultNow().notNull(),
 	updatedAt: timestamp('updated_at').defaultNow().notNull(),
 })

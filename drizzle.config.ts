@@ -8,7 +8,9 @@ export default defineConfig({
 		'./server/db/schema/auth-schema.ts',
 		'./server/db/schema/offering.ts',
 		'./server/db/schema/booking.ts',
+		'./server/db/schema/payment.ts',
 		'./server/db/schema/_other.ts',
+		'./server/db/schema/global.ts',
 	],
 	out: './server/utils/db/migrations',
 	dbCredentials: {

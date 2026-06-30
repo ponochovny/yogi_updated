@@ -28,35 +28,13 @@ useHead({
 	],
 })
 
-const currencies = ['USD', 'EUR']
-const categories = [
-	'Flow Arts',
-	'Yoga',
-	'Meditation',
-	'Breath work',
-	'Aerial',
-	'Energy Reading & Healing',
-	'Dance',
-	'Massage',
-	'Pilates',
-	'Physiotherapy',
-	'Coaching',
-	'Acupuncture',
-	'Psychotherapy',
-	'Sound Healing',
-	'Transformational Tool',
-]
-const types = [
-	'Festival',
-	'Retreat',
-	'Workshop',
-	'Teacher Training',
-	'Course',
-	'Group Class',
-	'Private Session',
-	'Treatment',
-	'Private Party',
-]
+const { data: paramsData } = await useFetch('/api/params', {
+	method: 'GET',
+})
+
+const types = computed(() => paramsData.value?.params.types || [])
+const categories = computed(() => paramsData.value?.params.categories || [])
+const currencies = computed(() => paramsData.value?.params.currencies || [])
 
 const studioSchema = toTypedSchema(createStudioSchema)
 
@@ -79,7 +57,7 @@ const {
 				timezone: guessUserTimezone(),
 			},
 		],
-		currency: currencies[0],
+		currency: paramsData.value?.params.currencies[0]?.id || '',
 		bio: '',
 		mission: '',
 		categories: [],
@@ -365,10 +343,10 @@ const removeFromGallery = (index: number) => {
 										<SelectLabel>Currencies</SelectLabel>
 										<SelectItem
 											v-for="currency in currencies"
-											:key="currency"
-											:value="currency"
+											:key="currency.id"
+											:value="currency.id"
 										>
-											{{ currency }}
+											{{ currency.name }}
 										</SelectItem>
 									</SelectGroup>
 								</SelectContent>
@@ -390,10 +368,10 @@ const removeFromGallery = (index: number) => {
 										<SelectLabel>Categories</SelectLabel>
 										<SelectItem
 											v-for="cat in categories"
-											:key="cat"
-											:value="cat"
+											:key="cat.id"
+											:value="cat.id"
 										>
-											{{ cat }}
+											{{ cat.name }}
 										</SelectItem>
 									</SelectGroup>
 								</SelectContent>
@@ -413,8 +391,12 @@ const removeFromGallery = (index: number) => {
 								<SelectContent position="item-aligned">
 									<SelectGroup>
 										<SelectLabel>Types</SelectLabel>
-										<SelectItem v-for="type in types" :key="type" :value="type">
-											{{ type }}
+										<SelectItem
+											v-for="type in types"
+											:key="type.id"
+											:value="type.id"
+										>
+											{{ type.name }}
 										</SelectItem>
 									</SelectGroup>
 								</SelectContent>

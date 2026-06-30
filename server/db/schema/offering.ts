@@ -37,28 +37,18 @@ export const activityTypeEnum = pgEnum('activity_type', [
 	ActivityType.EVENT,
 ])
 
-export const offeringCategories = pgTable('offering_categories', {
-	id: uuid('id').defaultRandom().primaryKey(),
-	studioId: uuid('studio_id')
-		.notNull()
-		.references(() => studios.id, { onDelete: 'cascade' }),
-	name: varchar('name').notNull(), // Example: "Yoga", "Pilates", "Massage"
-	color: varchar('color').default('#000000'), // For a beautiful UI in the calendar
-})
-
 export const offerings = pgTable('offerings', {
 	id: uuid('id').defaultRandom().primaryKey(),
 	slug: varchar('slug').notNull().unique(),
 	studioId: uuid('studio_id')
 		.notNull()
 		.references(() => studios.id, { onDelete: 'cascade' }),
-	categoryId: uuid('category_id').references(() => offeringCategories.id, {
-		onDelete: 'set null',
-	}),
 
 	name: varchar('name').notNull(),
 	description: text('description'),
 	gallery: text('gallery').array().default([]),
+	categories: uuid('categories').array(),
+	types: uuid('types').array(),
 
 	activityType: activityTypeEnum('activity_type').default('CLASS').notNull(),
 	isPrivate: boolean('is_private').default(false).notNull(),
@@ -96,11 +86,12 @@ export const pricingOptions = pgTable('pricing_options', {
 		.notNull()
 		.references(() => studios.id, { onDelete: 'cascade' }),
 
-	// If null, this membership/ticket applies to ALL offerings in the studio.
-	// If specified, it only applies to a specific category (e.g., only "Yoga")
-	categoryId: uuid('category_id').references(() => offeringCategories.id, {
-		onDelete: 'set null',
+	// Specific offering this pricing option is linked to. If null, it applies to all offerings in the studio.
+	offeringId: uuid('offering_id').references(() => offerings.id, {
+		onDelete: 'cascade',
 	}),
+
+	applicableCategoryIds: uuid('applicable_category_ids').array(),
 
 	name: varchar('name').notNull(), // "Single Visit", "10-Class Package", "Unlimited Monthly"
 	description: text('description'),
@@ -121,20 +112,12 @@ export const offeringsRelations = relations(offerings, ({ one }) => ({
 		fields: [offerings.studioId],
 		references: [studios.id],
 	}),
-	category: one(offeringCategories, {
-		fields: [offerings.categoryId],
-		references: [offeringCategories.id],
-	}),
 }))
 
 export const pricingOptionsRelations = relations(pricingOptions, ({ one }) => ({
 	studio: one(studios, {
 		fields: [pricingOptions.studioId],
 		references: [studios.id],
-	}),
-	category: one(offeringCategories, {
-		fields: [pricingOptions.categoryId],
-		references: [offeringCategories.id],
 	}),
 }))
 

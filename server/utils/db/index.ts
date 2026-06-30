@@ -5,6 +5,8 @@ import * as authSchema from '~~/server/db/schema/auth-schema'
 import * as studio from '~~/server/db/schema/studio'
 import * as offering from '~~/server/db/schema/offering'
 import * as booking from '~~/server/db/schema/booking'
+import * as payment from '~~/server/db/schema/payment'
+import * as globalSchema from '~~/server/db/schema/global'
 
 import ws from 'ws'
 
@@ -13,6 +15,8 @@ const schema = {
 	...authSchema,
 	...offering,
 	...booking,
+	...payment,
+	...globalSchema,
 	..._other,
 }
 

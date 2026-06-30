@@ -18,6 +18,7 @@
     "db:generate": "drizzle-kit generate",
     "db:migrate": "drizzle-kit migrate",
     "db:push": "drizzle-kit push",
+    "db:seed": "tsx server/db/seed.ts",
     "build": "nuxt build && npm run db:migrate",
     "db:auth:generate": "npx auth@latest generate --config server/utils/auth/index.ts --output server/db/schema/auth-schema.ts"
   },
