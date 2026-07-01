@@ -137,8 +137,7 @@ export const useBusinessMenu = () => {
 		// }
 
 		const workspaceRoles =
-			(user.value?.workspaces as { role: UserRole }[])?.map((el) => el.role) ??
-			[]
+			(user.value?.workspaces as IWorkSpace[])?.map((el) => el.role) ?? []
 		const uRoles = (user.value?.role as UserRole[]) ?? []
 
 		const roles = [...new Set([...workspaceRoles, ...uRoles])]
@@ -161,10 +160,24 @@ export const useBusinessMenu = () => {
 				),
 			}
 		}
+		const filteredMenuByStudioSlug = () => {
+			const studioSlug = slug.value
+
+			const workspace = (user.value?.workspaces as IWorkSpace[]).find(
+				(w) => w.studio.slug === studioSlug,
+			)
+			const isSuperAdmin = uRoles.includes(userRoles.SUPER_ADMIN)
+
+			if (workspace || isSuperAdmin) {
+				return [filteredMenu(studioMenu.value)]
+			}
+
+			return [filteredMenu(businessMenu.value)]
+		}
 
 		if (!slug.value) return [filteredMenu(businessMenu.value)]
 
-		return [filteredMenu(studioMenu.value)]
+		return filteredMenuByStudioSlug()
 	})
 
 	return { visibleMenu }

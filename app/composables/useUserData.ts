@@ -1,8 +1,8 @@
 import { placeholderImageUrl } from '~/config/constants'
-import type { UserRole, userRoles } from '~~/server/auth/config'
+import type { UserRole } from '~~/server/auth/config'
 
 export interface IWorkSpace {
-	role: (typeof userRoles)[keyof typeof userRoles]
+	role: UserRole
 	studio: {
 		id: string
 		slug: string
