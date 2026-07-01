@@ -1,24 +1,24 @@
 export const PagesConfig = {
-	HOME: '/',
+  HOME: '/',
 
-	LOGIN: '/login',
-	REGISTER: '/register',
-	RESET_PASSWORD: '/reset-password',
+  LOGIN: '/login',
+  REGISTER: '/register',
+  RESET_PASSWORD: '/reset-password',
 
-	SEARCH: '/search',
+  SEARCH: '/search',
 
-	PROFILE_SETTINGS: '/profile/settings',
-	PROFILE_BOOKINGS: '/profile/bookings',
+  PROFILE_SETTINGS: '/profile/settings',
+  PROFILE_BOOKINGS: '/profile/bookings',
 
-	BUSINESS: '/business',
-	BUSINESS_CALENDAR: '/business/calendar',
+  BUSINESS: '/business',
+  BUSINESS_CALENDAR: '/business/calendar',
 
-	CAUSES: '/causes',
+  CAUSES: '/causes',
 
-	CHECKOUT: '/checkout',
-	CHECKOUT_SUCCESS: '/checkout/success',
-	CHECKOUT_CANCEL: '/checkout/cancel',
+  CHECKOUT: '/checkout',
+  CHECKOUT_SUCCESS: '/checkout/success',
+  CHECKOUT_CANCEL: '/checkout/cancel',
 
-	MEMBERSHIP_PROMO: '/membership-promo',
-	TERMS_OF_SERVICE: '/terms-of-service',
+  MEMBERSHIP_PROMO: '/membership-promo',
+  TERMS_OF_SERVICE: '/terms-of-service'
 } as const

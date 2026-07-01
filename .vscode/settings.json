@@ -1,6 +1,4 @@
 {
-	"prisma.pinToPrisma6": true,
-	"cSpell.words": [
-		"promocodes"
-	]
+  "prisma.pinToPrisma6": true,
+  "cSpell.words": ["promocodes"]
 }

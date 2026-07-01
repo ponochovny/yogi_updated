@@ -6,28 +6,28 @@ import StudioPractitionerDashboard from './_components/StudioPractitionerDashboa
 import StudioPartnerOnboarding from './_components/StudioPartnerOnboarding.vue'
 
 definePageMeta({
-	title: 'Business Overview',
-	breadcrumbs: [
-		{ name: 'Businesses', url: '/business' },
-		{ name: 'Business Overview' },
-	],
+  title: 'Business Overview',
+  breadcrumbs: [
+    { name: 'Businesses', url: '/business' },
+    { name: 'Business Overview' }
+  ]
 })
 
 const { userData } = useUserData()
 </script>
 
 <template>
-	<div>
-		<StudioOwnerDashboard v-if="userData.roles?.includes(userRoles.BUSINESS)" />
+  <div>
+    <StudioOwnerDashboard v-if="userData.roles?.includes(userRoles.BUSINESS)" />
 
-		<StudioManagerDashboard
-			v-if="userData.roles?.includes(userRoles.MANAGER)"
-		/>
+    <StudioManagerDashboard
+      v-if="userData.roles?.includes(userRoles.MANAGER)"
+    />
 
-		<StudioPractitionerDashboard
-			v-if="userData.roles?.includes(userRoles.PRACTITIONER)"
-		/>
+    <StudioPractitionerDashboard
+      v-if="userData.roles?.includes(userRoles.PRACTITIONER)"
+    />
 
-		<StudioPartnerOnboarding v-if="!userData.roles?.length" />
-	</div>
+    <StudioPartnerOnboarding v-if="!userData.roles?.length" />
+  </div>
 </template>

@@ -2,7 +2,7 @@
 
 ## Get user role
 
-``` TS
+```TS
 // server/utils/auth/index.ts
 import { useDb } from '../db'
 

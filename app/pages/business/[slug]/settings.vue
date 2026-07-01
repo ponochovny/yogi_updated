@@ -1,9 +1,9 @@
 <script lang="ts" setup>
 useHead({
-	title: 'Studio Settings',
+  title: 'Studio Settings'
 })
 </script>
 
 <template>
-	<div>Business settings</div>
+  <div>Business settings</div>
 </template>

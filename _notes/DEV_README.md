@@ -18,7 +18,6 @@
 
 ### Production & Deployment
 
-
 `npx nuxi build`: Compile and generate a standalone server package in the .output directory.
 
 `npx nuxi generate`: Pre-render your entire application into static HTML and payload files.

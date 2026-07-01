@@ -2,35 +2,35 @@
 import type { LucideIcon } from '@lucide/vue'
 
 import {
-	SidebarGroup,
-	SidebarGroupContent,
-	SidebarMenu,
-	SidebarMenuButton,
-	SidebarMenuItem,
+  SidebarGroup,
+  SidebarGroupContent,
+  SidebarMenu,
+  SidebarMenuButton,
+  SidebarMenuItem
 } from '@/shared/ui/sidebar'
 
 defineProps<{
-	items: {
-		title: string
-		url: string
-		icon: LucideIcon
-	}[]
+  items: {
+    title: string
+    url: string
+    icon: LucideIcon
+  }[]
 }>()
 </script>
 
 <template>
-	<SidebarGroup>
-		<SidebarGroupContent>
-			<SidebarMenu>
-				<SidebarMenuItem v-for="item in items" :key="item.title">
-					<SidebarMenuButton as-child size="sm">
-						<NuxtLink :to="item.url">
-							<component :is="item.icon" />
-							<span>{{ item.title }}</span>
-						</NuxtLink>
-					</SidebarMenuButton>
-				</SidebarMenuItem>
-			</SidebarMenu>
-		</SidebarGroupContent>
-	</SidebarGroup>
+  <SidebarGroup>
+    <SidebarGroupContent>
+      <SidebarMenu>
+        <SidebarMenuItem v-for="item in items" :key="item.title">
+          <SidebarMenuButton as-child size="sm">
+            <NuxtLink :to="item.url">
+              <component :is="item.icon" />
+              <span>{{ item.title }}</span>
+            </NuxtLink>
+          </SidebarMenuButton>
+        </SidebarMenuItem>
+      </SidebarMenu>
+    </SidebarGroupContent>
+  </SidebarGroup>
 </template>

@@ -4,72 +4,72 @@ import { Avatar, AvatarFallback, AvatarImage } from '~/shared/ui/avatar'
 import type { OfferingItem } from '../schema'
 
 defineProps<{
-	offering: OfferingItem
+  offering: OfferingItem
 }>()
 </script>
 
 <template>
-	<div
-		class="relative flex flex-col rounded-3xl border border-muted bg-popover hover:shadow-orange-600/30 hover:shadow-xl hover:border-orange-600/20 transition-all duration-300"
-	>
-		<div>
-			<NuxtImg
-				:src="offering.gallery?.[0] || placeholderImageUrl"
-				alt="Image"
-				class="aspect-video h-full w-full rounded-t-3xl object-cover"
-			/>
-		</div>
-		<div class="flex flex-1 flex-col p-4 items-start">
-			<NuxtLink :to="`/offerings/${offering.slug}`" class="hover:underline">
-				<h3 class="text-lg font-bold">{{ offering.name }}</h3>
-			</NuxtLink>
-			<span
-				class="absolute top-3 left-3 bg-white/90 backdrop-blur-sm px-2 py-1 rounded-md text-xs font-semibold uppercase tracking-wider text-gray-700"
-			>
-				{{ offering.activityType }}
-			</span>
-			<p class="flex-1 text-muted-foreground line-clamp-3">
-				{{ offering.description }}
-			</p>
-			<div
-				class="pt-4 flex items-center justify-between text-xs text-muted-foreground"
-			>
-				<div class="flex items-center gap-1">
-					<span>⏱️ {{ offering.duration }} min</span>
-					<span v-if="offering.capacity"
-						>• 👥 up to {{ offering.capacity }} spots</span
-					>
-					<span
-						v-if="!offering.location?.name"
-						class="font-medium text-muted-foreground"
-					>
-						🌐 Online
-					</span>
-					<span v-else-if="offering.location?.city">
-						• {{ offering.location.city + ', ' + offering.location.country }}
-					</span>
-				</div>
-			</div>
-			<NuxtLink
-				:to="`/studios/${offering.studio.slug}`"
-				class="mt-2 inline-flex items-center space-x-2 group justify-self-end"
-			>
-				<Avatar>
-					<AvatarImage
-						:src="
-							offering.studio.logo?.replace(
-								'/upload/',
-								'/upload/w_64,h_64,c_fill/',
-							) || placeholderImageUrl
-						"
-						alt="Avatar"
-					/>
-					<AvatarFallback>{{ offering.studio.name[0] }}</AvatarFallback>
-				</Avatar>
-				<span class="text-sm text-muted-foreground group-hover:underline">
-					{{ offering.studio.name }}
-				</span>
-			</NuxtLink>
-		</div>
-	</div>
+  <div
+    class="relative flex flex-col rounded-3xl border border-muted bg-popover hover:shadow-orange-600/30 hover:shadow-xl hover:border-orange-600/20 transition-all duration-300"
+  >
+    <div>
+      <NuxtImg
+        :src="offering.gallery?.[0] || placeholderImageUrl"
+        alt="Image"
+        class="aspect-video h-full w-full rounded-t-3xl object-cover"
+      />
+    </div>
+    <div class="flex flex-1 flex-col p-4 items-start">
+      <NuxtLink :to="`/offerings/${offering.slug}`" class="hover:underline">
+        <h3 class="text-lg font-bold">{{ offering.name }}</h3>
+      </NuxtLink>
+      <span
+        class="absolute top-3 left-3 bg-white/90 backdrop-blur-sm px-2 py-1 rounded-md text-xs font-semibold uppercase tracking-wider text-gray-700"
+      >
+        {{ offering.activityType }}
+      </span>
+      <p class="flex-1 text-muted-foreground line-clamp-3">
+        {{ offering.description }}
+      </p>
+      <div
+        class="pt-4 flex items-center justify-between text-xs text-muted-foreground"
+      >
+        <div class="flex items-center gap-1">
+          <span>⏱️ {{ offering.duration }} min</span>
+          <span v-if="offering.capacity"
+            >• 👥 up to {{ offering.capacity }} spots</span
+          >
+          <span
+            v-if="!offering.location?.name"
+            class="font-medium text-muted-foreground"
+          >
+            🌐 Online
+          </span>
+          <span v-else-if="offering.location?.city">
+            • {{ offering.location.city + ', ' + offering.location.country }}
+          </span>
+        </div>
+      </div>
+      <NuxtLink
+        :to="`/studios/${offering.studio.slug}`"
+        class="mt-2 inline-flex items-center space-x-2 group justify-self-end"
+      >
+        <Avatar>
+          <AvatarImage
+            :src="
+              offering.studio.logo?.replace(
+                '/upload/',
+                '/upload/w_64,h_64,c_fill/'
+              ) || placeholderImageUrl
+            "
+            alt="Avatar"
+          />
+          <AvatarFallback>{{ offering.studio.name[0] }}</AvatarFallback>
+        </Avatar>
+        <span class="text-sm text-muted-foreground group-hover:underline">
+          {{ offering.studio.name }}
+        </span>
+      </NuxtLink>
+    </div>
+  </div>
 </template>

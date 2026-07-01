@@ -3,7 +3,7 @@ import Auth from '~/widgets/auth.vue'
 </script>
 
 <template>
-	<div class="max-w-md mx-auto">
-		<Auth mode="sign-up" />
-	</div>
+  <div class="max-w-md mx-auto">
+    <Auth mode="sign-up" />
+  </div>
 </template>

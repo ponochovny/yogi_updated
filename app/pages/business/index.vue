@@ -4,23 +4,23 @@ import MemberChooseBusiness from './_components/MemberChooseBusiness.vue'
 import BusinessOwnerStudiosList from './_components/BusinessOwnerStudiosList.vue'
 
 definePageMeta({
-	title: 'Main Dashboard',
-	breadcrumbs: [{ name: 'Main Dashboard', url: '/business' }],
+  title: 'Main Dashboard',
+  breadcrumbs: [{ name: 'Main Dashboard', url: '/business' }]
 })
 
 const { userData } = useUserData()
 
 useHead({
-	title: 'Main Dashboard',
+  title: 'Main Dashboard'
 })
 </script>
 
 <template>
-	<div>
-		<BusinessOwnerStudiosList
-			v-if="userData.roles.includes(userRoles.BUSINESS)"
-		/>
+  <div>
+    <BusinessOwnerStudiosList
+      v-if="userData.roles.includes(userRoles.BUSINESS)"
+    />
 
-		<MemberChooseBusiness v-else />
-	</div>
+    <MemberChooseBusiness v-else />
+  </div>
 </template>

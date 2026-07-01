@@ -1,33 +1,33 @@
 <script lang="ts" setup>
-import { format } from "date-fns";
-import { toast } from "vue-sonner";
+import { format } from 'date-fns'
+import { toast } from 'vue-sonner'
 
-const route = useRoute();
-const slug = computed(() => route.params.slug as string);
-const slotId = computed(() => route.params.slotId as string);
+const route = useRoute()
+const slug = computed(() => route.params.slug as string)
+const slotId = computed(() => route.params.slotId as string)
 
 const { data: bookings, refresh } = await useFetch(
-  `/api/business/studios/${slug.value}/slots/${slotId.value}/bookings`,
-);
+  `/api/business/studios/${slug.value}/slots/${slotId.value}/bookings`
+)
 const updateBookingStatus = async (bookingId: string, status: string) => {
   try {
     await $fetch(
       `/api/business/studios/${slug.value}/bookings/${bookingId}/status`,
       {
-        method: "PATCH",
-        body: { status },
-      },
-    );
+        method: 'PATCH',
+        body: { status }
+      }
+    )
 
-    toast.success("Booking status updated!");
+    toast.success('Booking status updated!')
 
-    await refresh();
+    await refresh()
   } catch (error) {
-    toast.error("Failed to update booking status", {
-      description: (error as Error).message || "Unknown error.",
-    });
+    toast.error('Failed to update booking status', {
+      description: (error as Error).message || 'Unknown error.'
+    })
   }
-};
+}
 </script>
 
 <template>
@@ -43,7 +43,7 @@ const updateBookingStatus = async (bookingId: string, status: string) => {
             'bg-rose-600/5 hover:bg-rose-600/10!':
               booking.status === 'CANCELLED',
             'bg-blue-400/10 hover:bg-blue-400/20!':
-              booking.status === 'ATTENDED',
+              booking.status === 'ATTENDED'
           }"
         >
           <div class="flex flex-col gap-1">
@@ -59,24 +59,24 @@ const updateBookingStatus = async (bookingId: string, status: string) => {
                     booking.status !== 'CANCELLED',
                   'bg-rose-500/20 text-rose-700':
                     booking.status === 'CANCELLED',
-                  'bg-blue-400': booking.status === 'ATTENDED',
+                  'bg-blue-400': booking.status === 'ATTENDED'
                 }"
               >
                 {{
-                  booking.status === "CANCELLED"
-                    ? "Cancelled"
-                    : booking.status !== "ATTENDED" &&
-                        booking.status !== "NO_SHOW"
-                      ? "No status"
-                      : booking.status === "ATTENDED"
-                        ? "Attended"
-                        : "No Show"
+                  booking.status === 'CANCELLED'
+                    ? 'Cancelled'
+                    : booking.status !== 'ATTENDED' &&
+                        booking.status !== 'NO_SHOW'
+                      ? 'No status'
+                      : booking.status === 'ATTENDED'
+                        ? 'Attended'
+                        : 'No Show'
                 }}
               </Badge>
             </div>
             <p class="text-xs text-gray-500">
               Booked at:
-              {{ format(new Date(booking.createdAt), "MMM dd, yyyy HH:mm") }}
+              {{ format(new Date(booking.createdAt), 'MMM dd, yyyy HH:mm') }}
             </p>
           </div>
           <div v-if="booking.status !== 'CANCELLED'" class="space-x-2">

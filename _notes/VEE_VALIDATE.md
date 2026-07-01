@@ -1,6 +1,6 @@
 ## Vee Validate - Boilerplate
 
-``` TS
+```TS
 // export type CreateStudioInput = z.infer<typeof createStudioSchema>
 import {
 	type CreateStudioInput,
@@ -62,7 +62,7 @@ const submitHandler = handleSubmit(createStudio)
 // })
 ```
 
-``` VUE
+```VUE
 <template>
 	<form class="space-y-4" @submit.prevent="submitHandler">
 		<!-- SINGLE -->
@@ -119,7 +119,7 @@ const submitHandler = handleSubmit(createStudio)
 							: 'Create Studio'
 			}}
 		</Button>
-		
+
 		<p v-if="errorMsg" class="mt-4 text-sm text-destructive">
 			{{ errorMsg }}
 		</p>

@@ -11,13 +11,13 @@ import * as globalSchema from '~~/server/db/schema/global'
 import ws from 'ws'
 
 const schema = {
-	...studio,
-	...authSchema,
-	...offering,
-	...booking,
-	...payment,
-	...globalSchema,
-	..._other,
+  ...studio,
+  ...authSchema,
+  ...offering,
+  ...booking,
+  ...payment,
+  ...globalSchema,
+  ..._other
 }
 
 let dbInstance: ReturnType<typeof drizzle<typeof schema>> | null = null
@@ -25,10 +25,10 @@ let dbInstance: ReturnType<typeof drizzle<typeof schema>> | null = null
 neonConfig.webSocketConstructor = ws
 
 export function useDb() {
-	if (!dbInstance) {
-		const pool = new Pool({ connectionString: process.env.DATABASE_URL })
+  if (!dbInstance) {
+    const pool = new Pool({ connectionString: process.env.DATABASE_URL })
 
-		dbInstance = drizzle(pool, { schema })
-	}
-	return dbInstance
+    dbInstance = drizzle(pool, { schema })
+  }
+  return dbInstance
 }

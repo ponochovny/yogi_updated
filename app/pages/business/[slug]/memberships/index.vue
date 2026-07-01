@@ -2,23 +2,23 @@
 import MembershipCreationForm from './_components/MembershipCreationForm.vue'
 
 definePageMeta({
-	title: 'Business Memberships',
-	breadcrumbs: [
-		{ name: 'Businesses', url: '/business' },
-		{ name: 'Memberships' },
-	],
+  title: 'Business Memberships',
+  breadcrumbs: [
+    { name: 'Businesses', url: '/business' },
+    { name: 'Memberships' }
+  ]
 })
 useHead({
-	title: 'Business Memberships',
+  title: 'Business Memberships'
 })
 
 const route = useRoute()
 const studioSlug = computed(() => route.params.slug as string)
 
 const {
-	data: membershipsData,
-	pending,
-	// error,
+  data: membershipsData,
+  pending
+  // error,
 } = await useFetch(`/api/business/studios/${studioSlug.value}/memberships`)
 
 // GET MEMBERSHIPS LIST FOR BUSINESS
@@ -81,53 +81,53 @@ const {
 </script>
 
 <template>
-	<div>
-		<h2 class="text-lg font-semibold">Memberships</h2>
-		<p class="text-sm text-muted-foreground">
-			Manage your studio's memberships and offerings.
-		</p>
-		<div v-if="pending" class="flex justify-center py-20">
-			<div class="animate-spin rounded-full h-8 w-8 border-b-2 border-white" />
-		</div>
-		<div class="flex flex-col space-y-2 mt-6">
-			<div
-				v-for="membership in membershipsData?.memberships"
-				:key="membership.id"
-				class="flex items-center justify-between rounded-lg border p-4"
-			>
-				<div class="flex justify-between items-center w-full gap-4">
-					<div>
-						<h3 class="text-md font-medium">{{ membership.name }}</h3>
-						<p class="text-sm text-muted-foreground">
-							{{ membership.description }}
-						</p>
-					</div>
-					<div>
-						<p class="text-sm font-medium">
-							Price: ${{ (Number(membership.price) / 100).toFixed(2) }}
-						</p>
-						<p class="text-sm text-muted-foreground">
-							Credits: {{ membership.credits ?? 'Unlimited' }}
-						</p>
-						<p class="text-sm text-muted-foreground">
-							Duration: {{ membership.durationDays }} days
-						</p>
-						<p class="text-sm text-muted-foreground">
-							Expires
-							<NuxtTime
-								:datetime="
-									new Date(membership.createdAt).setDate(
-										new Date(membership.createdAt).getDate() +
-											membership.durationDays,
-									)
-								"
-								relative
-							/>
-						</p>
-					</div>
-				</div>
-			</div>
-		</div>
-		<MembershipCreationForm :studio-slug="studioSlug" class="mt-6" />
-	</div>
+  <div>
+    <h2 class="text-lg font-semibold">Memberships</h2>
+    <p class="text-sm text-muted-foreground">
+      Manage your studio's memberships and offerings.
+    </p>
+    <div v-if="pending" class="flex justify-center py-20">
+      <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-white" />
+    </div>
+    <div class="flex flex-col space-y-2 mt-6">
+      <div
+        v-for="membership in membershipsData?.memberships"
+        :key="membership.id"
+        class="flex items-center justify-between rounded-lg border p-4"
+      >
+        <div class="flex justify-between items-center w-full gap-4">
+          <div>
+            <h3 class="text-md font-medium">{{ membership.name }}</h3>
+            <p class="text-sm text-muted-foreground">
+              {{ membership.description }}
+            </p>
+          </div>
+          <div>
+            <p class="text-sm font-medium">
+              Price: ${{ (Number(membership.price) / 100).toFixed(2) }}
+            </p>
+            <p class="text-sm text-muted-foreground">
+              Credits: {{ membership.credits ?? 'Unlimited' }}
+            </p>
+            <p class="text-sm text-muted-foreground">
+              Duration: {{ membership.durationDays }} days
+            </p>
+            <p class="text-sm text-muted-foreground">
+              Expires
+              <NuxtTime
+                :datetime="
+                  new Date(membership.createdAt).setDate(
+                    new Date(membership.createdAt).getDate() +
+                      membership.durationDays
+                  )
+                "
+                relative
+              />
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+    <MembershipCreationForm :studio-slug="studioSlug" class="mt-6" />
+  </div>
 </template>
