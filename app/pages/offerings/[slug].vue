@@ -90,7 +90,7 @@ const bookSlot = async (slot: { id: string }) => {
 								<div class="font-semibold">
 									{{ format(new Date(slot.startTime), 'HH:mm') }}
 								</div>
-								<div class="text-xs text-gray-300">
+								<div class="text-xs text-muted-foreground">
 									Coach: {{ slot.practitioner.name }}
 								</div>
 							</div>

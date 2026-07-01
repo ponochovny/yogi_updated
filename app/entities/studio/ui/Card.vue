@@ -27,7 +27,7 @@ defineProps<{
 			</p>
 			<p
 				v-if="studio.locations && studio.locations[0]"
-				class="mt-2 flex-1 truncate text-xs text-gray-300 max-w-full"
+				class="mt-2 flex-1 truncate text-xs text-muted-foreground max-w-full"
 			>
 				{{ studio.locations[0].address }}, {{ studio.locations[0].city }},
 				{{ studio.locations[0].country }}

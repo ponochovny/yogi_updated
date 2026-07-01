@@ -15,7 +15,7 @@ const studios = computed(() => studiosData.value?.studios)
 			class="size-full rounded-4xl bg-white/10 flex items-center justify-center p-24 flex-col gap-4 text-center"
 		>
 			<h2 class="text-4xl">Create your studio</h2>
-			<p class="text-gray-300 max-w-xl mx-auto mb-6">
+			<p class="text-muted-foreground max-w-xl mx-auto mb-6">
 				Create your first studio to start add offerings, practitioners and
 				schedules
 			</p>
@@ -55,7 +55,7 @@ const studios = computed(() => studiosData.value?.studios)
 							<h3 class="text-lg font-bold truncate">
 								{{ studio.name }}
 							</h3>
-							<p class="text-sm text-gray-300 truncate mt-0.5">
+							<p class="text-sm text-muted-foreground truncate mt-0.5">
 								{{ studio.categories?.join(', ') || 'No categories' }}
 							</p>
 						</div>
@@ -64,7 +64,7 @@ const studios = computed(() => studiosData.value?.studios)
 					<div class="grid grid-cols-2 gap-4 pt-4 border-t border-gray-500">
 						<div>
 							<p
-								class="text-xs text-gray-300 font-medium uppercase tracking-wider mb-1"
+								class="text-xs text-muted-foreground font-medium uppercase tracking-wider mb-1"
 							>
 								Locations
 							</p>
@@ -74,7 +74,7 @@ const studios = computed(() => studiosData.value?.studios)
 						</div>
 						<div>
 							<p
-								class="text-xs text-gray-300 font-medium uppercase tracking-wider mb-1"
+								class="text-xs text-muted-foreground font-medium uppercase tracking-wider mb-1"
 							>
 								Currency
 							</p>

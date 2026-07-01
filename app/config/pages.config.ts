@@ -13,6 +13,8 @@ export const PagesConfig = {
 	BUSINESS: '/business',
 	BUSINESS_CALENDAR: '/business/calendar',
 
+	CAUSES: '/causes',
+
 	CHECKOUT: '/checkout',
 	CHECKOUT_SUCCESS: '/checkout/success',
 	CHECKOUT_CANCEL: '/checkout/cancel',

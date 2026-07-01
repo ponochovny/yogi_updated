@@ -35,7 +35,7 @@ useHead({
 					<h2 class="text-lg font-semibold mb-2 flex items-center gap-2">
 						<StickyNotesIcon class="size-5" /> Offerings
 					</h2>
-					<p class="text-sm text-gray-300 mb-4">
+					<p class="text-sm text-muted-foreground mb-4">
 						Create group classes, personal training sessions, or online courses.
 					</p>
 				</div>
@@ -52,7 +52,7 @@ useHead({
 					<h2 class="text-lg font-semibold mb-2 flex items-center gap-2">
 						<UsersIcon class="size-5" /> Practitioners
 					</h2>
-					<p class="text-sm text-gray-300 mb-4">
+					<p class="text-sm text-muted-foreground mb-4">
 						Manage the practitioners who lead classes at your locations.
 					</p>
 				</div>
@@ -67,7 +67,7 @@ useHead({
 				<table class="w-full text-left border-collapse">
 					<thead>
 						<tr
-							class="bg-white/10 border-b text-xs font-semibold text-gray-300 uppercase"
+							class="bg-white/10 border-b text-xs font-semibold text-muted-foreground uppercase"
 						>
 							<th class="p-4">Name</th>
 							<th class="p-4">Type</th>

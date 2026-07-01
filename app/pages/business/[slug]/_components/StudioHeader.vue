@@ -24,7 +24,7 @@ defineProps<{
 			/>
 			<div>
 				<h1 class="text-2xl font-bold">{{ studio?.name }}</h1>
-				<p class="text-sm text-gray-300">
+				<p class="text-sm text-muted-foreground">
 					{{ studio?.locations?.length }} locations · {{ studio?.currency }}
 				</p>
 			</div>

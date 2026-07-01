@@ -31,7 +31,9 @@ defineProps<{
 			<p class="flex-1 text-muted-foreground line-clamp-3">
 				{{ offering.description }}
 			</p>
-			<div class="pt-4 flex items-center justify-between text-xs text-gray-300">
+			<div
+				class="pt-4 flex items-center justify-between text-xs text-muted-foreground"
+			>
 				<div class="flex items-center gap-1">
 					<span>⏱️ {{ offering.duration }} min</span>
 					<span v-if="offering.capacity"
@@ -39,7 +41,7 @@ defineProps<{
 					>
 					<span
 						v-if="!offering.location?.name"
-						class="font-medium text-gray-300"
+						class="font-medium text-muted-foreground"
 					>
 						🌐 Online
 					</span>

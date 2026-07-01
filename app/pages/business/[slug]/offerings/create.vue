@@ -141,7 +141,7 @@ const removeFromGallery = (index: number) => {
 			/>
 			<div>
 				<h1 class="text-2xl font-bold">Offering Creation</h1>
-				<p class="text-sm text-gray-300">
+				<p class="text-sm text-muted-foreground">
 					{{ offering?.studio?.name }} · {{ offering?.name }}
 				</p>
 			</div>

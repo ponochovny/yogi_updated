@@ -95,16 +95,22 @@ useHead({
 		</div>
 
 		<div class="bg-white/10 rounded-xl border shadow-sm overflow-hidden">
-			<div v-if="pending" class="p-8 text-center text-gray-300">Loading...</div>
+			<div v-if="pending" class="p-8 text-center text-muted-foreground">
+				Loading...
+			</div>
 
 			<table v-else class="w-full text-left">
 				<thead class="bg-white/10 border-b">
 					<tr>
-						<th class="px-6 py-3 text-sm font-medium text-gray-300">
+						<th class="px-6 py-3 text-sm font-medium text-muted-foreground">
 							Team Member
 						</th>
-						<th class="px-6 py-3 text-sm font-medium text-gray-300">Role</th>
-						<th class="px-6 py-3 text-sm font-medium text-gray-300">Status</th>
+						<th class="px-6 py-3 text-sm font-medium text-muted-foreground">
+							Role
+						</th>
+						<th class="px-6 py-3 text-sm font-medium text-muted-foreground">
+							Status
+						</th>
 					</tr>
 				</thead>
 				<tbody class="divide-y">
@@ -123,7 +129,9 @@ useHead({
 								<div class="font-medium text-gray-200">
 									{{ member.user.name }}
 								</div>
-								<div class="text-sm text-gray-300">{{ member.user.email }}</div>
+								<div class="text-sm text-muted-foreground">
+									{{ member.user.email }}
+								</div>
 							</div>
 						</td>
 						<td class="px-6 py-4 text-sm text-gray-200">
@@ -149,7 +157,7 @@ useHead({
 						</td>
 					</tr>
 					<tr v-if="team.length === 0">
-						<td colspan="3" class="px-6 py-8 text-center text-gray-300">
+						<td colspan="3" class="px-6 py-8 text-center text-muted-foreground">
 							No team members yet
 						</td>
 					</tr>

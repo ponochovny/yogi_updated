@@ -10,7 +10,7 @@ const memberStudios = computed(() => memberStudiosData.value?.studios)
 			class="size-full rounded-4xl bg-white/10 flex items-center justify-center p-24 flex-col gap-4 text-center"
 		>
 			<h2 class="text-4xl">Create your studio</h2>
-			<p class="text-gray-300 max-w-xl mx-auto mb-6">
+			<p class="text-muted-foreground max-w-xl mx-auto mb-6">
 				Create your first studio to start add offerings, practitioners and
 				schedules
 			</p>

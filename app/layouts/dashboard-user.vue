@@ -37,7 +37,7 @@ provide('sidebarProps', sidebarProps)
 <template>
 	<SidebarDashboardLayout>
 		<div
-			class="fixed right-1 bottom-1 border border-gray-500 px-4 py-2 rounded-md bg-white/10 text-sm text-white z-50 opacity-50 pointer-events-none"
+			class="fixed right-1 bottom-1 border border-gray-500 px-4 py-2 rounded-md bg-white/10 text-sm text-muted-foreground z-50 opacity-50 pointer-events-none"
 		>
 			<div>layouts/dashboard-user.vue</div>
 		</div>
