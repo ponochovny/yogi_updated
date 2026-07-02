@@ -13,21 +13,21 @@ definePageMeta({
   ]
 })
 
-const { userData } = useUserData()
+const route = useRoute()
+const { getRolesInStudio } = useUserData()
+const roles = computed(() => getRolesInStudio(route.params.slug as string))
 </script>
 
 <template>
   <div>
-    <StudioOwnerDashboard v-if="userData.roles?.includes(userRoles.BUSINESS)" />
+    <StudioOwnerDashboard v-if="roles?.includes(userRoles.BUSINESS)" />
 
-    <StudioManagerDashboard
-      v-if="userData.roles?.includes(userRoles.MANAGER)"
-    />
+    <StudioManagerDashboard v-if="roles?.includes(userRoles.MANAGER)" />
 
     <StudioPractitionerDashboard
-      v-if="userData.roles?.includes(userRoles.PRACTITIONER)"
+      v-if="roles?.includes(userRoles.PRACTITIONER)"
     />
 
-    <StudioPartnerOnboarding v-if="!userData.roles?.length" />
+    <StudioPartnerOnboarding v-if="!roles?.length" />
   </div>
 </template>

@@ -163,7 +163,7 @@ export const useBusinessMenu = () => {
     const filteredMenuByStudioSlug = () => {
       const studioSlug = slug.value
 
-      const workspace = (user.value?.workspaces as IWorkSpace[]).find(
+      const workspace = (user.value?.workspaces as IWorkSpace[])?.find(
         w => w.studio.slug === studioSlug
       )
       const isSuperAdmin = uRoles.includes(userRoles.SUPER_ADMIN)

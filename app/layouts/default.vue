@@ -20,7 +20,7 @@ const signOutHandler = async () => {
       <div>layouts/default.vue</div>
     </div>
     <div
-      class="fixed left-0 top-0 flex justify-between items-center w-full p-4 z-50 backdrop-blur-sm border-b border-gray-800"
+      class="fixed left-0 top-0 flex justify-between items-center w-full p-4 z-50 backdrop-blur-sm border-b border-border"
     >
       <NuxtLinkLocale to="/" as-child>
         <NuxtImg src="/img/logoBg.svg" width="65" height="65" alt="Nuxt Logo" />

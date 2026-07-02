@@ -28,9 +28,16 @@ useHead({
   ]
 })
 
-const { data: paramsData } = await useFetch('/api/params', {
+const { data: paramsData, error: paramsError } = await useFetch('/api/params', {
   method: 'GET'
 })
+
+if (paramsError.value) {
+  toast.error('Failed to fetch parameters. Please try again.', {
+    description: paramsError.value.message || 'Unknown error.'
+  })
+  navigateTo('/business')
+}
 
 const types = computed(() => paramsData.value?.params.types || [])
 const categories = computed(() => paramsData.value?.params.categories || [])
@@ -70,7 +77,11 @@ const {
 const errorMsg = ref('')
 const isProcessing = ref(false)
 const submitDisabled = computed(
-  () => isProcessing.value || isValidating.value || isSubmitting.value
+  () =>
+    isProcessing.value ||
+    isValidating.value ||
+    isSubmitting.value ||
+    paramsError.value
 )
 
 const {
@@ -82,6 +93,13 @@ const {
 const submitStudio = handleSubmit(async values => createStudio(values))
 
 const createStudio = async (values: CreateStudioInput) => {
+  if (paramsError.value) {
+    toast.error('Cannot create studio due to parameter fetch error.', {
+      description: paramsError.value.message || 'Unknown error.'
+    })
+    return
+  }
+
   errorMsg.value = ''
   isProcessing.value = true
 
@@ -126,6 +144,7 @@ const removeFromGallery = (index: number) => {
 
 <template>
   <div>
+    <p v-if="paramsError" class="text-red-700">{{ paramsError.message }}</p>
     <form class="space-y-4" @submit.prevent="submitStudio">
       <div class="space-y-6">
         <h2 class="text-lg font-semibold border-b pb-2">Studio Logo</h2>

@@ -37,9 +37,18 @@ const offeringSlug = route.params.offeringSlug as string
 const { data: contextData, pending: contextPending } = await useFetch(
   `/api/business/studios/${slug}/offering-context`
 )
-const { data: offerData, pending: offerPending } = await useFetch(
-  `/api/business/studios/${slug}/offerings/${offeringSlug}`
-)
+const {
+  data: offerData,
+  pending: offerPending,
+  error: offerError
+} = await useFetch(`/api/business/studios/${slug}/offerings/${offeringSlug}`)
+
+if (offerError.value) {
+  toast.error('Failed to load offering data. Please try again.', {
+    description: offerError.value.message || 'Unknown error.'
+  })
+  navigateTo(`/business/${slug}/offerings`)
+}
 
 const offering = computed(() => offerData.value?.offering)
 const pending = computed(() => contextPending.value || offerPending.value)
