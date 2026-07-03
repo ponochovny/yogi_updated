@@ -125,7 +125,7 @@ export default defineEventHandler(async event => {
           studioId: studio.id,
           offeringId: newOffering.id,
           name: ticket.name,
-          price: ticket.price * 100, // Convert to cents
+          price: Math.round(ticket.price * 100), // Convert to cents
           description: ticket.description,
           type: priceOptionsType.DROP_IN,
           durationDays: 1 // Drop-in tickets are valid for 1 day

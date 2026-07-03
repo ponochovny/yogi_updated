@@ -1,19 +1,24 @@
-import { eq } from 'drizzle-orm'
+import { and, eq } from 'drizzle-orm'
+import { priceOptionsType } from '~/entities/membership/schema'
+import { userRoles } from '~~/server/auth/config'
 import { pricingOptions } from '~~/server/db/schema/offering'
 import { studios } from '~~/server/db/schema/studio'
 
 export default defineEventHandler(async event => {
+  const userData = await requireAuthenticatedUser(event)
   const slug = requireRouteParam(event, 'slug')
   const db = useDb()
 
-  // Check if studio exists
-  // Check if user is owner or manager of the studio
-
   try {
+    const access = await checkStudioAccess(userData.id, slug, [
+      userRoles.BUSINESS,
+      userRoles.MANAGER
+    ])
+
     const [studio] = await db
       .select()
       .from(studios)
-      .where(eq(studios.slug, slug))
+      .where(eq(studios.id, access.studioId))
       .limit(1)
     if (!studio) {
       throwApiError(404, 'Studio not found')
@@ -22,7 +27,12 @@ export default defineEventHandler(async event => {
     const memberships = await db
       .select()
       .from(pricingOptions)
-      .where(eq(pricingOptions.studioId, studio.id))
+      .where(
+        and(
+          eq(pricingOptions.studioId, studio.id),
+          eq(pricingOptions.type, priceOptionsType.MEMBERSHIP)
+        )
+      )
 
     return { success: true, memberships }
   } catch (error: unknown) {

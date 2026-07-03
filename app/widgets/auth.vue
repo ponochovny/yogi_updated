@@ -205,7 +205,7 @@ const handleSignOut = async () => {
           {{ errorMsg }}
         </p>
       </form>
-      <div class="mt-4 text-center">
+      <div v-if="props.mode !== 'sign-up'" class="mt-4 text-center">
         <NuxtLink
           to="/reset-password"
           class="text-sm text-gray-400 hover:underline"

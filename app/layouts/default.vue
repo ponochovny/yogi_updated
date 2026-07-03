@@ -13,7 +13,7 @@ const signOutHandler = async () => {
 </script>
 
 <template>
-  <div role="main" class="relative pt-28 max-w-3xl mx-auto px-4">
+  <div role="main" class="relative pt-28">
     <DevOnly>
       <div
         class="fixed right-1 bottom-1 border border-gray-500 px-4 py-2 rounded-md dark:bg-white/10 text-sm text-muted-foreground z-50 opacity-50 pointer-events-none"
@@ -22,7 +22,7 @@ const signOutHandler = async () => {
       </div>
     </DevOnly>
     <div
-      class="fixed left-0 top-0 flex justify-between items-center w-full p-4 z-50 backdrop-blur-sm border-b border-border"
+      class="fixed left-0 top-0 flex justify-between items-center w-full p-4 z-50 backdrop-blur-sm border-b border-border bg-accent/10"
     >
       <NuxtLinkLocale to="/" as-child>
         <NuxtImg src="/img/logoBg.svg" width="65" height="65" alt="Nuxt Logo" />

@@ -18,13 +18,7 @@ const { data: paramsData } = await useFetch('/api/params', {
 
 const categories = computed(() => paramsData.value?.params.categories || [])
 
-const {
-  // isValidating,
-  // isSubmitting,
-  // values: formValues,
-  handleSubmit
-  // setFieldValue,
-} = useForm({
+const { isSubmitting, handleSubmit, resetForm } = useForm({
   validationSchema: toTypedSchema(createMembershipSchema),
   initialValues: {
     name: '',
@@ -38,7 +32,6 @@ const {
   }
 })
 
-const submit = handleSubmit(async values => createMembership(values))
 
 const createMembership = async (values: CreateMembershipInput) => {
   // errorMsg.value = ''
@@ -55,6 +48,7 @@ const createMembership = async (values: CreateMembershipInput) => {
 
     if (response.membership) {
       toast.success('Membership created successfully!')
+      resetForm()
       // navigateTo(`/business/${props.studioSlug}`)
     }
   } catch (error) {
@@ -63,6 +57,7 @@ const createMembership = async (values: CreateMembershipInput) => {
     })
   }
 }
+const submit = handleSubmit(createMembership)
 </script>
 
 <template>
@@ -205,7 +200,9 @@ const createMembership = async (values: CreateMembershipInput) => {
           </FormItem>
         </FormField>
       </div>
-      <Button type="submit" class="w-full">Create Membership</Button>
+      <Button type="submit" class="w-full" :disabled="isSubmitting"
+        >Create Membership</Button
+      >
     </form>
   </div>
 </template>

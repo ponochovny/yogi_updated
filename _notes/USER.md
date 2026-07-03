@@ -36,25 +36,32 @@ export const auth = betterAuth({
 })
 
 // app/page/index.vue
-const session = useSession()
-const user = computed(() => session.value?.data?.user || null)
+const { userData, getRolesInStudio } = useUserData()
 
-const isPractitioner = computed(() =>
-	user.value?.workspaces?.some((w) => w.role === userRoles.PRACTITIONER),
-)
-const isManager = computed(() =>
-	user.value?.workspaces?.some((w) => [userRoles.MANAGER].includes(w.role)),
-)
-const isBusiness = computed(() =>
-	user.value?.workspaces?.some((w) => [userRoles.BUSINESS].includes(w.role)),
-)
+const allRoles = userData.value.roles
+const studioRoles = getRolesInStudio(route.params.slug as string)
+```
 
-// OR
+## Check user authentication and access
 
-const roles = computed(() => {
-	// @ts-expect-error: workspaces field
-	const workspaces = session.value?.data?.user.workspaces ?? []
-	const { getRolesInStudio } = useWorkspaces(workspaces)
-	return getRolesInStudio(route.params.slug as string)
-})
+```TS
+const userData = await requireAuthenticatedUser(event)
+const slug = requireRouteParam(event, 'slug')
+const db = useDb()
+
+try {
+	const access = await checkStudioAccess(userData.id, slug, [
+		userRoles.BUSINESS,
+		userRoles.MANAGER
+	])
+
+	const [studio] = await db
+		.select()
+		.from(studios)
+		.where(eq(studios.id, access.studioId))
+		.limit(1)
+	if (!studio) {
+		throwApiError(404, 'Studio not found')
+	}
+	// ...
 ```

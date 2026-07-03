@@ -97,9 +97,7 @@ const submitReset = newPasswordForm.handleSubmit(async values => {
           <FormMessage />
         </FormItem>
       </FormField>
-      <ClientOnly>
-        <Button type="submit" class="w-full"> Reset Password </Button>
-      </ClientOnly>
+      <Button type="submit" class="w-full"> Reset Password </Button>
     </form>
     <p class="text-red-500 text-sm py-2">{{ errorMsg }}</p>
   </div>

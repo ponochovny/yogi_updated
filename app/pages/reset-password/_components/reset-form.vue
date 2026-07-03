@@ -67,11 +67,7 @@ const submitRequestReset = requestResetForm.handleSubmit(async values => {
         <Button
           type="submit"
           class="w-full"
-          :disabled="
-            requestResetForm.isSubmitting ||
-            requestResetForm.isValidating ||
-            requestResetLoading
-          "
+          :disabled="requestResetForm.isSubmitting"
         >
           Send Reset Link
         </Button>

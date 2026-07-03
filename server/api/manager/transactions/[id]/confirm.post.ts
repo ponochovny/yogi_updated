@@ -9,6 +9,14 @@ export default defineEventHandler(async event => {
   const db = useDb()
   const transactionId = requireRouteParam(event, 'id')
 
+  if (
+    !/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(
+      transactionId
+    )
+  ) {
+    throwApiError(400, 'Invalid transaction id')
+  }
+
   const [transaction] = await db
     .select()
     .from(transactions)
@@ -22,14 +30,6 @@ export default defineEventHandler(async event => {
     userRoles.MANAGER,
     userRoles.PRACTITIONER
   ])
-
-  if (
-    !/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(
-      transactionId
-    )
-  ) {
-    throwApiError(400, 'Invalid transaction id')
-  }
 
   const [updatedTransaction] = await db
     .update(transactions)

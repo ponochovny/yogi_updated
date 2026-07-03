@@ -13,6 +13,10 @@ definePageMeta({
   ]
 })
 
+useHead({
+  title: 'Business Overview'
+})
+
 const route = useRoute()
 const { getRolesInStudio } = useUserData()
 const roles = computed(() => getRolesInStudio(route.params.slug as string))

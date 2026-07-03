@@ -113,6 +113,9 @@ const {
               Duration: {{ membership.durationDays }} days
             </p>
             <p class="text-sm text-muted-foreground">
+              Valid for {{ membership.durationDays }} days after purchase
+            </p>
+            <!-- <p class="text-sm text-muted-foreground">
               Expires
               <NuxtTime
                 :datetime="
@@ -123,7 +126,7 @@ const {
                 "
                 relative
               />
-            </p>
+            </p> -->
           </div>
         </div>
       </div>

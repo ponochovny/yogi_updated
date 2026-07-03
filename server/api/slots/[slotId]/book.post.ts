@@ -44,7 +44,9 @@ export default defineEventHandler(async event => {
               slotId: offeringSlots.id,
               slotStatus: offeringSlots.status,
               slotOverrideCapacity: offeringSlots.capacityOverride,
-              offeringCapacity: offerings.capacity
+              offeringCapacity: offerings.capacity,
+              offeringId: offerings.id,
+              studioId: offerings.studioId
             })
             .from(offeringSlots)
             .innerJoin(offerings, eq(offeringSlots.offeringId, offerings.id))
@@ -104,16 +106,24 @@ export default defineEventHandler(async event => {
           const [pricing] = await tx
             .select()
             .from(pricingOptions)
-            .where(eq(pricingOptions.id, pricingOptionId))
+            .where(
+              and(
+                eq(pricingOptions.id, pricingOptionId),
+                eq(pricingOptions.offeringId, slotData.offeringId),
+                eq(pricingOptions.studioId, slotData.studioId)
+              )
+            )
             .limit(1)
 
-          if (!pricing) throw new Error('Pricing option not found')
+          if (!pricing) {
+            throwApiError(400, 'Invalid pricing option for this slot')
+          }
 
           const [newTransaction] = await tx
             .insert(transactions)
             .values({
               userId: clientId,
-              studioId: slotData.slotId,
+              studioId: pricing.studioId,
               amount: 0, // Assuming free booking; adjust as needed
               currency: 'USD',
               provider: TransactionProvider.FREE,

@@ -50,9 +50,11 @@ const breadcrumbs = computed(
                   >
                     <BreadcrumbLink
                       v-if="breadcrumb.url !== $route.path"
-                      :href="breadcrumb.url"
+                      as-child
                     >
-                      {{ breadcrumb.name }}
+                      <NuxtLink :to="breadcrumb.url">
+                        {{ breadcrumb.name }}
+                      </NuxtLink>
                     </BreadcrumbLink>
                     <BreadcrumbPage v-else>{{
                       breadcrumb.name

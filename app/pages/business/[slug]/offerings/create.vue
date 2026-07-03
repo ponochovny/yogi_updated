@@ -75,8 +75,6 @@ const submitDisabled = computed(
   () => isProcessing.value || isValidating.value || isSubmitting.value
 )
 
-const submitOffering = handleSubmit(async values => createOffering(values))
-
 const createOffering = async (values: CreateOfferingInput) => {
   errorMsg.value = ''
   isProcessing.value = true
@@ -100,6 +98,7 @@ const createOffering = async (values: CreateOfferingInput) => {
   }
 }
 
+const submitOffering = handleSubmit(createOffering)
 function togglePractitioner(id: string) {
   const currentIds = [...(formValues.practitionerIds || [])]
   const index = currentIds.indexOf(id)
@@ -314,8 +313,8 @@ const removeFromGallery = (index: number) => {
                 >Tickets (drop-in)</label
               >
               <p class="text-[0.8rem] text-muted-foreground mt-2">
-                Создайте разовые билеты для этого занятия (например: Стандарт,
-                Студенческий, VIP)
+                Create single-use tickets for this class (for example: Standard,
+                Student, VIP)
               </p>
             </div>
 
@@ -331,7 +330,7 @@ const removeFromGallery = (index: number) => {
                   class="absolute top-2 right-2 text-sm text-red-500 hover:text-red-700"
                   @click="remove(idx)"
                 >
-                  Удалить
+                  Delete
                 </button>
 
                 <div class="grid grid-cols-3 gap-4 mt-2">
@@ -393,7 +392,7 @@ const removeFromGallery = (index: number) => {
               class="w-fit mt-2"
               @click="push({ name: '', description: '', price: 0 })"
             >
-              + Добавить билет
+              + Add Ticket
             </Button>
           </div>
 

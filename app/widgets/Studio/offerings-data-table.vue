@@ -1,5 +1,10 @@
 <script lang="ts" setup>
-import { ArrowUpDown, ChevronDownIcon, MoreHorizontalIcon } from '@lucide/vue'
+import {
+  ArrowUpDown,
+  ChevronDownIcon,
+  MoreHorizontalIcon,
+  PencilSparklesIcon
+} from '@lucide/vue'
 import {
   FlexRender,
   getCoreRowModel,
@@ -77,7 +82,8 @@ const columns: ColumnDef<OfferingItemBusiness>[] = [
           Badge,
           {
             variant: 'secondary',
-            class: 'inline-block lowercase first-letter:uppercase'
+            class:
+              'inline-block lowercase first-letter:uppercase font-medium bg-amber-100 text-amber-800 dark:bg-amber-700 dark:text-amber-100'
           },
           () => row.getValue('activityType')
         )
@@ -175,7 +181,6 @@ const table = useVueTable({
           </Button>
         </DropdownMenuTrigger>
         <DropdownMenuContent align="end">
-          <DropdownMenuLabel>Actions</DropdownMenuLabel>
           <DropdownMenuItem
             @click="
               $router.push(
@@ -183,7 +188,7 @@ const table = useVueTable({
               )
             "
           >
-            Edit
+            <PencilSparklesIcon /> Edit
           </DropdownMenuItem>
         </DropdownMenuContent>
       </DropdownMenu>

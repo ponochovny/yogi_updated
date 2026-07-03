@@ -218,7 +218,7 @@ groupSlots()
     </div>
 
     <div
-      v-if="groupedSlots.length"
+      v-if="Object.keys(groupedSlots).length"
       class="p-6 bg-white/10 border rounded-xl shadow-sm"
     >
       <h2 class="text-lg font-semibold mb-4">Edit Slots</h2>

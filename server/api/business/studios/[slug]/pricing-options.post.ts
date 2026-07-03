@@ -1,13 +1,18 @@
+import { userRoles } from '~~/server/auth/config'
 import { pricingOptions } from '~~/server/db/schema/offering'
 
 export default defineEventHandler(async event => {
   const session = await auth.api.getSession({ headers: event.headers })
   if (!session) throw createError({ statusCode: 401, message: 'Unauthorized' })
 
-  const { studioId, name, description, type, price, credits, durationDays } =
+  const slug = requireRouteParam(event, 'slug')
+  const { name, description, type, price, credits, durationDays } =
     await readBody(event)
 
-  await checkStudioAccess(session.user.id, studioId, ['BUSINESS', 'MANAGER'])
+  const { studioId } = await checkStudioAccess(session.user.id, slug, [
+    userRoles.BUSINESS,
+    userRoles.MANAGER
+  ])
 
   const db = useDb()
 
@@ -18,7 +23,7 @@ export default defineEventHandler(async event => {
       name,
       description,
       type,
-      price,
+      price: price * 100, // Store in cents
       credits: type === 'MEMBERSHIP' ? null : credits, // Protection from fools
       durationDays,
       isActive: true // By default available for purchase

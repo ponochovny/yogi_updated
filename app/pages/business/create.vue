@@ -90,8 +90,6 @@ const {
   remove: removeLocation
 } = useFieldArray('locations')
 
-const submitStudio = handleSubmit(async values => createStudio(values))
-
 const createStudio = async (values: CreateStudioInput) => {
   if (paramsError.value) {
     toast.error('Cannot create studio due to parameter fetch error.', {
@@ -121,6 +119,8 @@ const createStudio = async (values: CreateStudioInput) => {
     isProcessing.value = false
   }
 }
+
+const submitStudio = handleSubmit(createStudio)
 
 // MEDIA FLOW >
 const uploadLogo = () => {

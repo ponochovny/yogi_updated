@@ -12,7 +12,11 @@ const { data: mySlots } = await useFetch('/api/practitioner/slots', {
 <template>
   <div class="space-y-8">
     <h2 class="text-2xl font-semibold">Practitioner Dashboard</h2>
-    <div v-if="mySlots?.length" class="space-y-4">
+    <div v-if="!mySlots?.length" class="text-muted-foreground">
+      You have no slots available. Please contact your studio administrator to
+      add slots.
+    </div>
+    <div v-else-if="mySlots?.length" class="space-y-4">
       <h3 class="text-xl font-medium">My Slots</h3>
       <ul class="space-y-2">
         <li
