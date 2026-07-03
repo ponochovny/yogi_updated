@@ -113,6 +113,13 @@
       "when": 1782825472446,
       "tag": "0015_soft_chimera",
       "breakpoints": true
+    },
+    {
+      "idx": 16,
+      "version": "7",
+      "when": 1783112983305,
+      "tag": "0016_mighty_penance",
+      "breakpoints": true
     }
   ]
 }
