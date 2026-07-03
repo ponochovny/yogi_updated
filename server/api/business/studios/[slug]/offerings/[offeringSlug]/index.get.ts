@@ -1,4 +1,8 @@
-import { offerings, offeringPractitioners } from '~~/server/db/schema/offering'
+import {
+  offerings,
+  offeringPractitioners,
+  pricingOptions
+} from '~~/server/db/schema/offering'
 import { studios } from '~~/server/db/schema/studio'
 import {
   mediaFiles,
@@ -68,7 +72,7 @@ export default defineEventHandler(async event => {
 
   try {
     // Fetch associated practitioners and gallery media files in parallel
-    const [practitionerRows, galleryRows] = await Promise.all([
+    const [practitionerRows, galleryRows, ticketsData] = await Promise.all([
       db
         .select({ practitionerId: offeringPractitioners.practitionerId })
         .from(offeringPractitioners)
@@ -86,7 +90,11 @@ export default defineEventHandler(async event => {
             eq(mediaFiles.type, MediaTypeEnum.GALLERY)
           )
         )
-        .orderBy(mediaFiles.order)
+        .orderBy(mediaFiles.order),
+      db
+        .select()
+        .from(pricingOptions)
+        .where(and(eq(pricingOptions.offeringId, offering.id)))
     ])
 
     return {
@@ -95,7 +103,15 @@ export default defineEventHandler(async event => {
         ...offering,
         practitionerIds: practitionerRows.map(row => row.practitionerId),
         gallery: galleryRows
-      }
+      },
+      tickets: ticketsData.map(ticket => ({
+        id: ticket.id,
+        name: ticket.name,
+        price: ticket.price / 100, // Convert from cents to dollars
+        description: ticket.description,
+        type: ticket.type,
+        durationDays: ticket.durationDays
+      }))
     }
   } catch (error: unknown) {
     if (isApiError(error)) throw error

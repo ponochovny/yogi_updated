@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { XIcon } from '@lucide/vue'
 import { toTypedSchema } from '@vee-validate/zod'
-import { useForm } from 'vee-validate'
+import { useFieldArray, useForm } from 'vee-validate'
 import { computed, ref, watch } from 'vue'
 import { toast } from 'vue-sonner'
 import { placeholderImageUrl } from '~/config/constants'
@@ -73,9 +73,18 @@ const {
     timezone: guessUserTimezone(),
     duration: 60 as number,
     capacity: null as number | null,
-    practitionerIds: []
+    practitionerIds: [],
+    tickets: [
+      {
+        name: 'Drop-in',
+        price: 0,
+        description: ''
+      }
+    ]
   }
 })
+
+const { fields, push, remove } = useFieldArray('tickets')
 
 const valuesInitialized = ref(false)
 watch(
@@ -91,6 +100,7 @@ watch(
       setFieldValue('timezone', value.timezone)
       setFieldValue('duration', value.duration)
       setFieldValue('capacity', value.capacity)
+      // setFieldValue('tickets', value.tickets)
       setFieldValue('practitionerIds', value.practitionerIds || [])
       valuesInitialized.value = true
     }
@@ -103,8 +113,6 @@ const isProcessing = ref(false)
 const submitDisabled = computed(
   () => isProcessing.value || isValidating.value || isSubmitting.value
 )
-
-const submitOffering = handleSubmit(async values => updateOffering(values))
 
 const updateOffering = async (values: CreateOfferingInput) => {
   errorMsg.value = ''
@@ -132,6 +140,20 @@ const updateOffering = async (values: CreateOfferingInput) => {
   }
 }
 
+// const submitOffering = handleSubmit(updateOffering)
+const submitOffering = handleSubmit(
+  values => {
+    // Success callback
+    console.log('Success:', values)
+    updateOffering(values)
+  },
+  ({ errors }) => {
+    const firstError = Object.keys(errors)[0]
+    toast.error(`Please fix the field: ${firstError}`, {
+      description: firstError || 'Unknown error.'
+    })
+  }
+)
 function togglePractitioner(id: string) {
   const currentIds = [...(formValues.practitionerIds || [])]
   const index = currentIds.indexOf(id)
@@ -347,6 +369,96 @@ const removeFromGallery = (index: number) => {
               <FormMessage />
             </FormItem>
           </FormField>
+
+          <div class="flex flex-col gap-4 col-span-2">
+            <div class="mb-2">
+              <label
+                class="text-base font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+                >Tickets (drop-in)</label
+              >
+              <p class="text-[0.8rem] text-muted-foreground mt-2">
+                Create single-use tickets for this class (for example: Standard,
+                Student, VIP)
+              </p>
+            </div>
+
+            <div class="flex flex-col gap-3">
+              <div
+                v-for="(field, idx) in fields"
+                :key="field.key"
+                class="flex flex-col gap-3 p-4 border rounded-lg bg-white/5 hover:bg-white/10 relative"
+              >
+                <button
+                  v-if="fields.length > 1"
+                  type="button"
+                  class="absolute top-2 right-2 text-sm text-red-500 hover:text-red-700"
+                  @click="remove(idx)"
+                >
+                  Delete
+                </button>
+
+                <div class="grid grid-cols-3 gap-4 mt-2">
+                  <FormField
+                    v-slot="{ componentField }"
+                    :name="`tickets[${idx}].name`"
+                  >
+                    <FormItem>
+                      <FormControl>
+                        <Input
+                          placeholder="Title"
+                          v-bind="componentField"
+                          autocomplete="off"
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  </FormField>
+
+                  <FormField
+                    v-slot="{ componentField }"
+                    :name="`tickets[${idx}].description`"
+                  >
+                    <FormItem>
+                      <FormControl>
+                        <Input
+                          placeholder="Description"
+                          v-bind="componentField"
+                          autocomplete="off"
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  </FormField>
+
+                  <FormField
+                    v-slot="{ componentField }"
+                    :name="`tickets[${idx}].price`"
+                  >
+                    <FormItem>
+                      <FormControl>
+                        <Input
+                          placeholder="Price"
+                          v-bind="componentField"
+                          autocomplete="off"
+                          type="number"
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  </FormField>
+                </div>
+              </div>
+            </div>
+
+            <Button
+              type="button"
+              variant="outline"
+              class="w-fit mt-2"
+              @click="push({ name: '', description: '', price: 0 })"
+            >
+              + Add Ticket
+            </Button>
+          </div>
 
           <div class="col-span-2">
             <FormField name="practitionerIds">
