@@ -15,6 +15,7 @@ const signOutHandler = async () => {
 <template>
   <div role="main" class="relative pt-28 max-w-3xl mx-auto px-4">
     <div
+      v-if="import.meta.env.DEV"
       class="fixed right-1 bottom-1 border border-gray-500 px-4 py-2 rounded-md dark:bg-white/10 text-sm text-muted-foreground z-50 opacity-50 pointer-events-none"
     >
       <div>layouts/default.vue</div>
