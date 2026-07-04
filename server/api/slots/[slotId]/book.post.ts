@@ -4,13 +4,11 @@ import {
   offerings,
   pricingOptions
 } from '~~/server/db/schema/offering'
+import { studios } from '~~/server/db/schema/studio'
 import { eq, and, sql } from 'drizzle-orm'
 import { BookingStatus, updateBookingSchema } from '~/entities/booking/schema'
-import {
-  TransactionProvider,
-  transactions,
-  TransactionStatus
-} from '~~/server/db/schema/payment'
+import { transactions } from '~~/server/db/schema/payment'
+import { getBookingTransactionState } from '~~/server/utils/booking-flow'
 
 export default defineEventHandler(async event => {
   const userData = await requireAuthenticatedUser(event)
@@ -46,10 +44,12 @@ export default defineEventHandler(async event => {
               slotOverrideCapacity: offeringSlots.capacityOverride,
               offeringCapacity: offerings.capacity,
               offeringId: offerings.id,
-              studioId: offerings.studioId
+              studioId: offerings.studioId,
+              currency: studios.currency
             })
             .from(offeringSlots)
             .innerJoin(offerings, eq(offeringSlots.offeringId, offerings.id))
+            .innerJoin(studios, eq(offerings.studioId, studios.id))
             .where(eq(offeringSlots.id, slotId))
             .limit(1)
 
@@ -119,15 +119,17 @@ export default defineEventHandler(async event => {
             throwApiError(400, 'Invalid pricing option for this slot')
           }
 
+          const transactionState = getBookingTransactionState(pricing.price)
+
           const [newTransaction] = await tx
             .insert(transactions)
             .values({
               userId: clientId,
               studioId: pricing.studioId,
-              amount: 0, // Assuming free booking; adjust as needed
-              currency: 'USD',
-              provider: TransactionProvider.FREE,
-              status: TransactionStatus.PENDING
+              amount: transactionState.transactionAmount,
+              currency: slotData.currency,
+              provider: transactionState.transactionProvider,
+              status: transactionState.transactionStatus
             })
             .returning({ id: transactions.id })
 
@@ -141,7 +143,7 @@ export default defineEventHandler(async event => {
             .values({
               slotId: slotId,
               userId: clientId,
-              status: BookingStatus.CONFIRMED,
+              status: transactionState.bookingStatus,
               transactionId: newTransaction.id
             })
             .returning({ id: bookings.id })

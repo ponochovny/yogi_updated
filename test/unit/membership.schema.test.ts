@@ -3,6 +3,7 @@ import {
   createMembershipSchema,
   priceOptionsType
 } from '../../app/entities/membership/schema'
+import { getBookingTransactionState } from '../../server/utils/booking-flow'
 
 describe('createMembershipSchema', () => {
   const baseInput = {
@@ -55,5 +56,18 @@ describe('createMembershipSchema', () => {
     })
 
     expect(result.success).toBe(false)
+  })
+
+  it('uses pricing data for paid bookings and free flow for zero-price bookings', () => {
+    const paidState = getBookingTransactionState(2500)
+    const freeState = getBookingTransactionState(0)
+
+    expect(paidState.transactionAmount).toBe(2500)
+    expect(paidState.transactionStatus).toBe('PENDING')
+    expect(paidState.bookingStatus).toBe('ACTIVE')
+
+    expect(freeState.transactionAmount).toBe(0)
+    expect(freeState.transactionStatus).toBe('SUCCESS')
+    expect(freeState.bookingStatus).toBe('CONFIRMED')
   })
 })
