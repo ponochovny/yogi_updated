@@ -6,7 +6,7 @@ export const priceOptionsType = {
   MEMBERSHIP: 'MEMBERSHIP'
 } as const
 
-export const createMembershipSchema = z.object({
+const commonMembershipFields = {
   name: z
     .string()
     .min(3, 'Name must be at least 3 characters long')
@@ -15,19 +15,35 @@ export const createMembershipSchema = z.object({
     .string()
     .min(10, 'Description must be at least 10 characters long')
     .max(500, 'Description must be at most 500 characters long'),
-  type: z.enum([
-    priceOptionsType.DROP_IN,
-    priceOptionsType.PACK,
-    priceOptionsType.MEMBERSHIP
-  ]),
   price: z.number().min(0, 'Price must be a positive number'),
-
-  // Limits logic
-  credits: z.number().nullable().optional(), // Visits amount. For DROP_IN = 1, PACK = 10, MEMBERSHIP = null (unlimited)
-  durationDays: z.number().min(1, 'Duration must be at least 1 day'), // Duration of the pass after purchase (e.g., 1 day, 30 days, 365 days)
-
+  durationDays: z.number().int().min(1, 'Duration must be at least 1 day'),
   isActive: z.boolean(),
   applicableCategoryIds: z.array(z.string()).optional()
-})
+} as const
+
+export const createMembershipSchema = z.discriminatedUnion('type', [
+  z.object({
+    type: z.literal(priceOptionsType.DROP_IN),
+    credits: z
+      .number()
+      .int()
+      .min(1, 'Drop-in memberships require exactly 1 credit')
+      .max(1, 'Drop-in memberships require exactly 1 credit'),
+    ...commonMembershipFields
+  }),
+  z.object({
+    type: z.literal(priceOptionsType.PACK),
+    credits: z
+      .number()
+      .int()
+      .min(1, 'Pack memberships require at least 1 credit'),
+    ...commonMembershipFields
+  }),
+  z.object({
+    type: z.literal(priceOptionsType.MEMBERSHIP),
+    credits: z.null(),
+    ...commonMembershipFields
+  })
+])
 
 export type CreateMembershipInput = z.infer<typeof createMembershipSchema>
