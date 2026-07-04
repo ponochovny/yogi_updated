@@ -88,7 +88,7 @@ export const pricingOptions = pgTable('pricing_options', {
 
   // Specific offering this pricing option is linked to. If null, it applies to all offerings in the studio.
   offeringId: uuid('offering_id').references(() => offerings.id, {
-    onDelete: 'cascade'
+    onDelete: 'restrict'
   }),
 
   applicableCategoryIds: uuid('applicable_category_ids').array(),
