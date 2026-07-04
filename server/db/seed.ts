@@ -52,10 +52,6 @@ const typeValues = [
 const currencyValues = ['USD', 'EUR'] as const
 
 async function seedGlobalData() {
-  const pool = new Pool({ connectionString: process.env.DATABASE_URL })
-  const db = drizzle(pool, {
-    schema: { globalCategories, globalTypes, globalCurrencies }
-  })
   const isDryRun = process.argv.includes('--dry-run')
 
   if (isDryRun) {
@@ -66,39 +62,48 @@ async function seedGlobalData() {
     return
   }
 
-  await db
-    .insert(globalCategories)
-    .values(
-      categoryValues.map(name => ({
-        name,
-        slug: slugify(name)
-      }))
-    )
-    .onConflictDoNothing({ target: globalCategories.slug })
+  const pool = new Pool({ connectionString: process.env.DATABASE_URL })
+  const db = drizzle(pool, {
+    schema: { globalCategories, globalTypes, globalCurrencies }
+  })
 
-  await db
-    .insert(globalTypes)
-    .values(
-      typeValues.map(name => ({
-        name,
-        slug: slugify(name)
-      }))
-    )
-    .onConflictDoNothing({ target: globalTypes.slug })
+  try {
+    await db
+      .insert(globalCategories)
+      .values(
+        categoryValues.map(name => ({
+          name,
+          slug: slugify(name)
+        }))
+      )
+      .onConflictDoNothing({ target: globalCategories.slug })
 
-  await db
-    .insert(globalCurrencies)
-    .values(
-      currencyValues.map(name => ({
-        name,
-        slug: slugify(name)
-      }))
-    )
-    .onConflictDoNothing({ target: globalCurrencies.slug })
+    await db
+      .insert(globalTypes)
+      .values(
+        typeValues.map(name => ({
+          name,
+          slug: slugify(name)
+        }))
+      )
+      .onConflictDoNothing({ target: globalTypes.slug })
 
-  console.log(
-    'Seed completed for global categories, global types, and global currencies.'
-  )
+    await db
+      .insert(globalCurrencies)
+      .values(
+        currencyValues.map(name => ({
+          name,
+          slug: slugify(name)
+        }))
+      )
+      .onConflictDoNothing({ target: globalCurrencies.slug })
+
+    console.log(
+      'Seed completed for global categories, global types, and global currencies.'
+    )
+  } finally {
+    await pool.end()
+  }
 }
 
 seedGlobalData().catch(error => {
