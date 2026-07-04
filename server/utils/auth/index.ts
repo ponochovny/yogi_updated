@@ -68,11 +68,6 @@ export const auth = betterAuth({
         },
         required: false,
         input: false
-      },
-      workspaces: {
-        type: 'json',
-        required: false,
-        input: false
       }
     }
   },
