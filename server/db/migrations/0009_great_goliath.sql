@@ -1,2 +1,0 @@
-CREATE TYPE "public"."media_type" AS ENUM('OFFERING', 'STUDIO', 'USER');--> statement-breakpoint
-ALTER TABLE "media_files" ALTER COLUMN "entity_type" SET DATA TYPE "public"."media_type" USING "entity_type"::"public"."media_type";

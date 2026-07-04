@@ -1,71 +1,72 @@
 import { studios, studioLocations } from '~~/server/db/schema/studio'
-import { mediaFiles } from '~~/server/db/schema/_other'
+import {
+  MediaEntityTypeEnum,
+  mediaFiles,
+  MediaTypeEnum
+} from '~~/server/db/schema/_other'
 import { and, eq, inArray, sql } from 'drizzle-orm'
 
-export default defineEventHandler(async (event) => {
-	const db = useDb()
-	const session = await auth.api.getSession({
-		headers: event.headers,
-	})
+export default defineEventHandler(async event => {
+  const userData = await requireAuthenticatedUser(event)
+  const currentUserId = userData.id
+  const db = useDb()
 
-	if (!session || !session.user) {
-		throw createError({
-			statusCode: 401,
-			statusMessage: 'Unauthorized access',
-		})
-	}
+  try {
+    const userStudios = await db
+      .select()
+      .from(studios)
+      .where(eq(studios.ownerId, currentUserId))
 
-	const currentUserId = session.user.id
+    if (!userStudios.length) {
+      return { success: true, studios: [] }
+    }
 
-	const userStudios = await db
-		.select()
-		.from(studios)
-		.where(eq(studios.ownerId, currentUserId))
+    const studioIds = userStudios.map(s => s.id)
 
-	if (!userStudios.length) {
-		return { success: true, studios: [] }
-	}
+    const [locations, media] = await Promise.all([
+      db
+        .select()
+        .from(studioLocations)
+        .where(sql`${studioLocations.studioId} IN ${studioIds}`),
+      db
+        .select()
+        .from(mediaFiles)
+        .where(
+          and(
+            inArray(mediaFiles.entityId, studioIds),
+            eq(mediaFiles.entityType, MediaEntityTypeEnum.STUDIO)
+          )
+        )
+    ])
 
-	const studioIds = userStudios.map((s) => s.id)
+    const studiosWithDetails = userStudios.map(studio => {
+      const studioLocs = locations.filter(l => l.studioId === studio.id)
+      const studioMedia = media.filter(m => m.entityId === studio.id)
 
-	const [locations, media] = await Promise.all([
-		db
-			.select()
-			.from(studioLocations)
-			.where(sql`${studioLocations.studioId} IN ${studioIds}`),
-		db
-			.select()
-			.from(mediaFiles)
-			.where(
-				and(
-					inArray(mediaFiles.entityId, studioIds),
-					eq(mediaFiles.entityType, 'STUDIO'),
-				),
-			),
-	])
+      const logo =
+        studioMedia.filter(m => m.type === MediaTypeEnum.LOGO)[0]?.url || null
+      const gallery = studioMedia
+        .filter(m => m.type === MediaTypeEnum.GALLERY)
+        .map(m => m.url)
 
-	const studiosWithDetails = userStudios.map((studio) => {
-		const studioLocs = locations.filter((l) => l.studioId === studio.id)
-		const studioMedia = media.filter((m) => m.entityId === studio.id)
+      const studioLocationsFormatted = studioLocs.map(l => ({
+        address: l.address,
+        city: l.city,
+        country: l.country
+      }))
 
-		const logo = studioMedia.filter((m) => m.type === 'LOGO')[0]?.url || null
-		const gallery = studioMedia
-			.filter((m) => m.type === 'GALLERY')
-			.map((m) => m.url)
+      return {
+        ...studio,
+        logo,
+        gallery,
+        locations: studioLocationsFormatted
+      }
+    })
 
-		const studioLocationsFormatted = studioLocs.map((l) => ({
-			address: l.address,
-			city: l.city,
-			country: l.country,
-		}))
-
-		return {
-			...studio,
-			logo,
-			gallery,
-			locations: studioLocationsFormatted,
-		}
-	})
-
-	return { success: true, studios: studiosWithDetails }
+    return { success: true, studios: studiosWithDetails }
+  } catch (error) {
+    if (isApiError(error)) throw error
+    console.error('Failed to fetch studios', error)
+    throwApiError(500, 'Failed to fetch studios')
+  }
 })

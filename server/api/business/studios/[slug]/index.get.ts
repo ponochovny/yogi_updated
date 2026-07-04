@@ -1,77 +1,98 @@
 import { studios, studioLocations } from '~~/server/db/schema/studio'
-import { mediaFiles } from '~~/server/db/schema/_other'
-import { and, eq } from 'drizzle-orm'
+import { mediaFiles, MediaTypeEnum } from '~~/server/db/schema/_other'
+import { and, eq, inArray } from 'drizzle-orm'
+import { useDb } from '~~/server/utils/db'
+import { userRoles } from '~~/server/auth/config'
+import {
+  globalCategories,
+  globalCurrencies,
+  globalTypes
+} from '~~/server/db/schema/global'
 
-export default defineEventHandler(async (event) => {
-	const session = await auth.api.getSession({
-		headers: event.headers,
-	})
+export default defineEventHandler(async event => {
+  const userData = await requireAuthenticatedUser(event)
+  const slug = requireRouteParam(event, 'slug')
+  const currentUserId = userData.id
+  const db = useDb()
 
-	if (!session || !session.user) {
-		throw createError({
-			statusCode: 401,
-			statusMessage: 'Unauthorized access',
-		})
-	}
+  const access = await checkStudioAccess(currentUserId, slug, [
+    userRoles.BUSINESS,
+    userRoles.MANAGER,
+    userRoles.PRACTITIONER
+  ])
 
-	// VALIDATING SLUG PARAMETER
-	const slug = getRouterParam(event, 'slug')
-	if (!slug) {
-		throw createError({
-			statusCode: 400,
-			statusMessage: 'Slug is required',
-		})
-	}
+  const [studio] = await db
+    .select()
+    .from(studios)
+    .where(eq(studios.id, access.studioId))
+    .limit(1)
+  if (!studio) {
+    throwApiError(
+      404,
+      'Studio not found or you do not have permission to view it'
+    )
+  }
 
-	const currentUserId = session.user.id
-	const db = useDb()
+  try {
+    const [locations, media, categoriesData, typesData, currenciesData] =
+      await Promise.all([
+        db
+          .select()
+          .from(studioLocations)
+          .where(eq(studioLocations.studioId, studio.id)),
+        db
+          .select()
+          .from(mediaFiles)
+          .where(
+            and(
+              eq(mediaFiles.entityId, studio.id),
+              eq(mediaFiles.entityType, 'STUDIO')
+            )
+          )
+          .orderBy(mediaFiles.order),
+        db
+          .select({ name: globalCategories.name })
+          .from(globalCategories)
+          .where(inArray(globalCategories.id, studio.categories || [])),
+        db
+          .select({ name: globalTypes.name })
+          .from(globalTypes)
+          .where(inArray(globalTypes.id, studio.types || [])),
+        db
+          .select({ name: globalCurrencies.name })
+          .from(globalCurrencies)
+          .where(eq(globalCurrencies.id, studio.currency))
+      ])
 
-	const [studio] = await db
-		.select()
-		.from(studios)
-		.where(and(eq(studios.slug, slug), eq(studios.ownerId, currentUserId)))
-		.limit(1)
+    const logo = media.find(file => file.type === MediaTypeEnum.LOGO) || null
+    const gallery = media.filter(file => file.type === MediaTypeEnum.GALLERY)
+    const categoryNames = categoriesData.map(c => c.name)
+    const typeNames = typesData.map(c => c.name)
+    const currencyName = currenciesData[0]?.name
 
-	if (!studio) {
-		throw createError({
-			statusCode: 404,
-			statusMessage:
-				'Studio not found or you do not have permission to view it',
-		})
-	}
-
-	const [locations, media] = await Promise.all([
-		db
-			.select()
-			.from(studioLocations)
-			.where(eq(studioLocations.studioId, studio.id)),
-		db
-			.select()
-			.from(mediaFiles)
-			.where(
-				and(
-					eq(mediaFiles.entityId, studio.id),
-					eq(mediaFiles.entityType, 'STUDIO'),
-				),
-			)
-			.orderBy(mediaFiles.order),
-	])
-
-	const logo = media.find((file) => file.type === 'LOGO') || null
-	const gallery = media.filter((file) => file.type === 'GALLERY')
-
-	return {
-		success: true,
-		studio: {
-			...studio,
-			locations,
-			logo: logo
-				? { url: logo.url, providerPublicId: logo.providerPublicId }
-				: null,
-			gallery: gallery.map((file) => ({
-				url: file.url,
-				providerPublicId: file.providerPublicId,
-			})),
-		},
-	}
+    return {
+      success: true,
+      studio: {
+        ...studio,
+        locations,
+        logo: logo
+          ? {
+              url: logo.url
+              // providerPublicId: logo.providerPublicId
+            }
+          : null,
+        gallery: gallery.map(file => ({
+          url: file.url
+          // providerPublicId: file.providerPublicId,
+        })),
+        categories: categoryNames,
+        types: typeNames,
+        currency: currencyName
+      }
+    }
+  } catch (error) {
+    if (isApiError(error)) throw error
+    console.error('Failed to fetch studio details', error)
+    throwApiError(500, 'Failed to fetch studio details')
+  }
 })

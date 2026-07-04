@@ -1,6 +1,15 @@
 ## Release notes
 
-### 06.05.2026 - v0.0.1-alpha
+### Jun 20 2026 - v0.0.2-alpha
+
+- Offering creation
+- Slots creation with generator
+- Booking cancel
+- Booking status change by manager/practitioner (attended/no show)
+- Public with studios & offerings
+- Public offering page with slots for booking
+
+### Jun 05 2026 - v0.0.1-alpha
 
 - Authentication
 - User Roles
@@ -23,6 +32,9 @@
 - ✅ Auth
 - ✅ User roles
 - ✅ Auth middleware
+
+#### Other
+
 - [ ] Change to Neon Auth
 - [ ] User role robust
 
@@ -30,28 +42,35 @@
 
 - ✅ UI, Layout
 - ✅ Profile settings
+- [ ] Email verification
+- ✅ Reset password
+- [ ] Google Authentication
 
 ### Main Dashboard
 
 - ✅ Main Dashboard
+- ✅ Main Dashboard with studios list
+- ✅ Main Dashboard with practitioners list
 
 ### Studio
 
 - ✅ Studio creation
 - [ ] Studio edit
-- [ ] Studio offerings
+- ✅ Studio offerings
 - [ ] Studio memberships
 - [ ] Studio causes
 - [ ] Studio promocodes
 
 ### Practitioner
 
-- [ ] Practitioner creation
+- ✅ Practitioner creation
 
 ### Offerings
 
-- [ ] Offering creation
-- [ ] Offering edit / duplicate
+- ✅ Offering creation
+- ✅ Offering edit
+- [ ] Offering duplicate
+- ✅ Offering with booking slots
 
 ### Memberships
 
@@ -68,6 +87,11 @@
 - [ ] Promo code creation
 - [ ] Promo code edit / duplicate
 
-### Booking service
+### Bookings
 
-- [ ] Offering creation with booking feature
+- ✅ Bookings table & migrations
+- ✅ Booking API endpoint
+- ✅ User bookings profile page
+- ✅ Cancel booking
+- [ ] Allow cancel but not in last hour
+- [ ] Cancel booking with refund

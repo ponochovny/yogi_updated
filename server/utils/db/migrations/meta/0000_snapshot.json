@@ -66,12 +66,8 @@
           "name": "studio_locations_studio_id_studios_id_fk",
           "tableFrom": "studio_locations",
           "tableTo": "studios",
-          "columnsFrom": [
-            "studio_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["studio_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -141,12 +137,8 @@
           "name": "studio_practitioners_studio_id_studios_id_fk",
           "tableFrom": "studio_practitioners",
           "tableTo": "studios",
-          "columnsFrom": [
-            "studio_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["studio_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         },
@@ -154,12 +146,8 @@
           "name": "studio_practitioners_user_id_user_id_fk",
           "tableFrom": "studio_practitioners",
           "tableTo": "user",
-          "columnsFrom": [
-            "user_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["user_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -169,10 +157,7 @@
         "studio_practitioners_studio_id_user_id_unique": {
           "name": "studio_practitioners_studio_id_user_id_unique",
           "nullsNotDistinct": false,
-          "columns": [
-            "studio_id",
-            "user_id"
-          ]
+          "columns": ["studio_id", "user_id"]
         }
       },
       "policies": {},
@@ -266,12 +251,8 @@
           "name": "studios_owner_id_user_id_fk",
           "tableFrom": "studios",
           "tableTo": "user",
-          "columnsFrom": [
-            "owner_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["owner_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -281,9 +262,7 @@
         "studios_slug_unique": {
           "name": "studios_slug_unique",
           "nullsNotDistinct": false,
-          "columns": [
-            "slug"
-          ]
+          "columns": ["slug"]
         }
       },
       "policies": {},
@@ -396,12 +375,8 @@
           "name": "account_user_id_user_id_fk",
           "tableFrom": "account",
           "tableTo": "user",
-          "columnsFrom": [
-            "user_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["user_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -488,12 +463,8 @@
           "name": "session_user_id_user_id_fk",
           "tableFrom": "session",
           "tableTo": "user",
-          "columnsFrom": [
-            "user_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["user_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -503,9 +474,7 @@
         "session_token_unique": {
           "name": "session_token_unique",
           "nullsNotDistinct": false,
-          "columns": [
-            "token"
-          ]
+          "columns": ["token"]
         }
       },
       "policies": {},
@@ -581,9 +550,7 @@
         "user_email_unique": {
           "name": "user_email_unique",
           "nullsNotDistinct": false,
-          "columns": [
-            "email"
-          ]
+          "columns": ["email"]
         }
       },
       "policies": {},
@@ -694,12 +661,8 @@
           "name": "offering_categories_studio_id_studios_id_fk",
           "tableFrom": "offering_categories",
           "tableTo": "studios",
-          "columnsFrom": [
-            "studio_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["studio_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -740,12 +703,8 @@
           "name": "offering_practitioners_offering_id_offerings_id_fk",
           "tableFrom": "offering_practitioners",
           "tableTo": "offerings",
-          "columnsFrom": [
-            "offering_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["offering_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         },
@@ -753,12 +712,8 @@
           "name": "offering_practitioners_practitioner_id_studio_practitioners_id_fk",
           "tableFrom": "offering_practitioners",
           "tableTo": "studio_practitioners",
-          "columnsFrom": [
-            "practitioner_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["practitioner_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -893,12 +848,8 @@
           "name": "offerings_studio_id_studios_id_fk",
           "tableFrom": "offerings",
           "tableTo": "studios",
-          "columnsFrom": [
-            "studio_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["studio_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         },
@@ -906,12 +857,8 @@
           "name": "offerings_category_id_offering_categories_id_fk",
           "tableFrom": "offerings",
           "tableTo": "offering_categories",
-          "columnsFrom": [
-            "category_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["category_id"],
+          "columnsTo": ["id"],
           "onDelete": "set null",
           "onUpdate": "no action"
         },
@@ -919,12 +866,8 @@
           "name": "offerings_location_id_studio_locations_id_fk",
           "tableFrom": "offerings",
           "tableTo": "studio_locations",
-          "columnsFrom": [
-            "location_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["location_id"],
+          "columnsTo": ["id"],
           "onDelete": "set null",
           "onUpdate": "no action"
         }
@@ -934,9 +877,7 @@
         "offerings_slug_unique": {
           "name": "offerings_slug_unique",
           "nullsNotDistinct": false,
-          "columns": [
-            "slug"
-          ]
+          "columns": ["slug"]
         }
       },
       "policies": {},
@@ -1024,12 +965,8 @@
           "name": "pricing_options_studio_id_studios_id_fk",
           "tableFrom": "pricing_options",
           "tableTo": "studios",
-          "columnsFrom": [
-            "studio_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["studio_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         },
@@ -1037,12 +974,8 @@
           "name": "pricing_options_category_id_offering_categories_id_fk",
           "tableFrom": "pricing_options",
           "tableTo": "offering_categories",
-          "columnsFrom": [
-            "category_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["category_id"],
+          "columnsTo": ["id"],
           "onDelete": "set null",
           "onUpdate": "no action"
         }
@@ -1124,55 +1057,32 @@
     "public.studio_role": {
       "name": "studio_role",
       "schema": "public",
-      "values": [
-        "MANAGER",
-        "PRACTITIONER",
-        "OWNER"
-      ]
+      "values": ["MANAGER", "PRACTITIONER", "OWNER"]
     },
     "public.activity_type": {
       "name": "activity_type",
       "schema": "public",
-      "values": [
-        "CLASS",
-        "APPOINTMENT",
-        "EVENT"
-      ]
+      "values": ["CLASS", "APPOINTMENT", "EVENT"]
     },
     "public.offering_type": {
       "name": "offering_type",
       "schema": "public",
-      "values": [
-        "GROUP",
-        "PRIVATE"
-      ]
+      "values": ["GROUP", "PRIVATE"]
     },
     "public.pricing_type": {
       "name": "pricing_type",
       "schema": "public",
-      "values": [
-        "DROP_IN",
-        "PACK",
-        "MEMBERSHIP"
-      ]
+      "values": ["DROP_IN", "PACK", "MEMBERSHIP"]
     },
     "public.media_entity_type": {
       "name": "media_entity_type",
       "schema": "public",
-      "values": [
-        "OFFERING",
-        "STUDIO",
-        "USER"
-      ]
+      "values": ["OFFERING", "STUDIO", "USER"]
     },
     "public.media_type": {
       "name": "media_type",
       "schema": "public",
-      "values": [
-        "GALLERY",
-        "LOGO",
-        "AVATAR"
-      ]
+      "values": ["GALLERY", "LOGO", "AVATAR"]
     }
   },
   "schemas": {},

@@ -1,154 +1,145 @@
-import { offerings, offeringPractitioners } from '~~/server/db/schema/offering'
 import {
-	studioLocations,
-	studioPractitioners,
-	studios,
+  offerings,
+  offeringPractitioners,
+  pricingOptions
+} from '~~/server/db/schema/offering'
+import {
+  studioLocations,
+  studioPractitioners,
+  studios
 } from '~~/server/db/schema/studio'
 import { and, eq, inArray } from 'drizzle-orm'
 import { createOfferingSchema } from '~/entities/offering/schema'
 import slugify from 'slugify'
 import {
-	MediaEntityTypeEnum,
-	mediaFiles,
-	MediaTypeEnum,
+  MediaEntityTypeEnum,
+  mediaFiles,
+  MediaTypeEnum
 } from '~~/server/db/schema/_other'
+import { priceOptionsType } from '~/entities/membership/schema'
 
-export default defineEventHandler(async (event) => {
-	const session = await auth.api.getSession({
-		headers: event.headers,
-	})
+export default defineEventHandler(async event => {
+  const userData = await requireAuthenticatedUser(event)
+  const slug = requireRouteParam(event, 'slug')
+  const currentUserId = userData.id
+  const db = useDb()
 
-	if (!session || !session.user) {
-		throw createError({
-			statusCode: 401,
-			statusMessage: 'Unauthorized access',
-		})
-	}
+  const body = await readValidatedBody(event, createOfferingSchema.parse)
 
-	// VALIDATING SLUG PARAMETER
-	const slug = getRouterParam(event, 'slug')
-	if (!slug) {
-		throw createError({
-			statusCode: 400,
-			statusMessage: 'Slug is required',
-		})
-	}
+  const offeringSlug = `${slugify(body.name, { lower: true })}-${Math.floor(1000 + Math.random() * 9000)}`
 
-	const currentUserId = session.user.id
-	const db = useDb()
+  // 1. Check if studio exists and the user is it's owner
+  const [studio] = await db
+    .select()
+    .from(studios)
+    .where(and(eq(studios.slug, slug), eq(studios.ownerId, currentUserId)))
+    .limit(1)
 
-	const body = await readValidatedBody(event, createOfferingSchema.parse)
+  if (!studio) {
+    throwApiError(404, "Studio is not found or you don't have permissions")
+  }
 
-	const offeringSlug = `${slugify(body.name, { lower: true })}-${Math.floor(1000 + Math.random() * 9000)}`
+  try {
+    const result = await db.transaction(async tx => {
+      // 1.1 Validations
+      if (body.locationId) {
+        const [location] = await tx
+          .select({ id: studioLocations.id })
+          .from(studioLocations)
+          .where(
+            and(
+              eq(studioLocations.id, body.locationId),
+              eq(studioLocations.studioId, studio.id)
+            )
+          )
+          .limit(1)
+        if (!location) {
+          throwApiError(400, 'Invalid location for this studio')
+        }
+      }
+      const validPractitioners = await tx
+        .select({ id: studioPractitioners.id })
+        .from(studioPractitioners)
+        .where(
+          and(
+            eq(studioPractitioners.studioId, studio.id),
+            inArray(studioPractitioners.id, body.practitionerIds)
+          )
+        )
+      if (validPractitioners.length !== body.practitionerIds.length) {
+        throwApiError(
+          400,
+          'One or more practitioners are invalid for this studio'
+        )
+      }
 
-	// 1. Check if studio exists and the user is it's owner
-	const [studio] = await db
-		.select()
-		.from(studios)
-		.where(and(eq(studios.slug, slug), eq(studios.ownerId, currentUserId)))
-		.limit(1)
+      // 2. Offering creation
+      const [newOffering] = await tx
+        .insert(offerings)
+        .values({
+          studioId: studio.id,
+          slug: offeringSlug,
+          name: body.name,
+          description: body.description,
+          activityType: body.activityType,
+          isPrivate: body.isPrivate,
+          locationId: body.locationId,
+          timezone: body.timezone,
+          duration: body.duration,
+          capacity: body.capacity,
+          isPublished: true // TODO: temporary, as there is no "publish" flow for now. All offerings are published by default
+        })
+        .returning()
 
-	if (!studio) {
-		throw createError({
-			statusCode: 404,
-			statusMessage: "Studio is not found or you don't have permissions",
-		})
-	}
+      if (!newOffering) throwApiError(500, 'Offering creation error')
 
-	try {
-		const result = await db.transaction(async (tx) => {
-			// 1.1 Validations
-			if (body.locationId) {
-				const [location] = await tx
-					.select({ id: studioLocations.id })
-					.from(studioLocations)
-					.where(
-						and(
-							eq(studioLocations.id, body.locationId),
-							eq(studioLocations.studioId, studio.id),
-						),
-					)
-					.limit(1)
-				if (!location) {
-					throw createError({
-						statusCode: 400,
-						statusMessage: 'Invalid location for this studio',
-					})
-				}
-			}
-			const validPractitioners = await tx
-				.select({ id: studioPractitioners.id })
-				.from(studioPractitioners)
-				.where(
-					and(
-						eq(studioPractitioners.studioId, studio.id),
-						inArray(studioPractitioners.id, body.practitionerIds),
-					),
-				)
-			if (validPractitioners.length !== body.practitionerIds.length) {
-				throw createError({
-					statusCode: 400,
-					statusMessage:
-						'One or more practitioners are invalid for this studio',
-				})
-			}
+      // 3. Add trainers
+      const practitionersToInsert = body.practitionerIds.map(
+        practitionerId => ({
+          offeringId: newOffering.id,
+          practitionerId: practitionerId
+        })
+      )
+      await tx.insert(offeringPractitioners).values(practitionersToInsert)
 
-			// 2. Offering creation
-			const [newOffering] = await tx
-				.insert(offerings)
-				.values({
-					studioId: studio.id,
-					slug: offeringSlug,
-					name: body.name,
-					description: body.description,
-					activityType: body.activityType,
-					isPrivate: body.isPrivate,
-					locationId: body.locationId,
-					timezone: body.timezone,
-					duration: body.duration,
-					capacity: body.capacity,
-					isPublished: true, // TODO: temporary, as there is no "publish" flow for now. All offerings are published by default
-				})
-				.returning()
+      if (body.gallery && body.gallery.length > 0) {
+        const galleryInserts = body.gallery.map(
+          (
+            image: { url: string; providerPublicId: string },
+            index: number
+          ) => ({
+            url: image.url,
+            providerPublicId: image.providerPublicId,
+            entityId: newOffering.id,
+            entityType: MediaEntityTypeEnum.OFFERING,
+            type: MediaTypeEnum.GALLERY,
+            order: index
+          })
+        )
+        await tx.insert(mediaFiles).values(galleryInserts)
+      }
 
-			if (!newOffering)
-				throw createError({
-					statusCode: 500,
-					message: 'Offering creation error',
-				})
+      // 4. Add tickets (drop-in)
+      if (body.tickets && body.tickets.length > 0) {
+        const ticketsInserts = body.tickets.map(ticket => ({
+          studioId: studio.id,
+          offeringId: newOffering.id,
+          name: ticket.name,
+          price: Math.round(ticket.price * 100), // Convert to cents
+          description: ticket.description,
+          type: priceOptionsType.DROP_IN,
+          durationDays: 1 // Drop-in tickets are valid for 1 day
+        }))
+        await tx.insert(pricingOptions).values(ticketsInserts)
+      }
 
-			// 3. Add trainers
-			const practitionersToInsert = body.practitionerIds.map(
-				(practitionerId) => ({
-					offeringId: newOffering.id,
-					practitionerId: practitionerId,
-				}),
-			)
-			await tx.insert(offeringPractitioners).values(practitionersToInsert)
+      return newOffering
+    })
 
-			if (body.gallery && body.gallery.length > 0) {
-				const galleryInserts = body.gallery.map(
-					(
-						image: { url: string; providerPublicId: string },
-						index: number,
-					) => ({
-						url: image.url,
-						providerPublicId: image.providerPublicId,
-						entityId: newOffering.id,
-						entityType: MediaEntityTypeEnum.OFFERING,
-						type: MediaTypeEnum.GALLERY,
-						order: index,
-					}),
-				)
-				await tx.insert(mediaFiles).values(galleryInserts)
-			}
-
-			return newOffering
-		})
-
-		return { success: true, offering: result }
-	} catch (error: unknown) {
-		console.error('Offering creation failed:', error)
-		throw createError({ statusCode: 500, message: 'Failed to create offering' })
-	}
+    return { success: true, offering: result }
+  } catch (error: unknown) {
+    if (isApiError(error)) throw error
+    console.error('Failed to create offering', error)
+    throwApiError(500, 'Failed to create offering')
+  }
 })

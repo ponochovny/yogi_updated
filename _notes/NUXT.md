@@ -1,6 +1,6 @@
 ## Nuxt - Request Typing
 
-``` TS
+```TS
 export type Offering = Omit<typeof offerings.$inferSelect,
 'createdAt' | 'updatedAt'
 > & {
@@ -8,7 +8,8 @@ export type Offering = Omit<typeof offerings.$inferSelect,
 	updatedAt: string
 }
 ```
-``` TS
+
+```TS
 import type { InternalApi } from 'nitropack'
 
 export type OfferingItem = InternalApi['/api/offerings']['get']['offerings'][number]
