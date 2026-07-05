@@ -1,10 +1,16 @@
 <script setup lang="ts">
 import { Trash2Icon } from '@lucide/vue'
 import { format } from 'date-fns'
+import { useFieldArray, useForm } from 'vee-validate'
 import { toast } from 'vue-sonner'
 import { placeholderImageUrl } from '~/config/constants'
 import { offeringSlotStatus } from '~/entities/offering/schema'
 import type { updateSlotsSchemaInput } from '~/entities/slots/schema'
+import {
+  scheduleSchema,
+  type UpdateScheduleInput
+} from '~/entities/schedule/schema'
+import { toTypedSchema } from '@vee-validate/zod'
 
 useHead({
   title: 'Schedule Management'
@@ -20,45 +26,49 @@ const route = useRoute()
 const slug = route.params.slug as string
 const offeringSlug = route.params.offeringSlug as string
 
-// Form state for generating slots
-const form = ref({
-  startDate: '',
-  endDate: '',
-  rules: [
-    { dayOfWeek: 1, startTime: '09:00', endTime: '10:00', practitionerId: '' }
-  ]
+const { handleSubmit } = useForm({
+  validationSchema: toTypedSchema(scheduleSchema),
+  initialValues: {
+    startDate: '',
+    endDate: '',
+    rules: [
+      { dayOfWeek: 1, startTime: '09:00', endTime: '10:00', practitionerId: '' }
+    ]
+  }
 })
 
-// Add new day rule to the generator
-const addRule = () => {
-  form.value.rules.push({
-    dayOfWeek: 1,
-    startTime: '09:00',
-    endTime: '10:00',
-    practitionerId: ''
-  })
-}
+const { fields, push, remove } = useFieldArray('rules')
+
+const submitRules = () =>
+  handleSubmit(generateSlots, errors => {
+    console.log('Validation errors:', errors)
+    toast.error('Please fix the validation errors before generating slots.')
+  })()
 
 // Generate slots via API
-const generateSlots = async () => {
+const generateSlots = async (values: UpdateScheduleInput) => {
   try {
     await $fetch(
       `/api/business/studios/${slug}/offerings/${offeringSlug}/slots/generate`,
       {
         method: 'POST',
-        body: form.value
+        body: values
       }
     )
     toast.success('Slots generated successfully!')
+    refreshOfferingsSlots()
     // Here we would typically refresh a list/calendar of existing slots below
   } catch (err) {
+    console.dir(err)
     toast.error('Generation failed', {
-      description: (err as Error).message || 'Unknown error.'
+      description:
+        (err as { data?: { message?: string } }).data?.message ||
+        'Unknown error.'
     })
   }
 }
 
-const { data: offeringsSlots } = await useFetch(
+const { data: offeringsSlots, refresh: refreshOfferingsSlots } = await useFetch(
   `/api/business/studios/${slug}/offerings/${offeringSlug}/slots`
 )
 const rawSlots = computed(() => offeringsSlots.value?.slots || [])
@@ -89,7 +99,9 @@ const updateSlot = async (slot: updateSlotsSchemaInput) => {
     toast.success('Slot updated successfully!')
   } catch (err) {
     toast.error('Update failed', {
-      description: (err as Error)?.message || 'Unknown error.'
+      description:
+        (err as { data?: { message?: string } }).data?.message ||
+        'Unknown error.'
     })
   }
 }
@@ -134,88 +146,216 @@ groupSlots()
   <div class="max-w-3xl space-y-8">
     <h1 class="text-2xl font-bold">Schedule Management</h1>
 
-    <div class="p-6 bg-white/10 border rounded-xl shadow-sm">
+    <form
+      class="p-6 bg-white/10 border rounded-xl shadow-sm space-y-6"
+      @submit.prevent="submitRules"
+    >
       <h2 class="text-lg font-semibold mb-4">Generate Recurring Slots</h2>
 
       <div class="grid grid-cols-2 gap-4 mb-6">
         <div>
-          <label class="block text-sm font-medium mb-1">Start Date</label>
-          <Input v-model="form.startDate" type="date" class="text-sm w-70" />
+          <FormField v-slot="{ value, setValue }" name="startDate">
+            <FormItem>
+              <FormLabel>Start date</FormLabel>
+              <FormControl>
+                <Input
+                  type="date"
+                  :model-value="value"
+                  @update:model-value="setValue"
+                />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          </FormField>
         </div>
         <div>
-          <label class="block text-sm font-medium mb-1">End Date</label>
-
-          <Input v-model="form.endDate" type="date" class="text-sm w-70" />
+          <FormField v-slot="{ value, setValue }" name="endDate">
+            <FormItem>
+              <FormLabel>End date</FormLabel>
+              <FormControl>
+                <Input
+                  type="date"
+                  :model-value="value"
+                  @update:model-value="setValue"
+                />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          </FormField>
         </div>
       </div>
 
       <div class="space-y-4 mb-6">
-        <h3 class="text-sm font-medium text-gray-200">Weekly Rules</h3>
-        <div
-          v-for="(rule, index) in form.rules"
-          :key="index"
-          class="flex gap-2 items-center bg-white/10 p-3 rounded-xl justify-start"
-        >
-          <NativeSelect v-model="rule.dayOfWeek" class="w-32.5">
-            <NativeSelectOption :value="1"> Monday </NativeSelectOption>
-            <NativeSelectOption :value="2"> Tuesday </NativeSelectOption>
-            <NativeSelectOption :value="3"> Wednesday </NativeSelectOption>
-            <NativeSelectOption :value="4"> Thursday </NativeSelectOption>
-            <NativeSelectOption :value="5"> Friday </NativeSelectOption>
-            <NativeSelectOption :value="6"> Saturday </NativeSelectOption>
-            <NativeSelectOption :value="0"> Sunday </NativeSelectOption>
-          </NativeSelect>
+        <!-- RULES -->
+        <div class="flex flex-col gap-4 col-span-2">
+          <div class="mb-2">
+            <label
+              class="text-base font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+              >Weekly Rules</label
+            >
+            <p class="text-[0.8rem] text-muted-foreground mt-2">
+              Define the recurring schedule for this offering. Each rule
+              specifies a day of the week, start and end time, and the
+              practitioner assigned to that slot.
+            </p>
+          </div>
 
-          <Input v-model="rule.startTime" type="time" class="text-sm w-30" />
-          <span class="text-gray-500">-</span>
-          <Input v-model="rule.endTime" type="time" class="text-sm w-30" />
-
-          <Select v-model="rule.practitionerId">
-            <SelectTrigger class="grow">
-              <div class="flex items-center gap-3">
-                <NuxtImg
-                  v-if="practitionerById.get(rule.practitionerId)"
-                  :src="
-                    practitionerById
-                      .get(rule.practitionerId)
-                      ?.avatar?.replace(
-                        '/upload/',
-                        '/upload/w_48,h_48,c_fill/'
-                      ) || placeholderImageUrl
-                  "
-                  class="w-6 h-6 rounded-full"
-                />
-                <span>{{
-                  practitionerById.get(rule.practitionerId)?.name ||
-                  'Select practitioner'
-                }}</span>
-              </div>
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem
-                v-for="practitioner in practitioners"
-                :key="practitioner.practitionerId"
-                :value="practitioner.practitionerId"
+          <div class="flex flex-col gap-3">
+            <div
+              v-for="(field, idx) in fields"
+              :key="field.key"
+              class="flex flex-col gap-3 p-4 border rounded-lg bg-white/5 hover:bg-white/10 relative"
+            >
+              <div
+                class="grid grid-cols-[130px_120px_120px_1fr_auto] gap-2 w-full mt-2"
               >
-                {{ practitioner.name }}
-              </SelectItem>
-            </SelectContent>
-          </Select>
+                <FormField
+                  v-slot="{ setValue, value }"
+                  :name="`rules[${idx}].dayOfWeek`"
+                >
+                  <FormItem>
+                    <FormControl>
+                      <NativeSelect
+                        class="w-32.5"
+                        :model-value="value"
+                        @update:model-value="setValue"
+                      >
+                        <NativeSelectOption :value="1">
+                          Monday
+                        </NativeSelectOption>
+                        <NativeSelectOption :value="2">
+                          Tuesday
+                        </NativeSelectOption>
+                        <NativeSelectOption :value="3">
+                          Wednesday
+                        </NativeSelectOption>
+                        <NativeSelectOption :value="4">
+                          Thursday
+                        </NativeSelectOption>
+                        <NativeSelectOption :value="5">
+                          Friday
+                        </NativeSelectOption>
+                        <NativeSelectOption :value="6">
+                          Saturday
+                        </NativeSelectOption>
+                        <NativeSelectOption :value="0">
+                          Sunday
+                        </NativeSelectOption>
+                      </NativeSelect>
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                </FormField>
+                <FormField
+                  v-slot="{ value, setValue }"
+                  :name="`rules[${idx}].startTime`"
+                >
+                  <FormItem>
+                    <FormControl>
+                      <Input
+                        type="time"
+                        :model-value="value"
+                        class="text-sm w-30"
+                        @update:model-value="setValue"
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                </FormField>
+                <FormField
+                  v-slot="{ value, setValue }"
+                  :name="`rules[${idx}].endTime`"
+                >
+                  <FormItem>
+                    <FormControl>
+                      <Input
+                        type="time"
+                        :model-value="value"
+                        class="text-sm w-30"
+                        @update:model-value="setValue"
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                </FormField>
+
+                <FormField
+                  v-slot="{ value, setValue }"
+                  :name="`rules[${idx}].practitionerId`"
+                >
+                  <FormItem>
+                    <FormControl>
+                      <Select
+                        :model-value="value"
+                        @update:model-value="setValue"
+                      >
+                        <SelectTrigger class="w-full">
+                          <div class="flex items-center gap-3">
+                            <NuxtImg
+                              v-if="practitionerById.get(value)"
+                              :src="
+                                practitionerById
+                                  .get(value)
+                                  ?.avatar?.replace(
+                                    '/upload/',
+                                    '/upload/w_48,h_48,c_fill/'
+                                  ) || placeholderImageUrl
+                              "
+                              class="w-6 h-6 rounded-full"
+                            />
+                            <span>
+                              {{
+                                practitionerById.get(value)?.name ||
+                                'Select practitioner'
+                              }}
+                            </span>
+                          </div>
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem
+                            v-for="practitioner in practitioners"
+                            :key="practitioner.practitionerId"
+                            :value="practitioner.practitionerId"
+                          >
+                            {{ practitioner.name }}
+                          </SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                </FormField>
+                <Button
+                  v-if="fields.length > 1"
+                  class="text-red-700 text-sm w-fit"
+                  variant="ghost"
+                  @click="remove(idx)"
+                >
+                  <Trash2Icon />
+                </Button>
+              </div>
+            </div>
+          </div>
 
           <Button
-            v-if="form.rules.length > 1"
-            class="text-red-700 text-sm"
-            variant="ghost"
-            @click="form.rules.splice(index, 1)"
+            type="button"
+            class="w-fit"
+            @click="
+              push({
+                dayOfWeek: 1,
+                startTime: '09:00',
+                endTime: '10:00',
+                practitionerId: ''
+              })
+            "
           >
-            <Trash2Icon />
+            + Add Rule
           </Button>
         </div>
-        <Button @click="addRule"> + Add Rule </Button>
       </div>
 
-      <Button class="w-full" @click="generateSlots"> Generate Slots </Button>
-    </div>
+      <Button class="w-full" type="submit"> Generate Slots </Button>
+    </form>
 
     <div
       v-if="Object.keys(groupedSlots).length"

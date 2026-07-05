@@ -104,11 +104,10 @@ export default defineEventHandler(async event => {
     }
 
     if (slotsToInsert.length === 0) {
-      return {
-        success: false,
-        message:
-          'In the selected range, there are no matches by days of the week'
-      }
+      throwApiError(
+        400,
+        'No slots generated. Please check your rules and date range.'
+      )
     }
 
     // 3. Batch Insert - very fast in Drizzle

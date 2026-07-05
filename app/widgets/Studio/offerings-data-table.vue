@@ -1,6 +1,7 @@
 <script lang="ts" setup>
 import {
   ArrowUpDown,
+  CalendarClockIcon,
   ChevronDownIcon,
   MoreHorizontalIcon,
   PencilSparklesIcon
@@ -189,6 +190,15 @@ const table = useVueTable({
             "
           >
             <PencilSparklesIcon /> Edit
+          </DropdownMenuItem>
+          <DropdownMenuItem
+            @click="
+              $router.push(
+                `/business/${route.params.slug}/offerings/${offering.slug}/schedule`
+              )
+            "
+          >
+            <CalendarClockIcon /> Schedule
           </DropdownMenuItem>
         </DropdownMenuContent>
       </DropdownMenu>
