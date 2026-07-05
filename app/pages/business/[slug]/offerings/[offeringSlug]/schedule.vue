@@ -39,11 +39,7 @@ const { handleSubmit } = useForm({
 
 const { fields, push, remove } = useFieldArray('rules')
 
-const submitRules = () =>
-  handleSubmit(generateSlots, errors => {
-    console.log('Validation errors:', errors)
-    toast.error('Please fix the validation errors before generating slots.')
-  })()
+const submitRules = () => handleSubmit(generateSlots)
 
 // Generate slots via API
 const generateSlots = async (values: UpdateScheduleInput) => {
@@ -59,7 +55,6 @@ const generateSlots = async (values: UpdateScheduleInput) => {
     refreshOfferingsSlots()
     // Here we would typically refresh a list/calendar of existing slots below
   } catch (err) {
-    console.dir(err)
     toast.error('Generation failed', {
       description:
         (err as { data?: { message?: string } }).data?.message ||
@@ -327,6 +322,7 @@ groupSlots()
                 </FormField>
                 <Button
                   v-if="fields.length > 1"
+                  type="button"
                   class="text-red-700 text-sm w-fit"
                   variant="ghost"
                   @click="remove(idx)"

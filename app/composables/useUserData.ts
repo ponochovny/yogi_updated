@@ -48,19 +48,19 @@ export const useUserData = () => {
   )
 
   const getRolesInStudio = (slug: string): UserRole[] => {
+    if (session.value?.isPending) return roles.value
+
     // @ts-expect-error: workspaces is not typed in the session object, but we know it exists
     const userWorkspaces = session.value?.data?.user?.workspaces as
       | IWorkSpace[]
       | undefined
-
-    if (!userWorkspaces) return roles.value
 
     const workspaces = userWorkspaces ?? []
 
     roles.value = workspaces
       .filter(w => w.studio.slug === slug)
       .map(w => w.role)
-    return roles.value.length > 0 ? roles.value : []
+    return roles.value
   }
 
   return { userData, getRolesInStudio, session }

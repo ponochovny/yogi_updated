@@ -65,32 +65,7 @@ export const createOfferingSchema = z.object({
   )
 })
 
-export const updateOfferingSchema = z.object({
-  name: z.string().min(2),
-  description: z.string().optional(),
-  activityType: z.enum([
-    ActivityType.CLASS,
-    ActivityType.APPOINTMENT,
-    ActivityType.EVENT
-  ]),
-  isPrivate: z.boolean(),
-  locationId: z.uuid().nullable(), // null means online
-  timezone: z.string(),
-  duration: z.number().min(5),
-  capacity: z.number().nullable(),
-  practitionerIds: z.array(z.uuid()).min(1, 'Choose at least one practitioner'),
-  gallery: z
-    .array(
-      z.object({
-        url: z.url('Invalid URL format for logo'),
-        providerPublicId: z
-          .string()
-          .trim()
-          .min(1, 'Provider public ID is required for logo')
-      })
-    )
-    .optional(),
-  // type: 'DROP_IN', offeringId: 'id', applicableCategoryIds: null
+export const updateOfferingSchema = createOfferingSchema.extend({
   tickets: z.array(
     z.object({
       id: z.string(),
@@ -100,7 +75,7 @@ export const updateOfferingSchema = z.object({
     })
   )
 })
-
+export type UpdateOfferingInput = z.infer<typeof updateOfferingSchema>
 export type CreateOfferingInput = z.infer<typeof createOfferingSchema>
 
 export const createSlotSchema = z.object({
