@@ -1,4 +1,4 @@
-import { and, eq } from 'drizzle-orm'
+import { and, eq, inArray } from 'drizzle-orm'
 import { priceOptionsType } from '~/entities/membership/schema'
 import { userRoles } from '~~/server/auth/config'
 import { pricingOptions } from '~~/server/db/schema/offering'
@@ -30,7 +30,10 @@ export default defineEventHandler(async event => {
       .where(
         and(
           eq(pricingOptions.studioId, studio.id),
-          eq(pricingOptions.type, priceOptionsType.MEMBERSHIP)
+          inArray(pricingOptions.type, [
+            priceOptionsType.MEMBERSHIP,
+            priceOptionsType.PACK
+          ])
         )
       )
 

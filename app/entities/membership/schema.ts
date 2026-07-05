@@ -6,7 +6,7 @@ export const priceOptionsType = {
   MEMBERSHIP: 'MEMBERSHIP'
 } as const
 
-const commonMembershipFields = {
+const basePricingSchema = z.object({
   name: z
     .string()
     .min(3, 'Name must be at least 3 characters long')
@@ -19,30 +19,25 @@ const commonMembershipFields = {
   durationDays: z.number().int().min(1, 'Duration must be at least 1 day'),
   isActive: z.boolean(),
   applicableCategoryIds: z.array(z.string()).optional()
-} as const
+})
 
 export const createMembershipSchema = z.discriminatedUnion('type', [
-  z.object({
+  // DROP-IN
+  basePricingSchema.extend({
     type: z.literal(priceOptionsType.DROP_IN),
-    credits: z
-      .number()
-      .int()
-      .min(1, 'Drop-in memberships require exactly 1 credit')
-      .max(1, 'Drop-in memberships require exactly 1 credit'),
-    ...commonMembershipFields
+    credits: z.literal(1, 'Drop-in requires exactly 1 credit')
   }),
-  z.object({
+
+  // PACK: From 2 credits and more (since 1 credit is a DROP_IN)
+  basePricingSchema.extend({
     type: z.literal(priceOptionsType.PACK),
-    credits: z
-      .number()
-      .int()
-      .min(1, 'Pack memberships require at least 1 credit'),
-    ...commonMembershipFields
+    credits: z.number().int().min(2, 'Pack requires at least 2 credits')
   }),
-  z.object({
+
+  // MEMBERSHIP: No credits (unlimited time), strictly 0
+  basePricingSchema.extend({
     type: z.literal(priceOptionsType.MEMBERSHIP),
-    credits: z.null(),
-    ...commonMembershipFields
+    credits: z.literal(0, 'Membership does not use credits')
   })
 ])
 
