@@ -137,6 +137,7 @@ export const useBusinessMenu = () => {
     // }
 
     const workspaceRoles =
+      // @ts-expect-error: workspaces is not typed in the session object, but we know it exists
       (user.value?.workspaces as IWorkSpace[])?.map(el => el.role) ?? []
     const uRoles = (user.value?.role as UserRole[]) ?? []
 
@@ -163,6 +164,7 @@ export const useBusinessMenu = () => {
     const filteredMenuByStudioSlug = () => {
       const studioSlug = slug.value
 
+      // @ts-expect-error: workspaces is not typed in the session object, but we know it exists
       const workspace = (user.value?.workspaces as IWorkSpace[])?.find(
         w => w.studio.slug === studioSlug
       )

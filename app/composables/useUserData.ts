@@ -22,6 +22,8 @@ export const useUserData = () => {
 
   const userData = ref({ ...emptyUserData })
 
+  const roles = ref<UserRole[]>([])
+
   watch(
     () => session.value?.data?.user,
     newUser => {
@@ -31,6 +33,7 @@ export const useUserData = () => {
       }
 
       const workspaceRoles =
+        // @ts-expect-error: workspaces is not typed in the session object, but we know it exists
         (newUser?.workspaces as { role: UserRole }[])?.map(el => el.role) ?? []
       const userRoles = (newUser?.role as UserRole[]) ?? []
 
@@ -45,13 +48,19 @@ export const useUserData = () => {
   )
 
   const getRolesInStudio = (slug: string): UserRole[] => {
-    const workspaces =
-      (session.value?.data?.user?.workspaces as IWorkSpace[]) ?? []
+    // @ts-expect-error: workspaces is not typed in the session object, but we know it exists
+    const userWorkspaces = session.value?.data?.user?.workspaces as
+      | IWorkSpace[]
+      | undefined
 
-    const roles = workspaces
+    if (!userWorkspaces) return roles.value
+
+    const workspaces = userWorkspaces ?? []
+
+    roles.value = workspaces
       .filter(w => w.studio.slug === slug)
       .map(w => w.role)
-    return roles.length > 0 ? roles : []
+    return roles.value.length > 0 ? roles.value : []
   }
 
   return { userData, getRolesInStudio, session }
