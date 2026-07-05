@@ -143,7 +143,14 @@ const membershipCreated = () => {
               <span
                 >Price: ${{ (Number(membership.price) / 100).toFixed(2) }}
               </span>
-              <span>Credits: {{ membership.credits ?? 'Unlimited' }}</span>
+              <span>
+                Credits:
+                {{
+                  membership.type === 'MEMBERSHIP'
+                    ? 'Unlimited'
+                    : membership.credits
+                }}
+              </span>
             </ItemDescription>
           </ItemContent>
         </Item>

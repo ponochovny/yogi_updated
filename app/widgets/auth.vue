@@ -47,40 +47,44 @@ const handleRegister = handleSubmit(async values => {
   errorMsg.value = ''
   isProcessing.value = true
 
-  const { error } = await signUp.email({
-    email: values.email,
-    password: values.password,
-    name: values.name,
-    callbackURL: '/'
-  })
+  try {
+    const { error } = await signUp.email({
+      email: values.email,
+      password: values.password,
+      name: values.name,
+      callbackURL: '/'
+    })
 
-  isProcessing.value = false
+    if (error) {
+      errorMsg.value = error.message || 'Error registering'
+      return
+    }
 
-  if (error) {
-    errorMsg.value = error.message || 'Error registering'
-    return
+    await router.push('/profile/settings')
+  } finally {
+    isProcessing.value = false
   }
-
-  await router.push('/profile/settings')
 })
 
 const handleLogin = handleSubmit(async values => {
   errorMsg.value = ''
   isProcessing.value = true
 
-  const { error } = await signIn.email({
-    email: values.email,
-    password: values.password
-  })
+  try {
+    const { error } = await signIn.email({
+      email: values.email,
+      password: values.password
+    })
 
-  isProcessing.value = false
+    if (error) {
+      errorMsg.value = error.message || 'Email or password is incorrect'
+      return
+    }
 
-  if (error) {
-    errorMsg.value = error.message || 'Email or password is incorrect'
-    return
+    await router.push('/profile/settings')
+  } finally {
+    isProcessing.value = false
   }
-
-  await router.push('/profile/settings')
 })
 
 const handleSignOut = async () => {
