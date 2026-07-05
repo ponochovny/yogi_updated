@@ -39,8 +39,6 @@ const { handleSubmit } = useForm({
 
 const { fields, push, remove } = useFieldArray('rules')
 
-const submitRules = () => handleSubmit(generateSlots)
-
 // Generate slots via API
 const generateSlots = async (values: UpdateScheduleInput) => {
   try {
@@ -62,6 +60,8 @@ const generateSlots = async (values: UpdateScheduleInput) => {
     })
   }
 }
+
+const submitRules = handleSubmit(generateSlots)
 
 const { data: offeringsSlots, refresh: refreshOfferingsSlots } = await useFetch(
   `/api/business/studios/${slug}/offerings/${offeringSlug}/slots`
