@@ -7,7 +7,7 @@ import { toast } from 'vue-sonner'
 import { placeholderImageUrl } from '~/config/constants'
 import {
   ActivityType,
-  createOfferingSchema,
+  updateOfferingSchema,
   type CreateOfferingInput
 } from '~/entities/offering/schema'
 import openUploadWidget from '~/shared/composables/useCloudinary'
@@ -51,9 +51,10 @@ if (offerError.value) {
 }
 
 const offering = computed(() => offerData.value?.offering)
+const tickets = computed(() => offerData.value?.tickets)
 const pending = computed(() => contextPending.value || offerPending.value)
 
-const offeringSchema = toTypedSchema(createOfferingSchema)
+const offeringSchema = toTypedSchema(updateOfferingSchema)
 
 const {
   isValidating,
@@ -76,6 +77,7 @@ const {
     practitionerIds: [],
     tickets: [
       {
+        id: '',
         name: 'Drop-in',
         price: 0,
         description: ''
@@ -100,7 +102,15 @@ watch(
       setFieldValue('timezone', value.timezone)
       setFieldValue('duration', value.duration)
       setFieldValue('capacity', value.capacity)
-      // setFieldValue('tickets', value.tickets)
+      setFieldValue(
+        'tickets',
+        tickets.value?.map(ticket => ({
+          id: ticket.id,
+          name: ticket.name,
+          price: ticket.price,
+          description: ticket.description || ''
+        })) || []
+      )
       setFieldValue('practitionerIds', value.practitionerIds || [])
       valuesInitialized.value = true
     }
@@ -140,20 +150,13 @@ const updateOffering = async (values: CreateOfferingInput) => {
   }
 }
 
-// const submitOffering = handleSubmit(updateOffering)
-const submitOffering = handleSubmit(
-  values => {
-    // Success callback
-    console.log('Success:', values)
-    updateOffering(values)
-  },
-  ({ errors }) => {
-    const firstError = Object.keys(errors)[0]
-    toast.error(`Please fix the field: ${firstError}`, {
-      description: firstError || 'Unknown error.'
-    })
-  }
-)
+const submitOffering = handleSubmit(updateOffering, ({ errors }) => {
+  console.log('Validation errors:', errors)
+  const firstError = Object.keys(errors)[0]
+  toast.error(`Please fix the field: ${firstError}`, {
+    description: firstError || 'Unknown error.'
+  })
+})
 function togglePractitioner(id: string) {
   const currentIds = [...(formValues.practitionerIds || [])]
   const index = currentIds.indexOf(id)
@@ -437,10 +440,11 @@ const removeFromGallery = (index: number) => {
                     <FormItem>
                       <FormControl>
                         <Input
-                          placeholder="Price"
+                          placeholder="Price (drop-in)"
                           v-bind="componentField"
                           autocomplete="off"
                           type="number"
+                          step="any"
                         />
                       </FormControl>
                       <FormMessage />
@@ -454,7 +458,7 @@ const removeFromGallery = (index: number) => {
               type="button"
               variant="outline"
               class="w-fit mt-2"
-              @click="push({ name: '', description: '', price: 0 })"
+              @click="push({ id: '', name: '', description: '', price: 0 })"
             >
               + Add Ticket
             </Button>

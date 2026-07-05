@@ -120,18 +120,16 @@ export default defineEventHandler(async event => {
       }
 
       // 4. Add tickets (drop-in)
-      if (body.tickets && body.tickets.length > 0) {
-        const ticketsInserts = body.tickets.map(ticket => ({
-          studioId: studio.id,
-          offeringId: newOffering.id,
-          name: ticket.name,
-          price: Math.round(ticket.price * 100), // Convert to cents
-          description: ticket.description,
-          type: priceOptionsType.DROP_IN,
-          durationDays: 1 // Drop-in tickets are valid for 1 day
-        }))
-        await tx.insert(pricingOptions).values(ticketsInserts)
-      }
+      const ticketsInserts = body.tickets.map(ticket => ({
+        studioId: studio.id,
+        offeringId: newOffering.id,
+        name: ticket.name,
+        price: Math.round(ticket.price * 100), // Convert to cents
+        description: ticket.description,
+        type: priceOptionsType.DROP_IN,
+        durationDays: 1 // Drop-in tickets are valid for 1 day
+      }))
+      await tx.insert(pricingOptions).values(ticketsInserts)
 
       return newOffering
     })
