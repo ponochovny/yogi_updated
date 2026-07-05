@@ -69,7 +69,8 @@ const submitRequestReset = requestResetForm.handleSubmit(async values => {
           class="w-full"
           :disabled="requestResetForm.isSubmitting"
         >
-          Send Reset Link
+          <Spinner v-if="requestResetForm.isSubmitting" class="animate-spin" />
+          {{ requestResetForm.isSubmitting ? 'Sending...' : 'Send Reset Link' }}
         </Button>
       </ClientOnly>
     </form>

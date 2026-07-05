@@ -188,6 +188,7 @@ const handleSignOut = async () => {
             :disabled="isProcessing"
             @click="handleRegister"
           >
+            <Spinner v-if="isProcessing" class="animate-spin" />
             Register
           </Button>
           <Button
@@ -197,6 +198,7 @@ const handleSignOut = async () => {
             :disabled="isProcessing"
             @click="handleLogin"
           >
+            <Spinner v-if="isProcessing" class="animate-spin" />
             Log in
           </Button>
         </div>
