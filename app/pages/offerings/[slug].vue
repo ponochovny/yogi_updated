@@ -1,6 +1,8 @@
 <script setup lang="ts">
 import { format } from 'date-fns'
+import type { BookingOptions, OfferingSlot } from '~/entities/booking/schema'
 import { toast } from 'vue-sonner'
+
 const route = useRoute()
 const offeringSlug = route.params.slug
 
@@ -13,8 +15,18 @@ const [{ data: offeringsData }, { data: offeringsSlots }] = await Promise.all([
 ])
 
 const offering = computed(() => offeringsData.value?.offering || null)
-
 const rawSlots = computed(() => offeringsSlots.value?.slots || [])
+
+useHead({
+  title: offering.value?.name || 'Offering',
+  meta: [
+    {
+      name: 'description',
+      content:
+        offering.value?.description || 'Offering details and available slots'
+    }
+  ]
+})
 
 // Group slots by date for UI presentation
 const groupedSlots = computed(() => {
@@ -33,13 +45,43 @@ const groupedSlots = computed(() => {
   )
 })
 
-// TODO: Set slot type properly instead of current type
-const bookSlot = async (slot: { id: string }) => {
+const selectedSlot = ref<OfferingSlot | null>(null)
+const dropInTickets = ref<BookingOptions['dropInTickets']>([])
+const userPasses = ref<BookingOptions['userPasses']>([])
+
+/** Fetch available pricing options for a given slot */
+const checkAvailablePricingOptions = async (slot: OfferingSlot) => {
   try {
-    await $fetch(`/api/slots/${slot.id}/book`, {
+    const pricingOptions = await $fetch(`/api/bookings/${slot.id}/options`)
+
+    dropInTickets.value = pricingOptions.options.dropInTickets
+    userPasses.value = pricingOptions.options.userPasses
+    selectedSlot.value = slot
+  } catch (err) {
+    toast.error(
+      `Error fetching pricing options: ${(err as { data: { message: string } }).data.message}`
+    )
+  }
+}
+
+/** Book a selected slot */
+const bookSlot = async (
+  slot: OfferingSlot,
+  pricingOptionId: string | null,
+  userPassId: string | null
+) => {
+  try {
+    // await $fetch(`/api/slots/${slot.id}/book`, {
+    //   method: 'POST',
+    //   body: {
+    //     ...slot
+    //   }
+    // })
+    await $fetch(`/api/bookings/${slot.id}`, {
       method: 'POST',
       body: {
-        ...slot
+        pricingOptionId,
+        userPassId
       }
     })
 
@@ -94,9 +136,72 @@ const bookSlot = async (slot: { id: string }) => {
                   Coach: {{ slot.practitioner.name }}
                 </div>
               </div>
-              <Button variant="outline" size="sm" @click="() => bookSlot(slot)">
-                Book Now
-              </Button>
+
+              <Dialog>
+                <DialogTrigger as-child>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    @click="checkAvailablePricingOptions(slot)"
+                  >
+                    Book Now
+                  </Button>
+                </DialogTrigger>
+                <DialogContent>
+                  <DialogHeader>
+                    <DialogTitle>
+                      Book the {{ offering?.name }}
+                      <br />
+                      on
+                      {{
+                        format(new Date(slot.startTime), 'MMMM d, yyyy HH:mm')
+                      }}
+                    </DialogTitle>
+                    <DialogDescription>
+                      Choose from the available booking options below:
+                    </DialogDescription>
+                  </DialogHeader>
+
+                  <div v-if="!dropInTickets.length && !userPasses.length">
+                    No available booking options for this slot.
+                  </div>
+
+                  <div v-else>
+                    <div v-if="dropInTickets.length">
+                      <h5 class="font-semibold mb-2">Drop-in Tickets</h5>
+                      <ul class="space-y-1 mb-4">
+                        <li
+                          v-for="ticket in dropInTickets"
+                          :key="ticket.id"
+                          class="flex justify-between items-center p-2 bg-white/5 rounded-lg"
+                          @click="bookSlot(slot, ticket.id, null)"
+                        >
+                          <span>Drop-in: {{ ticket.name }}</span> —
+                          <span>${{ ticket.price.toFixed(2) }}</span>
+                        </li>
+                      </ul>
+                    </div>
+
+                    <div v-if="userPasses.length">
+                      <h5 class="font-semibold mb-2">User Passes</h5>
+                      <p class="text-sm text-muted-foreground mb-2">
+                        Use your existing passes to book this slot.
+                      </p>
+                      <ul class="space-y-1">
+                        <li
+                          v-for="pass in userPasses"
+                          :key="pass.id"
+                          class="flex justify-between items-center p-2 bg-white/5 rounded-lg"
+                          @click="bookSlot(slot, null, pass.id)"
+                        >
+                          <span>{{ pass.name }}</span> —
+                          <span>{{ pass.remainingCredits }} credits left</span>
+                        </li>
+                      </ul>
+                    </div>
+                  </div>
+                </DialogContent>
+              </Dialog>
             </div>
           </div>
         </div>

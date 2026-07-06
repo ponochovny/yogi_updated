@@ -27,6 +27,7 @@ export default defineNuxtConfig({
     optimizeDeps: {
       include: [
         '@lucide/vue',
+        '@tanstack/vue-table',
         '@vee-validate/zod',
         '@vue/devtools-core',
         '@vue/devtools-kit',

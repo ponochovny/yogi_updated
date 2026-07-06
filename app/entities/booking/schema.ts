@@ -19,6 +19,11 @@ export const updatableBookingStatuses = [
   BookingStatus.COMPLETED
 ] as const
 
+export const createBookingSchema = z.object({
+  pricingOptionId: z.string().uuid().optional(),
+  userPassId: z.string().uuid().optional()
+})
+
 export const updateBookingStatusSchema = z.object({
   status: z.enum(updatableBookingStatuses)
 })
@@ -29,3 +34,9 @@ export const updateBookingSchema = z.object({
 
 export type BookingItem =
   InternalApi['/api/account/bookings']['get']['bookings'][number]
+
+export type OfferingSlot =
+  InternalApi['/api/offerings/:offeringSlug/slots']['get']['slots'][number]
+
+export type BookingOptions =
+  InternalApi['/api/bookings/:slotId/options']['get']['options']
