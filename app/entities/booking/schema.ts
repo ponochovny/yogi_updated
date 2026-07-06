@@ -19,10 +19,14 @@ export const updatableBookingStatuses = [
   BookingStatus.COMPLETED
 ] as const
 
-export const createBookingSchema = z.object({
-  pricingOptionId: z.string().uuid().optional(),
-  userPassId: z.string().uuid().optional()
-})
+export const createBookingSchema = z
+  .object({
+    pricingOptionId: z.string().uuid().optional(),
+    userPassId: z.string().uuid().optional()
+  })
+  .refine(data => Boolean(data.pricingOptionId) !== Boolean(data.userPassId), {
+    message: 'Provide exactly one of pricingOptionId or userPassId'
+  })
 
 export const updateBookingStatusSchema = z.object({
   status: z.enum(updatableBookingStatuses)

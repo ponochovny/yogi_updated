@@ -32,7 +32,7 @@ If you need to trigger a rollback conditionally without throwing an unexpected e
 
 ```TS
 await db.transaction(async (tx) => {
-  const [newAccount] = await tx.insert(accounts).values({ userId: 3, balance: 50 });
+  const [newAccount] = await tx.insert(accounts).values({ userId: 3, balance: 50 }).returning();
 
   if (newAccount.balance < 0) {
     tx.rollback(); // Explicitly rolls back the transaction
@@ -61,7 +61,7 @@ For tips on how to handle database connections and transactions safely within a 
 
 ## Prevent Race Conditions
 
-In Drizzle ORM, `.for('update')` is used inside a transaction to append the SQL `FOR UPDATE` clause to a `SELECT` query. This locks the selected rows, preventing other concurrent transactions from reading or modifying those specific records until your transaction is committed or rolled back.
+In Drizzle ORM, `.for('update')` is used inside a transaction to append the SQL `FOR UPDATE` clause to a `SELECT` query. This locks the selected rows against conflicting writes until the transaction commits or rolls back.
 
 You need this to prevent race conditions during read-modify-write operations.
 

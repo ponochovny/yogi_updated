@@ -61,6 +61,8 @@ const handleRegister = handleSubmit(async values => {
     }
 
     await router.push('/profile/settings')
+  } catch {
+    errorMsg.value = 'Error registering'
   } finally {
     isProcessing.value = false
   }

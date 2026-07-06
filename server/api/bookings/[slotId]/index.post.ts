@@ -9,8 +9,8 @@ import {
   transactions,
   userPasses
 } from '~~/server/db/schema/payment'
-import { eq, and, sql } from 'drizzle-orm'
-import { createBookingSchema } from '~/entities/booking/schema'
+import { eq, and, sql, inArray } from 'drizzle-orm'
+import { BookingStatus, createBookingSchema } from '~/entities/booking/schema'
 import { priceOptionsType } from '~/entities/membership/schema'
 
 export default defineEventHandler(async event => {
@@ -60,11 +60,13 @@ export default defineEventHandler(async event => {
       .select({
         id: offerings.id,
         capacity: offerings.capacity,
-        studioId: offerings.studioId,
-        currency: offerings.timezone // or pull currency from studio if needed, using default currency
+        studioId: offerings.studioId
       })
       .from(offerings)
       .where(eq(offerings.id, slot.offeringId))
+    if (!offering) {
+      throw createError({ statusCode: 404, message: 'Offering not found' })
+    }
 
     const maxCapacity = slot.capacityOverride ?? offering?.capacity ?? 999999
 
@@ -75,7 +77,11 @@ export default defineEventHandler(async event => {
       .where(
         and(
           eq(bookings.slotId, slotId),
-          sql`${bookings.status} IN (BookingStatus.CONFIRMED, BookingStatus.ATTENDED, BookingStatus.NO_SHOW)`
+          inArray(bookings.status, [
+            BookingStatus.CONFIRMED,
+            BookingStatus.ATTENDED,
+            BookingStatus.NO_SHOW
+          ])
         )
       )
 
@@ -175,7 +181,7 @@ export default defineEventHandler(async event => {
         .insert(transactions)
         .values({
           userId: userData.id,
-          studioId: offering?.studioId as string,
+          studioId: offering.studioId,
           amount: pricing.price, // Prices are stored in cents/kopecks
           currency: 'USD', // Ideally fetched dynamically, fallback to USD
           provider: TransactionProvider.CASH, // Payment to be made on location
@@ -217,6 +223,14 @@ export default defineEventHandler(async event => {
       }
     }
   })
+
+  if (!result) {
+    throw createError({
+      statusCode: 400,
+      message:
+        'Unable to create booking: no valid pricing option or pass provided'
+    })
+  }
 
   return {
     success: true,
