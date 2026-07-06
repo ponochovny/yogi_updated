@@ -5,6 +5,11 @@ import {
   MediaTypeEnum
 } from '~~/server/db/schema/_other'
 import { and, eq, inArray, sql } from 'drizzle-orm'
+import {
+  globalCategories,
+  globalCurrencies,
+  globalTypes
+} from '~~/server/db/schema/global'
 
 export default defineEventHandler(async event => {
   const userData = await requireAuthenticatedUser(event)
@@ -23,25 +28,39 @@ export default defineEventHandler(async event => {
 
     const studioIds = userStudios.map(s => s.id)
 
-    const [locations, media] = await Promise.all([
-      db
-        .select()
-        .from(studioLocations)
-        .where(sql`${studioLocations.studioId} IN ${studioIds}`),
-      db
-        .select()
-        .from(mediaFiles)
-        .where(
-          and(
-            inArray(mediaFiles.entityId, studioIds),
-            eq(mediaFiles.entityType, MediaEntityTypeEnum.STUDIO)
-          )
-        )
-    ])
+    const [locations, media, categoriesData, typesData, currenciesData] =
+      await Promise.all([
+        db
+          .select()
+          .from(studioLocations)
+          .where(sql`${studioLocations.studioId} IN ${studioIds}`),
+        db
+          .select()
+          .from(mediaFiles)
+          .where(
+            and(
+              inArray(mediaFiles.entityId, studioIds),
+              eq(mediaFiles.entityType, MediaEntityTypeEnum.STUDIO)
+            )
+          ),
+        db.select().from(globalCategories),
+        db.select().from(globalTypes),
+        db.select().from(globalCurrencies)
+      ])
 
     const studiosWithDetails = userStudios.map(studio => {
       const studioLocs = locations.filter(l => l.studioId === studio.id)
       const studioMedia = media.filter(m => m.entityId === studio.id)
+      const studioCategoryIds = studio.categories || []
+      const studioTypeIds = studio.types || []
+      const categoryNames = categoriesData
+        .filter(c => studioCategoryIds.includes(c.id))
+        .map(c => c.name)
+      const typeNames = typesData
+        .filter(t => studioTypeIds.includes(t.id))
+        .map(t => t.name)
+      const currencyName =
+        currenciesData.find(c => c.id === studio.currency)?.name || null
 
       const logo =
         studioMedia.filter(m => m.type === MediaTypeEnum.LOGO)[0]?.url || null
@@ -59,7 +78,10 @@ export default defineEventHandler(async event => {
         ...studio,
         logo,
         gallery,
-        locations: studioLocationsFormatted
+        locations: studioLocationsFormatted,
+        categories: categoryNames,
+        types: typeNames,
+        currency: currencyName
       }
     })
 

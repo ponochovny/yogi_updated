@@ -52,12 +52,15 @@ const userPasses = ref<BookingOptions['userPasses']>([])
 /** Fetch available pricing options for a given slot */
 const checkAvailablePricingOptions = async (slot: OfferingSlot) => {
   selectedSlot.value = slot
+  dropInTickets.value = []
+  userPasses.value = []
   try {
     const pricingOptions = await $fetch(`/api/bookings/${slot.id}/options`)
     if (selectedSlot.value?.id !== slot.id) return // stale response guard
     dropInTickets.value = pricingOptions.options.dropInTickets
     userPasses.value = pricingOptions.options.userPasses
   } catch (err) {
+    if (selectedSlot.value?.id !== slot.id) return // stale response guard
     const message =
       (err as { data?: { message?: string } })?.data?.message ?? 'Unknown error'
     toast.error(`Error fetching pricing options: ${message}`)

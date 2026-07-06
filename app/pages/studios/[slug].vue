@@ -55,7 +55,7 @@ const studio = computed(() => studioData.value?.studio || null)
 </script>
 
 <template>
-  <div class="max-w-6xl mx-auto">
+  <div class="max-w-6xl mx-auto mb-20">
     <div class="rounded-4xl bg-neutral-900">
       <div class="rounded-tr-4xl rounded-tl-4xl h-112.5">
         <NuxtImg
@@ -68,9 +68,14 @@ const studio = computed(() => studioData.value?.studio || null)
       <div>
         <NuxtImg
           v-if="studio?.logo"
-          :src="studio.logo.url || placeholderImageUrl"
+          :src="
+            studio.logo.url.replace(
+              '/upload/',
+              '/upload/w_160,h_160,c_fill/'
+            ) || placeholderImageUrl
+          "
           alt="Studio Logo"
-          class="w-32 h-32 object-cover rounded-full -mt-16 ml-16 border-4 border-neutral-900"
+          class="size-40 object-cover rounded-full -mt-16 ml-16"
         />
         <div class="flex gap-6 py-8 px-16">
           <div class="flex flex-col shrink gap-6">
