@@ -1,6 +1,7 @@
 <script lang="ts" setup>
 import { format } from 'date-fns'
 import { toast } from 'vue-sonner'
+import { TransactionProvider } from '~~/server/db/schema/payment'
 
 const route = useRoute()
 const slug = computed(() => route.params.slug as string)
@@ -91,7 +92,10 @@ const updateBookingStatus = async (bookingId: string, status: string) => {
             </p>
           </div>
           <Button
-            v-if="booking.status === 'PENDING'"
+            v-if="
+              booking.transaction?.provider === TransactionProvider.CASH &&
+              booking.status === 'PENDING'
+            "
             class="bg-yellow-400 hover:bg-yellow-500!"
             variant="ghost"
             @click="updateBookingStatus(booking.id, 'CONFIRMED')"

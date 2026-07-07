@@ -78,22 +78,15 @@ export default defineEventHandler(async event => {
     if (!metadataResult.success) {
       // Build a safe, allowlisted payload before logging.
       const sanitizedMetadata = {
-        id: rawMetadata.id,
-        status: rawMetadata.status,
-        // redact or omit anything sensitive before attaching it to Sentry
-        email: '[redacted]'
+        transactionId: rawMetadata.transactionId,
+        pricingOptionId: rawMetadata.pricingOptionId,
+        hasBookingId: Boolean(rawMetadata.bookingId)
       }
 
       // Logging the error for debugging purposes
       Sentry.captureException(metadataResult.error, {
         extra: { sanitizedMetadata }
       })
-
-      console.error(
-        '[WEBHOOK ERROR] Invalid payment metadata structure:',
-        metadataResult.error
-      )
-      console.error('Raw metadata received:', rawMetadata)
 
       // Return 200 to the gateway to stop retries
       return { received: true, error: 'Metadata mismatch logged' }
@@ -139,9 +132,17 @@ export default defineEventHandler(async event => {
 
         if (!pricing) throw new Error('Associated tariff not found')
 
+        const durationDays = Number(pricing.durationDays)
+        if (!Number.isFinite(durationDays) || durationDays < 0) {
+          throw createError({
+            statusCode: 400,
+            message: 'Pricing option is missing a valid duration'
+          })
+        }
+
         const validFrom = new Date()
-        const validUntil = new Date()
-        validUntil.setDate(validUntil.getDate() + pricing.durationDays)
+        const validUntil = new Date(validFrom)
+        validUntil.setDate(validUntil.getDate() + durationDays)
 
         // Add the pass to the user wallet
         await tx.insert(userPasses).values({

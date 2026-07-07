@@ -1,5 +1,5 @@
 <script lang="ts" setup>
-import { TicketIcon } from '@lucide/vue'
+import { CrownIcon, LayersIcon } from '@lucide/vue'
 import MembershipCreationForm from './_components/MembershipCreationForm.vue'
 
 definePageMeta({
@@ -20,66 +20,12 @@ const {
   data: membershipsData,
   pending,
   refresh
-  // error,
 } = await useFetch(`/api/business/studios/${studioSlug.value}/memberships`)
 
 // GET MEMBERSHIPS LIST FOR BUSINESS
 // MEMBERSHIP CREATION
 // MEMBERSHIP EDIT
 // ARCHIVE MEMBERSHIP
-
-// type Membership = {
-// 	id: string
-// 	studioId: string
-// 	offeringId: string | null
-
-// 	applicableCategoryIds: string[]
-
-// 	name: string // "Single Visit", "10-Class Package", "Unlimited Monthly"
-// 	description: string
-// 	type: string
-
-// 	price: number
-
-// 	// Limits logic
-// 	credits: number | null // Visits amount. For DROP_IN = 1, PACK = 10, MEMBERSHIP = null (unlimited)
-// 	durationDays: number // Duration of the pass after purchase (e.g., 1 day, 30 days, 365 days)
-
-// 	isActive: boolean
-// 	createdAt: Date
-// }
-
-// const memberships = ref<Partial<Membership>[]>([
-// 	{
-// 		name: 'Single Visit',
-// 		description: 'One-time access to the studio for a single class or session.',
-// 		type: 'DROP_IN',
-// 		price: 2000, // $20.00
-// 		credits: 1,
-// 		durationDays: 1,
-// 		isActive: true,
-// 	},
-// 	{
-// 		name: '10-Class Package',
-// 		description: 'Access to 10 classes or sessions within a specified period.',
-// 		type: 'PACK',
-// 		price: 15000, // $150.00
-// 		credits: 10,
-// 		durationDays: 30,
-// 		isActive: true,
-// 	},
-// 	{
-// 		name: 'Unlimited Monthly',
-// 		description: 'Unlimited access to the studio for a month.',
-// 		type: 'MEMBERSHIP',
-// 		price: 50000, // $500.00
-// 		credits: null,
-// 		durationDays: 30,
-// 		isActive: true,
-// 	},
-// ])
-
-// Запись в БД: offeringId: null. Поле applicableCategoryIds содержит массив UUID глобальных категорий (например, ['id_йоги', 'id_растяжки']). Если массив пустой/null — абонемент действует на все услуги студии.
 
 const isSheetOpen = ref(false)
 const membershipCreated = () => {
@@ -125,7 +71,8 @@ const membershipCreated = () => {
           variant="outline"
         >
           <ItemMedia variant="icon">
-            <TicketIcon />
+            <LayersIcon v-if="membership.credits" />
+            <CrownIcon v-else />
           </ItemMedia>
           <ItemContent>
             <ItemTitle class="line-clamp-1">

@@ -1,9 +1,10 @@
 import { bookings } from '~~/server/db/schema/booking'
-import { offeringSlots } from '~~/server/db/schema/offering'
+import { offeringSlots, pricingOptions } from '~~/server/db/schema/offering'
 import { user } from '~~/server/db/schema/auth-schema'
 import { and, eq, sql } from 'drizzle-orm'
 import { userRoles } from '~~/server/auth/config'
 import { MediaEntityTypeEnum, MediaTypeEnum } from '~~/server/db/schema/_other'
+import { transactions, userPasses } from '~~/server/db/schema/payment'
 
 const userImg = sql`(
     SELECT url
@@ -77,11 +78,24 @@ export default defineEventHandler(async event => {
         name: user.name,
         email: user.email,
         image: sql<string>`user_img.url`
+      },
+      transaction: {
+        provider: transactions.provider,
+        status: transactions.status
+      },
+      userPass: {
+        name: pricingOptions.name,
+        type: pricingOptions.type
       }
     })
     .from(bookings)
     .innerJoin(user, eq(bookings.userId, user.id))
     .leftJoinLateral(userImg, sql`TRUE`)
+    .leftJoin(transactions, eq(bookings.transactionId, transactions.id))
+
+    .leftJoin(userPasses, eq(bookings.userPassId, userPasses.id))
+    .leftJoin(pricingOptions, eq(userPasses.pricingOptionId, pricingOptions.id))
+
     .innerJoin(offeringSlots, eq(bookings.slotId, offeringSlots.id))
     .where(and(...conditions))
 

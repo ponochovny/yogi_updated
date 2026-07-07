@@ -38,15 +38,13 @@ export default defineEventHandler(async event => {
         )
       )
 
-    const globalCategoriesData = await db
-      .select()
-      .from(globalCategories)
-      .where(
-        inArray(
-          globalCategories.id,
-          memberships.flatMap(m => m.applicableCategoryIds || [])
-        )
-      )
+    const categoryIds = memberships.flatMap(m => m.applicableCategoryIds || [])
+    const globalCategoriesData = categoryIds.length
+      ? await db
+          .select()
+          .from(globalCategories)
+          .where(inArray(globalCategories.id, categoryIds))
+      : []
 
     return {
       success: true,

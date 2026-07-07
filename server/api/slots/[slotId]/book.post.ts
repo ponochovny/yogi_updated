@@ -108,7 +108,7 @@ export default defineEventHandler(async event => {
             .from(pricingOptions)
             .where(
               and(
-                eq(pricingOptions.id, pricingOptionId),
+                eq(pricingOptions.id, pricingOptionId || ''),
                 eq(pricingOptions.offeringId, slotData.offeringId),
                 eq(pricingOptions.studioId, slotData.studioId)
               )

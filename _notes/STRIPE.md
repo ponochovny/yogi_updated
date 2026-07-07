@@ -7,3 +7,5 @@
 `npm i -g @stripe/cli`
 
 `stripe login`
+
+`npx stripe listen --forward-to localhost:3000/api/checkout/webhook`

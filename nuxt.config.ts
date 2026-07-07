@@ -41,7 +41,9 @@ export default defineNuxtConfig({
         'tailwind-merge',
         'vee-validate',
         'vue-sonner',
-        'zod'
+        'zod',
+        'drizzle-orm',
+        'drizzle-orm/pg-core'
       ]
     }
   },
@@ -92,7 +94,13 @@ export default defineNuxtConfig({
       cloudinaryName: process.env.CLOUDINARY_CLOUD_NAME ?? '',
       cloudinaryUploadPreset: process.env.CLOUDINARY_UPLOAD_PRESET ?? '',
       // sentry
-      sentryDsn: process.env.NUXT_PUBLIC_SENTRY_DSN
+      sentryDsn: process.env.NUXT_PUBLIC_SENTRY_DSN,
+      sentryTracesSampleRate:
+        process.env.NUXT_PUBLIC_SENTRY_TRACES_SAMPLE_RATE ?? '0.1',
+      sentryReplaysSessionSampleRate:
+        process.env.NUXT_PUBLIC_SENTRY_REPLAYS_SESSION_SAMPLE_RATE ?? '0.01',
+      sentryReplaysOnErrorSampleRate:
+        process.env.NUXT_PUBLIC_SENTRY_REPLAYS_ON_ERROR_SAMPLE_RATE ?? '0.1'
     }
   },
 
