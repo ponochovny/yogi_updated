@@ -17,7 +17,8 @@ export default defineNuxtConfig({
     // '@nuxt/test-utils',
     // '@pinia/nuxt',
     'nuxt-vitalizer',
-    'shadcn-nuxt'
+    'shadcn-nuxt',
+    '@sentry/nuxt'
   ],
 
   css: ['./app/assets/css/main.css'],
@@ -58,6 +59,16 @@ export default defineNuxtConfig({
     componentDir: './app/shared/ui'
   },
 
+  sentry: {
+    // Enable automatic upload of source maps so Sentry shows readable paths to .vue files instead of minified JS
+    sourceMapsUploadOptions: {
+      org: 'self-12e',
+      project: 'javascript-nuxt',
+      // Token required for production builds (obtain from Sentry)
+      authToken: process.env.SENTRY_AUTH_TOKEN
+    }
+  },
+
   routeRules: {
     '/business/**': {
       appLayout: 'business',
@@ -79,7 +90,9 @@ export default defineNuxtConfig({
       baseUrl: '',
       // cloudinary
       cloudinaryName: process.env.CLOUDINARY_CLOUD_NAME ?? '',
-      cloudinaryUploadPreset: process.env.CLOUDINARY_UPLOAD_PRESET ?? ''
+      cloudinaryUploadPreset: process.env.CLOUDINARY_UPLOAD_PRESET ?? '',
+      // sentry
+      sentryDsn: process.env.NUXT_PUBLIC_SENTRY_DSN
     }
   },
 
