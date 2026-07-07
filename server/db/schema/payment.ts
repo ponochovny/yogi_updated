@@ -10,11 +10,18 @@ import { studios } from './studio'
 import { pricingOptions } from './offering'
 import { user } from './auth-schema'
 
+export const UserPassStatus = {
+  ACTIVE: 'ACTIVE',
+  EXPIRED: 'EXPIRED',
+  EXHAUSTED: 'EXHAUSTED',
+  CANCELLED: 'CANCELLED'
+} as const
+
 export const passStatusEnum = pgEnum('pass_status', [
-  'ACTIVE',
-  'EXPIRED',
-  'EXHAUSTED',
-  'CANCELLED'
+  UserPassStatus.ACTIVE,
+  UserPassStatus.EXPIRED,
+  UserPassStatus.EXHAUSTED,
+  UserPassStatus.CANCELLED
 ])
 
 export const TransactionProvider = {
@@ -85,7 +92,7 @@ export const userPasses = pgTable('user_passes', {
 
   transactionId: uuid('transaction_id').references(() => transactions.id), // Link to the transaction that paid for this pass
 
-  status: passStatusEnum('status').default('ACTIVE').notNull(),
+  status: passStatusEnum('status').default(UserPassStatus.ACTIVE).notNull(),
 
   remainingCredits: integer('remaining_credits'), // Null = unlimited, number = remaining sessions
   validFrom: timestamp('valid_from', { withTimezone: true }).notNull(),

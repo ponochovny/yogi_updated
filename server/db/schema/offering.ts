@@ -132,7 +132,9 @@ export const offeringSlots = pgTable('offering_slots', {
     .references(() => studioPractitioners.id),
   startTime: timestamp('start_time', { withTimezone: true }).notNull(),
   endTime: timestamp('end_time', { withTimezone: true }).notNull(),
-  status: offeringSlotStatusEnum('status').default('ACTIVE').notNull(),
+  status: offeringSlotStatusEnum('status')
+    .default(offeringSlotStatus.ACTIVE)
+    .notNull(),
   googleEventId: text('google_event_id'),
   capacityOverride: integer('capacity_override'),
   createdAt: timestamp('created_at').defaultNow().notNull()

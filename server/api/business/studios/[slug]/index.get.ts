@@ -51,24 +51,30 @@ export default defineEventHandler(async event => {
           )
           .orderBy(mediaFiles.order),
         db
-          .select({ name: globalCategories.name })
+          .select()
           .from(globalCategories)
           .where(inArray(globalCategories.id, studio.categories || [])),
         db
-          .select({ name: globalTypes.name })
+          .select()
           .from(globalTypes)
           .where(inArray(globalTypes.id, studio.types || [])),
         db
-          .select({ name: globalCurrencies.name })
+          .select()
           .from(globalCurrencies)
           .where(eq(globalCurrencies.id, studio.currency))
       ])
 
     const logo = media.find(file => file.type === MediaTypeEnum.LOGO) || null
     const gallery = media.filter(file => file.type === MediaTypeEnum.GALLERY)
-    const categoryNames = categoriesData.map(c => c.name)
-    const typeNames = typesData.map(c => c.name)
-    const currencyName = currenciesData[0]?.name
+    const categoryNames = categoriesData
+      .filter(cat => studio.categories?.includes(cat.id))
+      .map(cat => cat.name)
+    const typeNames = typesData
+      .filter(type => studio.types?.includes(type.id))
+      .map(type => type.name)
+    const currencyName = currenciesData
+      .filter(currency => currency.id === studio.currency)
+      .map(currency => currency.name)
 
     return {
       success: true,
@@ -87,7 +93,7 @@ export default defineEventHandler(async event => {
         })),
         categories: categoryNames,
         types: typeNames,
-        currency: currencyName
+        currency: currencyName[0]
       }
     }
   } catch (error) {

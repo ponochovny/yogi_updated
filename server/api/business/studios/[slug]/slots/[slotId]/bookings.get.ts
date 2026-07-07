@@ -1,8 +1,19 @@
 import { bookings } from '~~/server/db/schema/booking'
 import { offeringSlots } from '~~/server/db/schema/offering'
 import { user } from '~~/server/db/schema/auth-schema'
-import { and, eq } from 'drizzle-orm'
+import { and, eq, sql } from 'drizzle-orm'
 import { userRoles } from '~~/server/auth/config'
+import { MediaEntityTypeEnum, MediaTypeEnum } from '~~/server/db/schema/_other'
+
+const userImg = sql`(
+    SELECT url
+    FROM media_files
+    WHERE entity_id = ${user.id}::text
+      AND entity_type = ${MediaEntityTypeEnum.USER}
+      AND type = ${MediaTypeEnum.AVATAR}
+    ORDER BY created_at DESC
+    LIMIT 1
+  ) user_img`
 
 export default defineEventHandler(async event => {
   const userData = await requireAuthenticatedUser(event)
@@ -65,11 +76,12 @@ export default defineEventHandler(async event => {
         id: user.id,
         name: user.name,
         email: user.email,
-        image: user.image
+        image: sql<string>`user_img.url`
       }
     })
     .from(bookings)
     .innerJoin(user, eq(bookings.userId, user.id))
+    .leftJoinLateral(userImg, sql`TRUE`)
     .innerJoin(offeringSlots, eq(bookings.slotId, offeringSlots.id))
     .where(and(...conditions))
 

@@ -1,48 +1,41 @@
 <script lang="ts" setup>
 import { MapPinIcon } from '@lucide/vue'
+import { toast } from 'vue-sonner'
 import { placeholderImageUrl } from '~/config/constants'
 
 const route = useRoute()
-console.log(route.params.slug)
 
-const memberships = ref([
-  {
-    id: 1,
-    types: ['Yoga', 'Pilates'],
-    categories: ['Beginner', 'Intermediate'],
-    credits: 10,
-    name: 'Yoga & Pilates Membership',
-    description: 'Access to all yoga and pilates classes for a month.',
-    price: '$99',
-    valid_until: '2024-12-31'
-  },
-  {
-    id: 2,
-    types: ['Meditation'],
-    categories: ['Advanced'],
-    credits: 5,
-    name: 'Yoga & Pilates Membership',
-    description: 'Access to all yoga and pilates classes for a month.',
-    price: '$99',
-    valid_until: '2024-12-31'
-  },
-  {
-    id: 3,
-    types: ['Meditation'],
-    categories: ['Advanced'],
-    credits: null,
-    name: 'Yoga & Pilates Membership',
-    description: 'Access to all yoga and pilates classes for a month.',
-    price: '$99',
-    valid_until: '2024-12-31'
+const { data: membershipsData } = await useFetch(
+  `/api/business/studios/${route.params.slug}/memberships`
+)
+const memberships = computed(() => membershipsData.value?.memberships || [])
+
+const formatList = (list: string[]) => list?.join(', ') || ''
+
+const isProcessing = ref<boolean>(false)
+
+async function buyMembership(pricingOptionId: string) {
+  isProcessing.value = true
+  try {
+    const response = await $fetch<{ url: string }>(
+      '/api/checkout/create-session',
+      {
+        method: 'POST',
+        body: { pricingOptionId }
+      }
+    )
+
+    if (response.url) {
+      window.location.href = response.url // Redirect to Stripe checkout
+    }
+  } catch (error) {
+    toast.error(
+      (error as { data: { message: string } }).data.message ||
+        'An error occurred while processing your request.'
+    )
+  } finally {
+    isProcessing.value = false
   }
-])
-const formatList = (list: string[]) => list.join(', ')
-
-const buyMembership = (membershipId: number) => {
-  const membership = memberships.value.find(m => m.id === membershipId)
-  console.log('Buying membership:', membership)
-  // Implement the logic to handle membership purchase
 }
 
 const { data: studioData, error: studioError } = await useFetch(
@@ -103,7 +96,7 @@ const studio = computed(() => studioData.value?.studio || null)
             <div class="flex items-center gap-2">
               <MapPinIcon class="size-5" />
               {{
-                studio?.locations.map(location => location.address).join(', ')
+                studio?.locations.map(location => location.address)?.join(', ')
               }}
             </div>
             <h2 class="text-lg font-bold">About</h2>
@@ -147,8 +140,12 @@ const studio = computed(() => studioData.value?.studio || null)
                   </p>
                 </div>
                 <div class="text-sm text-muted-foreground">
-                  {{ membership.price }} - Valid until:
-                  {{ membership.valid_until }}
+                  ${{ Math.round(membership.price / 100) }} - Duration:
+                  {{
+                    membership.durationDays
+                      ? membership.durationDays + ' days'
+                      : 'Unlimited'
+                  }}
                 </div>
                 <div class="text-sm text-muted-foreground">
                   Credits:
@@ -157,14 +154,14 @@ const studio = computed(() => studioData.value?.studio || null)
                   }}</span>
                 </div>
                 <div class="text-sm text-muted-foreground">
-                  Applies for types
-                  <span class="font-bold">{{
-                    formatList(membership.types)
-                  }}</span>
-                  with categories
-                  <span class="font-bold">{{
-                    formatList(membership.categories)
-                  }}</span>
+                  Applies for
+                  <template v-if="membership.applicableCategories.length">
+                    categories:
+                    <span class="font-bold">{{
+                      formatList(membership.applicableCategories)
+                    }}</span>
+                  </template>
+                  <template v-else> all categories </template>
                 </div>
                 <Button type="button" @click="buyMembership(membership.id)"
                   >Buy membership</Button
