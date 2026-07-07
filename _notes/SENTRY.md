@@ -27,6 +27,11 @@ Sentry.init({
   replaysSessionSampleRate: 0.1,
   replaysOnErrorSampleRate: 1.0
 })
+/**
+ * Make the sample rates explicit debug defaults, not copy-paste production values.
+ * tracesSampleRate: 1.0 and the replay rates will generate a lot of telemetry and can collect user
+ * interaction data. Gate these behind env vars or label them as staging-only.
+ */
 
 ```
 
@@ -82,8 +87,16 @@ npm install --save-dev @types/uuid
 ```TS
 import * as Sentry from '@sentry/nuxt'
 
+// Build a safe, allowlisted payload before logging.
+const sanitizedMetadata = {
+  id: rawMetadata.id,
+  status: rawMetadata.status,
+  // redact or omit anything sensitive before attaching it to Sentry
+  email: '[redacted]'
+}
+
 // Logging the error for debugging purposes
 Sentry.captureException(metadataResult.error, {
-  extra: { rawMetadata } // прикрепит сырые данные к отчету в Sentry!
+  extra: { sanitizedMetadata }
 })
 ```

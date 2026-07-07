@@ -8,6 +8,7 @@ import {
   globalCurrencies,
   globalTypes
 } from '~~/server/db/schema/global'
+import { resolveStudioMetadata } from '~~/server/utils/studio-metadata'
 
 export default defineEventHandler(async event => {
   const userData = await requireAuthenticatedUser(event)
@@ -66,15 +67,12 @@ export default defineEventHandler(async event => {
 
     const logo = media.find(file => file.type === MediaTypeEnum.LOGO) || null
     const gallery = media.filter(file => file.type === MediaTypeEnum.GALLERY)
-    const categoryNames = categoriesData
-      .filter(cat => studio.categories?.includes(cat.id))
-      .map(cat => cat.name)
-    const typeNames = typesData
-      .filter(type => studio.types?.includes(type.id))
-      .map(type => type.name)
-    const currencyName = currenciesData
-      .filter(currency => currency.id === studio.currency)
-      .map(currency => currency.name)
+    const { categories, types, currency } = resolveStudioMetadata(
+      studio,
+      categoriesData,
+      typesData,
+      currenciesData
+    )
 
     return {
       success: true,
@@ -91,9 +89,9 @@ export default defineEventHandler(async event => {
           url: file.url
           // providerPublicId: file.providerPublicId,
         })),
-        categories: categoryNames,
-        types: typeNames,
-        currency: currencyName[0]
+        categories,
+        types,
+        currency
       }
     }
   } catch (error) {

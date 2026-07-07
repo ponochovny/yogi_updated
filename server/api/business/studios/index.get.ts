@@ -4,12 +4,13 @@ import {
   mediaFiles,
   MediaTypeEnum
 } from '~~/server/db/schema/_other'
-import { and, eq, inArray, sql } from 'drizzle-orm'
+import { and, eq, inArray } from 'drizzle-orm'
 import {
   globalCategories,
   globalCurrencies,
   globalTypes
 } from '~~/server/db/schema/global'
+import { resolveStudioMetadata } from '~~/server/utils/studio-metadata'
 
 export default defineEventHandler(async event => {
   const userData = await requireAuthenticatedUser(event)
@@ -27,13 +28,26 @@ export default defineEventHandler(async event => {
     }
 
     const studioIds = userStudios.map(s => s.id)
+    const referenceDataCache = ((
+      globalThis as typeof globalThis & {
+        __studioReferenceDataCache?: {
+          categories: Array<{ id: string; name: string; slug?: string }> | null
+          types: Array<{ id: string; name: string; slug?: string }> | null
+          currencies: Array<{ id: string; name: string; slug?: string }> | null
+        }
+      }
+    ).__studioReferenceDataCache ??= {
+      categories: null,
+      types: null,
+      currencies: null
+    })
 
     const [locations, media, categoriesData, typesData, currenciesData] =
       await Promise.all([
         db
           .select()
           .from(studioLocations)
-          .where(sql`${studioLocations.studioId} IN ${studioIds}`),
+          .where(inArray(studioLocations.studioId, studioIds)),
         db
           .select()
           .from(mediaFiles)
@@ -43,24 +57,41 @@ export default defineEventHandler(async event => {
               eq(mediaFiles.entityType, MediaEntityTypeEnum.STUDIO)
             )
           ),
-        db.select().from(globalCategories),
-        db.select().from(globalTypes),
-        db.select().from(globalCurrencies)
+        referenceDataCache.categories ??
+          db
+            .select()
+            .from(globalCategories)
+            .then(result => {
+              referenceDataCache.categories = result
+              return result
+            }),
+        referenceDataCache.types ??
+          db
+            .select()
+            .from(globalTypes)
+            .then(result => {
+              referenceDataCache.types = result
+              return result
+            }),
+        referenceDataCache.currencies ??
+          db
+            .select()
+            .from(globalCurrencies)
+            .then(result => {
+              referenceDataCache.currencies = result
+              return result
+            })
       ])
 
     const studiosWithDetails = userStudios.map(studio => {
       const studioLocs = locations.filter(l => l.studioId === studio.id)
       const studioMedia = media.filter(m => m.entityId === studio.id)
-      const studioCategoryIds = studio.categories || []
-      const studioTypeIds = studio.types || []
-      const categoryNames = categoriesData
-        .filter(c => studioCategoryIds.includes(c.id))
-        .map(c => c.name)
-      const typeNames = typesData
-        .filter(t => studioTypeIds.includes(t.id))
-        .map(t => t.name)
-      const currencyName =
-        currenciesData.find(c => c.id === studio.currency)?.name || null
+      const { categories, types, currency } = resolveStudioMetadata(
+        studio,
+        categoriesData,
+        typesData,
+        currenciesData
+      )
 
       const logo =
         studioMedia.filter(m => m.type === MediaTypeEnum.LOGO)[0]?.url || null
@@ -79,9 +110,9 @@ export default defineEventHandler(async event => {
         logo,
         gallery,
         locations: studioLocationsFormatted,
-        categories: categoryNames,
-        types: typeNames,
-        currency: currencyName
+        categories,
+        types,
+        currency
       }
     })
 

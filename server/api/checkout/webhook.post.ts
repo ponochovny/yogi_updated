@@ -76,9 +76,17 @@ export default defineEventHandler(async event => {
     const metadataResult = PaymentMetadataSchema.safeParse(rawMetadata)
 
     if (!metadataResult.success) {
+      // Build a safe, allowlisted payload before logging.
+      const sanitizedMetadata = {
+        id: rawMetadata.id,
+        status: rawMetadata.status,
+        // redact or omit anything sensitive before attaching it to Sentry
+        email: '[redacted]'
+      }
+
       // Logging the error for debugging purposes
       Sentry.captureException(metadataResult.error, {
-        extra: { rawMetadata } // прикрепит сырые данные к отчету в Sentry!
+        extra: { sanitizedMetadata }
       })
 
       console.error(
