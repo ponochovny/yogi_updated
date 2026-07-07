@@ -16,7 +16,10 @@ const isSentryEnabled =
 
 const parseSampleRate = (value: unknown, fallback: number) => {
   const parsedValue = typeof value === 'number' ? value : Number(value)
-  return Number.isFinite(parsedValue) ? parsedValue : fallback
+  if (!Number.isFinite(parsedValue) || parsedValue < 0 || parsedValue > 1) {
+    return fallback
+  }
+  return parsedValue
 }
 
 Sentry.init({

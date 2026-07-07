@@ -103,12 +103,18 @@ export default defineEventHandler(async event => {
             throwApiError(400, 'You have already booked this session')
           }
 
+          if (!pricingOptionId) {
+            throwApiError(400, 'Pricing option is required for booking')
+          }
+
+          // Fetch the pricing option to ensure it belongs to the same offering and studio
+
           const [pricing] = await tx
             .select()
             .from(pricingOptions)
             .where(
               and(
-                eq(pricingOptions.id, pricingOptionId || ''),
+                eq(pricingOptions.id, pricingOptionId),
                 eq(pricingOptions.offeringId, slotData.offeringId),
                 eq(pricingOptions.studioId, slotData.studioId)
               )

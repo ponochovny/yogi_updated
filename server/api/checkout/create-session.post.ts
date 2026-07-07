@@ -42,6 +42,37 @@ const stripe = new Stripe(process.env.STRIPE_SECRET_KEY || '', {
   apiVersion: '2026-06-24.dahlia' // or latest stable version
 })
 
+const revertPendingCheckoutState = async (
+  db: ReturnType<typeof useDb>,
+  transactionId: string | null,
+  bookingId: string | null
+) => {
+  if (!transactionId) {
+    return
+  }
+
+  await db.transaction(async tx => {
+    await tx
+      .update(transactions)
+      .set({
+        status: TransactionStatus.FAILED,
+        providerTransactionId: null,
+        updatedAt: new Date()
+      })
+      .where(eq(transactions.id, transactionId))
+
+    if (bookingId) {
+      await tx
+        .update(bookings)
+        .set({
+          status: BookingStatus.CANCELLED,
+          updatedAt: new Date()
+        })
+        .where(eq(bookings.id, bookingId))
+    }
+  })
+}
+
 export default defineEventHandler(async event => {
   const userData = await requireAuthenticatedUser(event)
   /** If slotId is provided, it's a Drop-In. Otherwise, it's a Pass purchase. */
@@ -214,41 +245,50 @@ export default defineEventHandler(async event => {
 
   const stripeCurrency = checkoutCurrency.toLowerCase()
 
-  // 4. Generate Stripe Checkout Session
-  const stripeSession = await stripe.checkout.sessions.create({
-    payment_method_types: ['card'],
-    line_items: [
-      {
-        price_data: {
-          currency: stripeCurrency,
-          product_data: {
-            name: lineItemName,
-            description: pricing.description || undefined
+  try {
+    // 4. Generate Stripe Checkout Session
+    const stripeSession = await stripe.checkout.sessions.create({
+      payment_method_types: ['card'],
+      line_items: [
+        {
+          price_data: {
+            currency: stripeCurrency,
+            product_data: {
+              name: lineItemName,
+              description: pricing.description || undefined
+            },
+            unit_amount: pricing.price // Stored in cents (e.g. 1500 = $15.00)
           },
-          unit_amount: pricing.price // Stored in cents (e.g. 1500 = $15.00)
-        },
-        quantity: 1
+          quantity: 1
+        }
+      ],
+      mode: 'payment',
+      success_url: `${process.env.APP_URL || 'http://localhost:3000'}/checkout/success?transactionId=${transactionId}`,
+      cancel_url: `${process.env.APP_URL || 'http://localhost:3000'}/checkout/cancel?transactionId=${transactionId}`,
+      // Crucial: metadata carries database references to identify the invoice on webhook reception
+      metadata: {
+        transactionId: transactionId,
+        ...(bookingId && { bookingId: bookingId }), // null if purchasing a membership
+        pricingOptionId: pricing.id,
+        userId: userData.id
       }
-    ],
-    mode: 'payment',
-    success_url: `${process.env.APP_URL || 'http://localhost:3000'}/checkout/success?transactionId=${transactionId}`,
-    cancel_url: `${process.env.APP_URL || 'http://localhost:3000'}/checkout/cancel?transactionId=${transactionId}`,
-    // Crucial: metadata carries database references to identify the invoice on webhook reception
-    metadata: {
-      transactionId: transactionId,
-      bookingId: bookingId, // null if purchasing a membership
-      pricingOptionId: pricing.id,
-      userId: userData.id
+    })
+
+    if (!transactionId) {
+      throwApiError(500, 'Transaction ID is missing after creation')
     }
-  })
 
-  // 5. Update transaction with Stripe external ID
-  await db
-    .update(transactions)
-    .set({ providerTransactionId: stripeSession.id })
-    .where(eq(transactions.id, transactionId || ''))
+    // 5. Update transaction with Stripe external ID
+    await db
+      .update(transactions)
+      .set({ providerTransactionId: stripeSession.id })
+      .where(eq(transactions.id, transactionId))
 
-  checkoutUrl = stripeSession.url
+    checkoutUrl = stripeSession.url
+  } catch (error) {
+    await revertPendingCheckoutState(db, transactionId, bookingId)
+    throw error
+  }
 
   return {
     success: true,
