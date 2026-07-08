@@ -50,12 +50,19 @@ const signOutHandler = async () => {
             <Avatar class="h-8 w-8 rounded-lg">
               <AvatarImage :src="user.avatar" :alt="user.name" as-child>
                 <NuxtImg
-                  :src="user.avatar"
+                  :src="
+                    user.avatar?.replace(
+                      '/upload/',
+                      '/upload/w_100,h_100,c_thumb,g_custom/'
+                    )
+                  "
                   :alt="user.name"
                   class="object-cover"
                 />
               </AvatarImage>
-              <AvatarFallback class="rounded-lg"> CN </AvatarFallback>
+              <AvatarFallback class="rounded-lg">{{
+                user.name.charAt(0)
+              }}</AvatarFallback>
             </Avatar>
             <div class="grid flex-1 text-left text-sm leading-tight">
               <span class="truncate font-medium">{{ user.name }}</span>
@@ -69,9 +76,7 @@ const signOutHandler = async () => {
           align="end"
           :side-offset="4"
         >
-          <template
-            v-if="user.roles.includes(userRoles.USER) && user.roles.length > 1"
-          >
+          <template v-if="user.roles.length">
             <DropdownMenuGroup>
               <DropdownMenuItem
                 v-if="!$route.path.startsWith('/profile')"

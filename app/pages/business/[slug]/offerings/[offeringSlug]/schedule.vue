@@ -51,7 +51,6 @@ const generateSlots = async (values: UpdateScheduleInput) => {
     )
     toast.success('Slots generated successfully!')
     refreshOfferingsSlots()
-    // Here we would typically refresh a list/calendar of existing slots below
   } catch (err) {
     toast.error('Generation failed', {
       description:
@@ -101,8 +100,8 @@ const updateSlot = async (slot: updateSlotsSchemaInput) => {
   }
 }
 
-const groupedSlots = ref(
-  {} as Record<
+const groupedSlots = computed<
+  Record<
     string,
     Array<{
       id: string
@@ -112,9 +111,8 @@ const groupedSlots = ref(
       status: (typeof offeringSlotStatus)[keyof typeof offeringSlotStatus]
     }>
   >
-)
-const groupSlots = () => {
-  groupedSlots.value = rawSlots.value.reduce((acc, slot) => {
+>(() => {
+  return rawSlots.value.reduce((acc, slot) => {
     // Format UTC to Local string representation for grouping (e.g., 'June 15, 2026')
     const dateKey = format(new Date(slot.startTime), 'MMMM d, yyyy')
 
@@ -133,8 +131,7 @@ const groupSlots = () => {
     })
     return acc
   }, {})
-}
-groupSlots()
+})
 </script>
 
 <template>

@@ -90,7 +90,7 @@ useHead({
         </div>
         <Button type="submit" :disabled="isSubmitting">
           <Spinner v-if="isSubmitting" class="animate-spin" />
-          {{ isSubmitting ? '...' : 'Add Member' }}
+          Add Member
         </Button>
       </form>
     </div>
