@@ -3,18 +3,17 @@ import { studios, studioPractitioners } from '~~/server/db/schema/studio'
 import { eq, and, sql } from 'drizzle-orm'
 import { bookings } from '~~/server/db/schema/booking'
 import { BookingStatus } from '~/entities/booking/schema'
+import { user } from '~~/server/db/schema/auth-schema'
 
 export default defineEventHandler(async event => {
-  const userData = await requireAuthenticatedUser(event)
+  await requireAuthenticatedUser(event)
 
   // We get an optional parameter from the URL, for example: /api/practitioner/slots?studioSlug=yoga-center
   const query = getQuery(event)
   const slug = query.studioSlug as string | undefined
   const db = useDb()
 
-  // Basic conditions: the practitioner must be linked to the current user
-  const conditions = [eq(studioPractitioners.userId, userData.id)]
-
+  const conditions = []
   // If the frontend requested a specific studio, we add a filter to the conditions array.
   if (slug) {
     conditions.push(eq(studios.slug, slug))
@@ -51,6 +50,11 @@ export default defineEventHandler(async event => {
         id: studios.id,
         name: studios.name,
         slug: studios.slug
+      },
+      practitioner: {
+        id: studioPractitioners.id,
+        name: user.name,
+        email: user.email
       }
     })
     .from(offeringSlots)
@@ -59,6 +63,7 @@ export default defineEventHandler(async event => {
       studioPractitioners,
       eq(offeringSlots.practitionerId, studioPractitioners.id)
     )
+    .leftJoin(user, eq(studioPractitioners.userId, user.id))
     // 2. Binding an offering to a slot
     .innerJoin(offerings, eq(offeringSlots.offeringId, offerings.id))
     // 3. Binding a studio to an offering
