@@ -35,7 +35,8 @@ export default defineEventHandler(async event => {
 				WHERE ${bookings.slotId} = ${offeringSlots.id}
 				AND ${bookings.status} IN (
 					${BookingStatus.CONFIRMED}, 
-					${BookingStatus.ATTENDED}, 
+					${BookingStatus.ATTENDED},
+          ${BookingStatus.PENDING}, 
 					${BookingStatus.NO_SHOW}
 				)
 			)`,

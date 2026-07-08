@@ -102,6 +102,7 @@ export default defineEventHandler(async event => {
       availableUserPasses.push({
         id: pass.id,
         name: pricing.name,
+        type: pricing.type,
         remainingCredits: pass.remainingCredits, // null for unlimited
         validUntil: pass.validUntil
       })

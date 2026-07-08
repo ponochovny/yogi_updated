@@ -35,6 +35,7 @@ export default defineEventHandler(async event => {
 				AND ${bookings.status} IN (
 					${BookingStatus.CONFIRMED}, 
 					${BookingStatus.ATTENDED}, 
+					${BookingStatus.PENDING}, 
 					${BookingStatus.NO_SHOW}
 				)
 			)`,

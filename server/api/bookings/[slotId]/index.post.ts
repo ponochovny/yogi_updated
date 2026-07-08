@@ -203,7 +203,7 @@ export default defineEventHandler(async event => {
         .values({
           slotId: slot.id,
           userId: userData.id,
-          status: 'CONFIRMED', // Slot is secured for client, awaiting cash validation
+          status: BookingStatus.PENDING, // Slot is secured for client, awaiting cash validation
           transactionId: newTransaction.id,
           createdAt: new Date(),
           updatedAt: new Date()
