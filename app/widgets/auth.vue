@@ -5,11 +5,13 @@ import SignupForm from '~/shared/signup-03/components/SignupForm.vue'
 const props = defineProps<{
   mode?: 'sign-up' | 'login'
 }>()
+
+const resolvedMode = computed(() => props.mode ?? 'login')
 </script>
 
 <template>
   <div class="space-y-6">
-    <LoginForm v-if="props.mode === 'login'" />
-    <SignupForm v-else-if="props.mode === 'sign-up'" />
+    <LoginForm v-if="resolvedMode === 'login'" />
+    <SignupForm v-else-if="resolvedMode === 'sign-up'" />
   </div>
 </template>

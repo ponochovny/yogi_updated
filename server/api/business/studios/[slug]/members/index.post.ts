@@ -55,7 +55,7 @@ export default defineEventHandler(async event => {
             name: body.name,
             emailVerified: false, // Important flag: the user has not yet confirmed their email
             bio: body.bio || null,
-            role: [userRoles.USER, body.role], // Assign the role directly to the user
+            role: [...new Set([userRoles.USER, body.role])], // Ensure base USER role without duplicates
             createdAt: new Date(),
             updatedAt: new Date()
           })

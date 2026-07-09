@@ -11,6 +11,7 @@ definePageMeta({
 const {
   data: bookingsData,
   pending,
+  error,
   refresh
 } = useFetch('/api/account/bookings')
 const bookings = computed(() => bookingsData.value?.bookings || [])
@@ -51,6 +52,7 @@ const cancelBooking = async (bookingId: string) => {
   <div>
     <h1 class="text-2xl font-bold mb-4">My Bookings</h1>
     <div v-if="pending" class="text-gray-500 shimmer">Loading bookings...</div>
+    <div v-else-if="error" class="text-red-500">Failed to load bookings.</div>
     <div v-else-if="bookings.length === 0" class="text-gray-500">
       You have no bookings yet.
     </div>

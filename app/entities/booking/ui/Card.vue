@@ -40,10 +40,10 @@ defineEmits<{
       >
         <div class="flex flex-col">
           <p class="">
-            {{ format(booking.slot.startTime, 'MMM d, yyyy') }}
+            {{ format(new Date(booking.slot.startTime), 'MMM d, yyyy') }}
           </p>
           <p class="text-2xl">
-            {{ format(booking.slot.startTime, 'h:mm a') }}
+            {{ format(new Date(booking.slot.startTime), 'h:mm a') }}
           </p>
         </div>
       </div>
