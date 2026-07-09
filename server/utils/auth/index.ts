@@ -13,6 +13,7 @@ import { user as userSchema } from '~~/server/db/schema/auth-schema'
 import { studioMembers, studios } from '~~/server/db/schema/studio'
 
 export const auth = betterAuth({
+  baseURL: process.env.BETTER_AUTH_URL,
   database: drizzleAdapter(useDb(), {
     provider: 'pg'
   }),
@@ -50,6 +51,12 @@ export const auth = betterAuth({
         .where(eq(userSchema.id, user.id))
 
       console.log(`Email verified for user: ${user.id} post-reset.`)
+    }
+  },
+  socialProviders: {
+    google: {
+      clientId: process.env.GOOGLE_CLIENT_ID as string,
+      clientSecret: process.env.GOOGLE_CLIENT_SECRET as string
     }
   },
   advanced: {

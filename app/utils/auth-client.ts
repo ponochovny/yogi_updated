@@ -6,7 +6,12 @@ export const authClient = createAuthClient(
   import.meta.env.VITE_BASE_URL
     ? {
         baseURL: `${import.meta.env.VITE_BASE_URL}/api/auth`,
-        plugins: [inferAdditionalFields<typeof auth>()]
+        plugins: [inferAdditionalFields<typeof auth>()],
+        sessionOptions: {
+          refetchOnWindowFocus: false, // Disable refresh on tab focus
+          refetchInterval: 0, // Disable polling (default: 0)
+          refetchWhenOffline: false // Disable when offline (default: false)
+        }
       }
     : undefined
 )
