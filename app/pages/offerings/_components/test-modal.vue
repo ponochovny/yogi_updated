@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { ref, computed } from 'vue'
-import { CreditCardIcon, BanknoteIcon, Loader2Icon } from 'lucide-react'
+import { CreditCardIcon, BanknoteIcon, Loader2Icon } from '@lucide/vue'
 
 // TS Interface for response mapping from /api/bookings/options
 interface PricingOption {
@@ -46,9 +46,7 @@ onMounted(async () => {
     const data = await $fetch<{
       success: boolean
       options: { dropInTickets: PricingOption[]; userPasses: UserPass[] }
-    }>('/api/bookings/options', {
-      query: { slotId: props.slotId }
-    })
+    }>(`/api/bookings/${props.slotId}/options`)
 
     if (data.success) {
       options.value = data.options
@@ -144,15 +142,15 @@ async function handleConfirmBooking() {
 
 <template>
   <div
-    class="bg-white rounded-2xl shadow-xl border border-slate-100 max-w-md w-full overflow-hidden"
+    class="bg-white/10 rounded-2xl shadow-xl border border-border max-w-md w-full overflow-hidden"
   >
     <!-- Header -->
     <div
-      class="px-6 py-5 border-b border-slate-100 flex items-center justify-between"
+      class="px-6 py-5 border-b border-border flex items-center justify-between"
     >
-      <h3 class="font-bold text-lg text-slate-800">Оформление записи</h3>
+      <h3 class="font-bold text-lg">Оформление записи</h3>
       <button
-        class="text-slate-400 hover:text-slate-600 transition-colors"
+        class="text-muted-foreground hover:text-slate-600 transition-colors"
         @click="emit('close')"
       >
         <span class="text-xl">&times;</span>
@@ -162,7 +160,7 @@ async function handleConfirmBooking() {
     <!-- Loading State -->
     <div
       v-if="pending"
-      class="flex flex-col items-center justify-center py-12 gap-3 text-slate-500"
+      class="flex flex-col items-center justify-center py-12 gap-3 text-gray-800 shimmer"
     >
       <Loader2Icon class="w-8 h-8 animate-spin text-orange-500" />
       <span class="text-sm">Загрузка способов оплаты...</span>
@@ -178,7 +176,7 @@ async function handleConfirmBooking() {
         <button
           :class="
             paymentFlowMode === 'PASS'
-              ? 'bg-white text-slate-800 shadow-sm'
+              ? 'bg-white  shadow-sm'
               : 'text-slate-500'
           "
           class="py-2 text-xs font-semibold rounded-lg transition-all"
@@ -189,7 +187,7 @@ async function handleConfirmBooking() {
         <button
           :class="
             paymentFlowMode === 'TICKET'
-              ? 'bg-white text-slate-800 shadow-sm'
+              ? 'bg-white  shadow-sm'
               : 'text-slate-500'
           "
           class="py-2 text-xs font-semibold rounded-lg transition-all"
@@ -202,7 +200,7 @@ async function handleConfirmBooking() {
       <!-- FLOW 1: Active user memberships/packs -->
       <div v-if="paymentFlowMode === 'PASS'" class="space-y-3">
         <div
-          class="text-xs font-semibold text-slate-400 uppercase tracking-wider"
+          class="text-xs font-semibold text-muted-foreground uppercase tracking-wider"
         >
           Выберите доступный абонемент:
         </div>
@@ -213,7 +211,7 @@ async function handleConfirmBooking() {
             :class="
               selectedPassId === pass.id
                 ? 'border-orange-500 bg-orange-50/50'
-                : 'border-slate-100 bg-white hover:border-slate-300'
+                : 'border-border bg-white hover:border-slate-300'
             "
             class="flex items-center justify-between p-4 rounded-xl border-2 cursor-pointer transition-all"
           >
@@ -225,7 +223,7 @@ async function handleConfirmBooking() {
                 class="text-orange-500 focus:ring-orange-500"
               />
               <div>
-                <div class="font-bold text-slate-800 text-sm">
+                <div class="font-bold text-sm">
                   {{ pass.name }}
                 </div>
                 <div class="text-xs text-slate-500">
@@ -240,7 +238,7 @@ async function handleConfirmBooking() {
                 </div>
               </div>
             </div>
-            <div class="text-xs text-slate-400 font-medium">
+            <div class="text-xs text-muted-foreground font-medium">
               до {{ new Date(pass.validUntil).toLocaleDateString() }}
             </div>
           </label>
@@ -251,9 +249,7 @@ async function handleConfirmBooking() {
       <div v-if="paymentFlowMode === 'TICKET'" class="space-y-4">
         <!-- Tickets list -->
         <div class="space-y-3">
-          <div
-            class="text-xs font-semibold text-slate-400 uppercase tracking-wider"
-          >
+          <div class="text-xs text-muted-foreground uppercase tracking-wider">
             Выберите разовый билет:
           </div>
           <label
@@ -261,8 +257,8 @@ async function handleConfirmBooking() {
             :key="ticket.id"
             :class="
               selectedTicketId === ticket.id
-                ? 'border-orange-500 bg-orange-50/50'
-                : 'border-slate-100 bg-white hover:border-slate-300'
+                ? 'border-white/30 bg-white/20'
+                : 'border-border bg-white/10 hover:border-slate-300'
             "
             class="flex items-center justify-between p-4 rounded-xl border-2 cursor-pointer transition-all"
           >
@@ -274,10 +270,10 @@ async function handleConfirmBooking() {
                 class="text-orange-500 focus:ring-orange-500"
               />
               <div>
-                <div class="font-bold text-slate-800 text-sm">
+                <div class="font-bold text-sm">
                   {{ ticket.name }}
                 </div>
-                <div class="text-xs text-slate-500">
+                <div class="text-xs text-muted-foreground">
                   {{
                     ticket.description ||
                     'Разовое посещение выбранной тренировки'
@@ -285,7 +281,7 @@ async function handleConfirmBooking() {
                 </div>
               </div>
             </div>
-            <div class="text-base font-extrabold text-slate-900">
+            <div class="text-base font-extrabold text-muted-foreground">
               ${{ (ticket.price / 100).toFixed(2) }}
             </div>
           </label>
@@ -294,7 +290,7 @@ async function handleConfirmBooking() {
         <!-- Single ticket payment methods -->
         <div class="space-y-3 pt-2">
           <div
-            class="text-xs font-semibold text-slate-400 uppercase tracking-wider"
+            class="text-xs font-semibold text-muted-foreground uppercase tracking-wider"
           >
             Способ оплаты билета:
           </div>
@@ -309,7 +305,7 @@ async function handleConfirmBooking() {
               class="flex flex-col items-center gap-2 p-4 rounded-xl border-2 text-center transition-all"
               @click="paymentMethod = 'ONLINE'"
             >
-              <CreditCardIcon class="w-5 h-5" />
+              <CreditCardIcon class="size-5" />
               <span class="text-xs font-bold">Оплатить онлайн</span>
             </button>
             <button
@@ -353,7 +349,7 @@ async function handleConfirmBooking() {
       </button>
 
       <!-- Terms Disclaimer -->
-      <p class="text-[10px] text-center text-slate-400 leading-relaxed">
+      <p class="text-[10px] text-center text-muted-foreground leading-relaxed">
         Нажимая кнопку, вы подтверждаете согласие с правилами отмены. <br />
         Отмена записи без сгорания средств возможна не позднее чем за 1 час до
         начала занятия.
