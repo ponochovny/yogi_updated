@@ -3,15 +3,21 @@ import { format } from 'date-fns'
 const route = useRoute()
 const studioSlug = route.params.slug ? String(route.params.slug) : undefined
 
-const { data: allSlots } = await useFetch('/api/business/studios/slots', {
-  method: 'GET',
-  query: { studioSlug }
-})
+const { data: allSlots, error } = await useFetch(
+  '/api/business/studios/slots',
+  {
+    method: 'GET',
+    query: { studioSlug }
+  }
+)
 </script>
 
 <template>
   <div class="space-y-8">
     <h2 class="text-2xl font-semibold">Business Slots</h2>
+    <div v-if="error" class="text-red-500">
+      Error loading slots: {{ error.message }}
+    </div>
     <div v-if="allSlots?.length" class="space-y-4">
       <h3 class="text-xl font-medium">My Slots</h3>
       <ul class="space-y-2">
@@ -45,5 +51,6 @@ const { data: allSlots } = await useFetch('/api/business/studios/slots', {
         </li>
       </ul>
     </div>
+    <div v-else class="text-gray-500">No slots available.</div>
   </div>
 </template>

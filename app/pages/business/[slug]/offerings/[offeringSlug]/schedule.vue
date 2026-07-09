@@ -112,13 +112,22 @@ const groupedSlots = computed<
     }>
   >
 >(() => {
-  return rawSlots.value.reduce((acc, slot) => {
+  return rawSlots.value.reduce<
+    Record<
+      string,
+      Array<{
+        id: string
+        startTime: string
+        endTime: string
+        practitionerId: string
+        status: (typeof offeringSlotStatus)[keyof typeof offeringSlotStatus]
+      }>
+    >
+  >((acc, slot) => {
     // Format UTC to Local string representation for grouping (e.g., 'June 15, 2026')
     const dateKey = format(new Date(slot.startTime), 'MMMM d, yyyy')
 
-    // @ts-expect-error: We know the structure of the slot object and that practitioner is included
     if (!acc[dateKey]) acc[dateKey] = []
-    // @ts-expect-error: We know the structure of the slot object and that practitioner is included
     acc[dateKey].push({
       ...slot,
       startTime: format(new Date(slot.startTime), 'HH:mm'), // Format for time input

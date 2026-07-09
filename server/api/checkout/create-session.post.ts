@@ -246,6 +246,9 @@ export default defineEventHandler(async event => {
   const stripeCurrency = checkoutCurrency.toLowerCase()
 
   try {
+    if (!transactionId) {
+      throwApiError(500, 'Transaction ID is missing after creation')
+    }
     // 4. Generate Stripe Checkout Session
     const stripeSession = await stripe.checkout.sessions.create({
       payment_method_types: ['card'],
@@ -274,10 +277,6 @@ export default defineEventHandler(async event => {
       }
     })
 
-    if (!transactionId) {
-      throwApiError(500, 'Transaction ID is missing after creation')
-    }
-
     // 5. Update transaction with Stripe external ID
     await db
       .update(transactions)
@@ -286,7 +285,11 @@ export default defineEventHandler(async event => {
 
     checkoutUrl = stripeSession.url
   } catch (error) {
-    await revertPendingCheckoutState(db, transactionId, bookingId)
+    try {
+      await revertPendingCheckoutState(db, transactionId, bookingId)
+    } catch (revertError) {
+      console.error('Failed to revert pending checkout state', revertError)
+    }
     throw error
   }
 
