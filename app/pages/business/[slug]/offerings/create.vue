@@ -325,7 +325,7 @@ const removeFromGallery = (index: number) => {
                 :key="field.key"
                 class="flex flex-col gap-3 p-4 border rounded-lg bg-white/5 hover:bg-white/10 relative"
               >
-                <div class="grid grid-cols-[1fr_1fr_1ft_auto] gap-2 mt-2">
+                <div class="grid grid-cols-[1fr_1fr_1fr_auto] gap-2 mt-2">
                   <FormField
                     v-slot="{ componentField }"
                     :name="`tickets[${idx}].name`"
@@ -373,6 +373,7 @@ const removeFromGallery = (index: number) => {
                             :aria-invalid="!!errorMessage"
                             placeholder="0.00"
                             type="number"
+                            step="any"
                           />
                           <InputGroupAddon align="inline-end">
                             <InputGroupText>USD</InputGroupText>

@@ -8,7 +8,11 @@ definePageMeta({
   breadcrumbs: [{ name: 'My Bookings' }]
 })
 
-const { data: bookingsData, refresh } = useFetch('/api/account/bookings')
+const {
+  data: bookingsData,
+  pending,
+  refresh
+} = useFetch('/api/account/bookings')
 const bookings = computed(() => bookingsData.value?.bookings || [])
 
 useHead({
@@ -46,7 +50,8 @@ const cancelBooking = async (bookingId: string) => {
 <template>
   <div>
     <h1 class="text-2xl font-bold mb-4">My Bookings</h1>
-    <div v-if="bookings.length === 0" class="text-gray-500">
+    <div v-if="pending" class="text-gray-500 shimmer">Loading bookings...</div>
+    <div v-else-if="bookings.length === 0" class="text-gray-500">
       You have no bookings yet.
     </div>
     <div v-else class="flex flex-col gap-4">
@@ -59,6 +64,9 @@ const cancelBooking = async (bookingId: string) => {
             :src="group[0]?.offering.coverImage || placeholderImageUrl"
             :alt="group[0]?.offering.name || 'Offering Cover Image'"
             class="aspect-video h-20 object-cover rounded-md"
+            width="150"
+            height="100"
+            provider="cloudinary"
           />
           <NuxtLink :to="`/offerings/${offeringSlug}`">
             <h2 class="text-xl font-semibold">{{ group[0]?.offering.name }}</h2>

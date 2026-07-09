@@ -54,8 +54,8 @@ export default defineEventHandler(async event => {
             email: body.email,
             name: body.name,
             emailVerified: false, // Important flag: the user has not yet confirmed their email
-            bio: body.bio || '',
-            role: [body.role], // Assign the role directly to the user
+            bio: body.bio || null,
+            role: [userRoles.USER, body.role], // Assign the role directly to the user
             createdAt: new Date(),
             updatedAt: new Date()
           })

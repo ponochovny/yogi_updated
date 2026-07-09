@@ -1,5 +1,4 @@
 <script lang="ts" setup>
-import { Settings2Icon } from '@lucide/vue'
 import { placeholderImageUrl } from '~/config/constants'
 import type { OwnerStudioItem } from '~/entities/studio/schema'
 
@@ -9,9 +8,7 @@ defineProps<{
 </script>
 
 <template>
-  <div
-    class="flex items-center justify-between p-6 bg-white/10 rounded-xl shadow-sm"
-  >
+  <div class="flex items-center justify-between">
     <div class="flex items-center gap-4">
       <NuxtImg
         :src="
@@ -29,15 +26,5 @@ defineProps<{
         </p>
       </div>
     </div>
-
-    <NuxtLink
-      v-if="studio?.slug"
-      :to="`/business/${studio.slug}/settings`"
-      as-child
-    >
-      <Button variant="outline" size="sm">
-        <Settings2Icon /> Studio Settings
-      </Button>
-    </NuxtLink>
   </div>
 </template>

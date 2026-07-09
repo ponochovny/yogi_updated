@@ -261,9 +261,7 @@ const bookSlot = async (
                                 {{ ticket.description }}
                               </span>
                             </div>
-                            <span
-                              >${{ parseFloat(ticket.price.toFixed(2)) }}</span
-                            >
+                            <span>${{ ticket.price.toFixed(2) }}</span>
                           </li>
                         </Button>
                       </ul>

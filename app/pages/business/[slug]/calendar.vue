@@ -14,11 +14,11 @@ const { userData } = useUserData()
 
 const isPractitioner = computed(() => {
   const roles = unref(userData)?.roles
-  return roles.includes(userRoles.PRACTITIONER)
+  return roles?.includes(userRoles.PRACTITIONER) ?? false
 })
 const isBusinessOwner = computed(() => {
   const roles = unref(userData)?.roles
-  return roles.includes(userRoles.BUSINESS)
+  return roles?.includes(userRoles.BUSINESS) ?? false
 })
 </script>
 

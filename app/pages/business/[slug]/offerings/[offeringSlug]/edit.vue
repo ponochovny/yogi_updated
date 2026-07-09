@@ -440,6 +440,7 @@ const removeFromGallery = (index: number) => {
                             :aria-invalid="!!errorMessage"
                             placeholder="0.00"
                             type="number"
+                            step="any"
                           />
                           <InputGroupAddon align="inline-end">
                             <InputGroupText>USD</InputGroupText>

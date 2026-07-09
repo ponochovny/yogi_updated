@@ -48,6 +48,12 @@ export default defineNuxtConfig({
     }
   },
 
+  image: {
+    cloudinary: {
+      baseURL: 'https://res.cloudinary.com/dllruwqbd/image/fetch'
+    }
+  },
+
   i18n: {
     defaultLocale: 'en',
     locales: [
