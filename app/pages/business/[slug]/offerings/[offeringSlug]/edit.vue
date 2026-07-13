@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { Trash2Icon, XIcon } from '@lucide/vue'
+import { PlusIcon, Trash2Icon, XIcon } from '@lucide/vue'
 import { toTypedSchema } from '@vee-validate/zod'
 import { useFieldArray, useForm } from 'vee-validate'
 import { computed, ref, watch } from 'vue'
@@ -204,7 +204,7 @@ const removeFromGallery = (index: number) => {
       </div>
     </div>
 
-    <div class="bg-white/10 rounded-xl shadow-sm border p-6">
+    <div>
       <div v-if="pending" class="py-10 text-center">Loading data...</div>
 
       <form v-else class="space-y-6" @submit.prevent="submitOffering">
@@ -231,15 +231,16 @@ const removeFromGallery = (index: number) => {
                   placeholder="Offering description"
                   v-bind="componentField"
                   autocomplete="off"
+                  class="min-h-[100px]"
                 />
               </FormControl>
               <FormMessage />
             </FormItem>
           </FormField>
 
-          <div class="col-span-2">
+          <div class="col-span-2 mb-6">
             <h2 class="text-lg font-semibold border-b pb-2 mb-4">Gallery</h2>
-            <div class="mb-6 flex items-center flex-wrap space-x-4 space-y-4">
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-4 mb-4">
               <div
                 v-for="(image, index) in formValues.gallery"
                 :key="index"
@@ -247,10 +248,12 @@ const removeFromGallery = (index: number) => {
               >
                 <NuxtImg
                   :src="
-                    image.url?.replace('/upload/', '/upload/w_280,c_fill/') ||
-                    placeholderImageUrl
+                    image.url?.replace(
+                      '/upload/',
+                      '/upload/w_600,h_400,c_fill/'
+                    ) || placeholderImageUrl
                   "
-                  class="h-40 aspect-video rounded-2xl object-cover border"
+                  class="w-full aspect-video rounded-2xl object-cover border"
                 />
                 <Button
                   type="button"
@@ -267,10 +270,10 @@ const removeFromGallery = (index: number) => {
                 :src="placeholderImageUrl"
                 class="h-40 aspect-video rounded-2xl object-cover border"
               />
-              <Button type="button" @click="uploadGallery">
-                Update Gallery
-              </Button>
             </div>
+            <Button type="button" @click="uploadGallery">
+              <PlusIcon class="size-4" /> Upload Images
+            </Button>
           </div>
 
           <FormField v-slot="{ componentField }" name="activityType">
@@ -373,105 +376,100 @@ const removeFromGallery = (index: number) => {
             </FormItem>
           </FormField>
 
-          <div class="flex flex-col gap-4 col-span-2">
-            <div class="mb-2">
-              <label
-                class="text-base font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+          <Card class="bg-transparent border-0 shadow-none col-span-2">
+            <CardHeader class="px-0">
+              <CardTitle>Tickets (drop-in)</CardTitle>
+              <CardDescription
+                >Create single-use tickets for this class (for example:
+                Standard, Student, VIP)</CardDescription
               >
-                Tickets (drop-in)
-              </label>
-              <p class="text-[0.8rem] text-muted-foreground mt-2">
-                Create single-use tickets for this class (for example: Standard,
-                Student, VIP)
-              </p>
-            </div>
+            </CardHeader>
+            <CardContent class="p-0">
+              <ItemGroup>
+                <template v-for="(field, idx) in fields" :key="field.key">
+                  <Item class="px-0">
+                    <div class="grid grid-cols-[1fr_1fr_1fr_auto] gap-2 w-full">
+                      <FormField
+                        v-slot="{ componentField }"
+                        :name="`tickets[${idx}].name`"
+                      >
+                        <FormItem>
+                          <FormControl>
+                            <Input
+                              placeholder="Title"
+                              v-bind="componentField"
+                              autocomplete="off"
+                            />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      </FormField>
 
-            <div class="flex flex-col gap-3">
-              <div
-                v-for="(field, idx) in fields"
-                :key="field.key"
-                class="flex flex-col gap-3 p-4 border rounded-lg bg-white/5 hover:bg-white/10 relative"
+                      <FormField
+                        v-slot="{ componentField }"
+                        :name="`tickets[${idx}].description`"
+                      >
+                        <FormItem>
+                          <FormControl>
+                            <Input
+                              placeholder="Description"
+                              v-bind="componentField"
+                              autocomplete="off"
+                            />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      </FormField>
+
+                      <FormField
+                        v-slot="{ errorMessage, componentField }"
+                        :name="`tickets[${idx}].price`"
+                      >
+                        <FormItem>
+                          <FormControl>
+                            <InputGroup>
+                              <InputGroupAddon>
+                                <InputGroupText>$</InputGroupText>
+                              </InputGroupAddon>
+                              <InputGroupInput
+                                v-bind="componentField"
+                                :aria-invalid="!!errorMessage"
+                                placeholder="0.00"
+                                type="number"
+                                step="any"
+                              />
+                              <InputGroupAddon align="inline-end">
+                                <InputGroupText>USD</InputGroupText>
+                              </InputGroupAddon>
+                            </InputGroup>
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      </FormField>
+                      <Button
+                        v-if="fields.length > 1"
+                        type="button"
+                        class="text-red-700 text-sm w-fit"
+                        variant="ghost"
+                        @click="remove(idx)"
+                      >
+                        <Trash2Icon />
+                      </Button>
+                    </div>
+                  </Item>
+                  <ItemSeparator v-if="idx < fields.length - 1" />
+                </template>
+              </ItemGroup>
+              <Button
+                type="button"
+                variant="outline"
+                class="w-fit mt-2"
+                @click="push({ id: '', name: '', description: '', price: 0 })"
               >
-                <div class="grid grid-cols-[1fr_1fr_1fr_auto] gap-2 mt-2">
-                  <FormField
-                    v-slot="{ componentField }"
-                    :name="`tickets[${idx}].name`"
-                  >
-                    <FormItem>
-                      <FormControl>
-                        <Input
-                          placeholder="Title"
-                          v-bind="componentField"
-                          autocomplete="off"
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  </FormField>
-
-                  <FormField
-                    v-slot="{ componentField }"
-                    :name="`tickets[${idx}].description`"
-                  >
-                    <FormItem>
-                      <FormControl>
-                        <Input
-                          placeholder="Description"
-                          v-bind="componentField"
-                          autocomplete="off"
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  </FormField>
-
-                  <FormField
-                    v-slot="{ errorMessage, componentField }"
-                    :name="`tickets[${idx}].price`"
-                  >
-                    <FormItem>
-                      <FormControl>
-                        <InputGroup>
-                          <InputGroupAddon>
-                            <InputGroupText>$</InputGroupText>
-                          </InputGroupAddon>
-                          <InputGroupInput
-                            v-bind="componentField"
-                            :aria-invalid="!!errorMessage"
-                            placeholder="0.00"
-                            type="number"
-                            step="any"
-                          />
-                          <InputGroupAddon align="inline-end">
-                            <InputGroupText>USD</InputGroupText>
-                          </InputGroupAddon>
-                        </InputGroup>
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  </FormField>
-                  <Button
-                    v-if="fields.length > 1"
-                    type="button"
-                    class="text-red-700 text-sm w-fit"
-                    variant="ghost"
-                    @click="remove(idx)"
-                  >
-                    <Trash2Icon />
-                  </Button>
-                </div>
-              </div>
-            </div>
-
-            <Button
-              type="button"
-              variant="outline"
-              class="w-fit mt-2"
-              @click="push({ id: '', name: '', description: '', price: 0 })"
-            >
-              + Add Ticket
-            </Button>
-          </div>
+                + Add Ticket
+              </Button>
+            </CardContent>
+          </Card>
 
           <div class="col-span-2">
             <FormField name="practitionerIds">
@@ -505,7 +503,7 @@ const removeFromGallery = (index: number) => {
                       :src="
                         prac.avatar?.replace(
                           '/upload/',
-                          '/upload/w_44,h_44,c_fill/'
+                          '/upload/w_44,h_44,c_thumb,g_custom/'
                         ) || placeholderImageUrl
                       "
                       class="w-6 h-6 rounded-full m-0"

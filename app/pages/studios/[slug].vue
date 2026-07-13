@@ -64,7 +64,7 @@ const studio = computed(() => studioData.value?.studio || null)
           :src="
             studio.logo.url.replace(
               '/upload/',
-              '/upload/w_160,h_160,c_fill/'
+              '/upload/w_160,h_160,c_thumb,g_custom/'
             ) || placeholderImageUrl
           "
           alt="Studio Logo"
@@ -110,7 +110,12 @@ const studio = computed(() => studioData.value?.studio || null)
               >
                 <NuxtImg
                   v-if="practitioner.avatar"
-                  :src="practitioner.avatar || placeholderImageUrl"
+                  :src="
+                    practitioner.avatar.replace(
+                      '/upload/',
+                      '/upload/w_48,h_48,c_thumb,g_custom/'
+                    ) || placeholderImageUrl
+                  "
                   alt="Practitioner Avatar"
                   class="w-12 h-12 object-cover rounded-full"
                 />

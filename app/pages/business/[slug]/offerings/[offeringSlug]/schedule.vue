@@ -299,7 +299,7 @@ const groupedSlots = computed<
                                   .get(value)
                                   ?.avatar?.replace(
                                     '/upload/',
-                                    '/upload/w_48,h_48,c_fill/'
+                                    '/upload/w_48,h_48,c_thumb,g_custom/'
                                   ) || placeholderImageUrl
                               "
                               class="w-6 h-6 rounded-full"
@@ -396,7 +396,7 @@ const groupedSlots = computed<
                       .get(slot.practitionerId)
                       ?.avatar?.replace(
                         '/upload/',
-                        '/upload/w_48,h_48,c_fill/'
+                        '/upload/w_48,h_48,c_thumb,g_custom/'
                       ) || placeholderImageUrl
                   "
                   class="w-6 h-6 rounded-full"

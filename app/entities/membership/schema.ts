@@ -1,4 +1,5 @@
 import * as z from 'zod'
+import type { InternalApi } from 'nitropack'
 
 export const priceOptionsType = {
   DROP_IN: 'DROP_IN',
@@ -42,3 +43,6 @@ export const createMembershipSchema = z.discriminatedUnion('type', [
 ])
 
 export type CreateMembershipInput = z.infer<typeof createMembershipSchema>
+
+export type MembershipItemBusiness =
+  InternalApi['/api/business/studios/:slug/memberships']['get']['memberships'][number]

@@ -146,7 +146,7 @@ const removeFromGallery = (index: number) => {
 			</div>
 		</div> -->
 
-    <div class="bg-white/10 rounded-xl shadow-sm border p-6">
+    <Item class="">
       <div v-if="pending" class="py-10 text-center">Loading data...</div>
 
       <form v-else class="space-y-6" @submit.prevent="submitOffering">
@@ -490,6 +490,6 @@ const removeFromGallery = (index: number) => {
           {{ errorMsg }}
         </p>
       </form>
-    </div>
+    </Item>
   </div>
 </template>

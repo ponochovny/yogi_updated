@@ -5,6 +5,7 @@ import { useForm } from 'vee-validate'
 import { toTypedSchema } from '@vee-validate/zod'
 import * as z from 'zod'
 import { toast } from 'vue-sonner'
+import GoogleAuthButton from '~/shared/components/GoogleAuthButton.vue'
 
 const props = defineProps<{
   class?: HTMLAttributes['class']

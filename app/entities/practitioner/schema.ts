@@ -1,3 +1,4 @@
+import type { InternalApi } from 'nitropack'
 import { z } from 'zod'
 import { userRoles } from '~~/server/auth/config'
 
@@ -16,3 +17,6 @@ export const addPractitionerSchema = z.object({
 })
 
 export type AddPractitionerInput = z.infer<typeof addPractitionerSchema>
+
+export type StudioMemberItem =
+  InternalApi['/api/business/studios/:slug/members']['get']['team'][number]

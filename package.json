@@ -24,7 +24,7 @@
     "db:auth:generate": "npx auth@latest generate --config server/utils/auth/index.ts --output server/db/schema/auth-schema.ts"
   },
   "dependencies": {
-    "@lucide/vue": "^1.23.0",
+    "@lucide/vue": "^1.24.0",
     "@neondatabase/neon-js": "^0.6.1-beta",
     "@neondatabase/serverless": "^1.1.0",
     "@nuxt/a11y": "^1.0.0-alpha.1",

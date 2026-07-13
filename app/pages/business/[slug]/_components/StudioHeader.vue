@@ -14,7 +14,7 @@ defineProps<{
         :src="
           studio?.logo?.url?.replace(
             '/upload/',
-            '/upload/w_100,h_100,c_fill/'
+            '/upload/w_100,h_100,c_thumb,g_custom/'
           ) || placeholderImageUrl
         "
         class="w-16 h-16 rounded-full object-cover"

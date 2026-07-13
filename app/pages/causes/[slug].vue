@@ -39,7 +39,6 @@ const studioCauses = [
 
 const chips = [5, 10, 20, 50]
 const modelValue = ref<number>(5)
-const currency = { symbol: '$' }
 const handleChipClick = (chip: number) => {
   modelValue.value = chip
 }
@@ -132,25 +131,61 @@ const onSubmit = (event: Event) => {
                         </DialogHeader>
                         <form @submit="onSubmit">
                           <div class="mb-4 flex items-center gap-1.5 text-2xl">
-                            <Button @click="modelValue = 5"> 5 </Button>
-                            <Button @click="modelValue = 10"> 10 </Button>
-                            <Button @click="modelValue = 15"> 15 </Button>
+                            <Button
+                              :variant="
+                                modelValue === 5 ? 'default' : 'outline'
+                              "
+                              @click="modelValue = 5"
+                            >
+                              5
+                            </Button>
+                            <Button
+                              :variant="
+                                modelValue === 10 ? 'default' : 'outline'
+                              "
+                              @click="modelValue = 10"
+                            >
+                              10
+                            </Button>
+                            <Button
+                              :variant="
+                                modelValue === 20 ? 'default' : 'outline'
+                              "
+                              @click="modelValue = 20"
+                            >
+                              20
+                            </Button>
+                            <Button
+                              :variant="
+                                modelValue === 50 ? 'default' : 'outline'
+                              "
+                              @click="modelValue = 50"
+                            >
+                              50
+                            </Button>
                           </div>
 
-                          <!-- v-model="sum"
-														mask="#*.##" -->
-                          <div class="relative mb-6">
-                            <Input
-                              id="donation-amount"
-                              v-model="modelValue"
-                              class="pl-6"
-                              type="number"
-                              name="donation-amount"
-                              placeholder="Enter amount"
-                            />
-                            <span class="absolute left-3 top-1 text-basic-600"
-                              >$</span
+                          <div
+                            class="grid w-full max-w-sm items-center gap-1.5 mb-4"
+                          >
+                            <Label for="donation-amount-modal"
+                              >Custom amount</Label
                             >
+                            <InputGroup>
+                              <InputGroupAddon>
+                                <InputGroupText>$</InputGroupText>
+                              </InputGroupAddon>
+                              <InputGroupInput
+                                id="donation-amount-modal"
+                                v-model="modelValue"
+                                placeholder="0.00"
+                                step="0.1"
+                                type="number"
+                              />
+                              <InputGroupAddon align="inline-end">
+                                <InputGroupText>USD</InputGroupText>
+                              </InputGroupAddon>
+                            </InputGroup>
                           </div>
 
                           <!-- SOME PREORDER PART -->
@@ -172,7 +207,7 @@ const onSubmit = (event: Event) => {
               </ul>
             </div>
           </div>
-          <div class="w-86.5 bg-neutral-800 max-h-78.5 ml-9 rounded-2xl p-6">
+          <div class="w-86.5 bg-neutral-800 ml-9 rounded-2xl p-6 self-baseline">
             <div class="mb-8">
               <p class="font-bold mb-1">
                 $ {{ cause.earned }} / {{ cause.goal }} goal
@@ -195,10 +230,7 @@ const onSubmit = (event: Event) => {
               </p>
             </div>
             <div>
-              <label
-                class="text-basic-800 text-body3 mb-3 block"
-                for="donation-amount"
-              >
+              <label class="text-sm mb-3 block" for="donation-amount">
                 Enter how much you want to donate
               </label>
               <div class="flex flex-col">
@@ -207,20 +239,30 @@ const onSubmit = (event: Event) => {
                     v-for="chip in chips"
                     :key="chip"
                     class="rounded-[120px] border border-solid flex-1"
+                    :variant="modelValue === chip ? 'default' : 'outline'"
                     @click="handleChipClick(chip)"
                   >
                     $ {{ chip }}
                   </Button>
                 </div>
-                <Input
-                  id="donation-amount"
-                  :currency="currency?.symbol"
-                  :model-value="modelValue"
-                  class="dark:bg-neutral-900 mb-4"
-                  name="donation-amount"
-                  type="number"
-                  label="Custom amount"
-                />
+                <div class="grid w-full max-w-sm items-center gap-1.5 mb-4">
+                  <Label for="donation-amount">Custom amount</Label>
+                  <InputGroup>
+                    <InputGroupAddon>
+                      <InputGroupText>$</InputGroupText>
+                    </InputGroupAddon>
+                    <InputGroupInput
+                      id="donation-amount"
+                      v-model="modelValue"
+                      placeholder="0.00"
+                      step="0.1"
+                      type="number"
+                    />
+                    <InputGroupAddon align="inline-end">
+                      <InputGroupText>USD</InputGroupText>
+                    </InputGroupAddon>
+                  </InputGroup>
+                </div>
                 <Button @click="handleDonateClick"> Donate </Button>
               </div>
             </div>

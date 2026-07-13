@@ -23,17 +23,22 @@
       <div
         class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 xl:grid-cols-2 gap-4"
       >
-        <OfferingCard
-          v-for="offering in offerings"
-          :key="offering.id"
-          :offering="offering"
-        />
-        <div
-          v-if="!offerings.length"
-          class="col-span-4 text-center text-muted-foreground"
-        >
-          No active offerings available.
+        <div v-if="offeringsPending">
+          <p class="shimmer text-foreground/60">Loading offerings...</p>
         </div>
+        <template v-else>
+          <OfferingCard
+            v-for="offering in offerings"
+            :key="offering.id"
+            :offering="offering"
+          />
+          <div
+            v-if="!offerings.length"
+            class="col-span-4 text-center text-muted-foreground"
+          >
+            No active offerings available.
+          </div>
+        </template>
       </div>
     </div>
 
@@ -42,17 +47,22 @@
       <div
         class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 xl:grid-cols-2 gap-4"
       >
-        <StudioCard
-          v-for="studio in studios"
-          :key="studio.id"
-          :studio="studio"
-        />
-        <div
-          v-if="!studios.length"
-          class="col-span-4 text-center text-muted-foreground"
-        >
-          No studios
+        <div v-if="studiosPending">
+          <p class="shimmer text-foreground/60">Loading studios...</p>
         </div>
+        <template v-else>
+          <StudioCard
+            v-for="studio in studios"
+            :key="studio.id"
+            :studio="studio"
+          />
+          <div
+            v-if="!studios.length"
+            class="col-span-4 text-center text-muted-foreground"
+          >
+            No studios
+          </div>
+        </template>
       </div>
     </div>
   </div>
@@ -70,9 +80,10 @@ definePageMeta({
 
 const { locales, setLocale } = useI18n()
 
-const { data: studiosData } = useFetch(`/api/studios`)
+const { data: studiosData, pending: studiosPending } = useFetch(`/api/studios`)
 const studios = computed(() => studiosData.value?.studios || [])
 
-const { data: offeringsData } = useFetch(`/api/offerings`)
+const { data: offeringsData, pending: offeringsPending } =
+  useFetch(`/api/offerings`)
 const offerings = computed(() => offeringsData.value?.offerings || [])
 </script>

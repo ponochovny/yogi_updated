@@ -2,8 +2,7 @@
 import { format } from 'date-fns'
 import type { BookingOptions, OfferingSlot } from '~/entities/booking/schema'
 import { toast } from 'vue-sonner'
-import { CrownIcon, TicketIcon } from '@lucide/vue'
-import testModal from './_components/test-modal.vue'
+import BookWithPricingOptions from './_components/BookWithPricingOptions.vue'
 
 const route = useRoute()
 const offeringSlug = route.params.slug
@@ -75,39 +74,39 @@ const checkAvailablePricingOptions = async (slot: OfferingSlot) => {
 }
 
 /** Book a selected slot */
-const bookSlot = async (
-  slot: OfferingSlot,
-  pricingOptionId: string | null,
-  userPassId: string | null
-) => {
-  try {
-    // await $fetch(`/api/slots/${slot.id}/book`, {
-    //   method: 'POST',
-    //   body: {
-    //     ...slot
-    //   }
-    // })
-    await $fetch(`/api/bookings/${slot.id}`, {
-      method: 'POST',
-      body: {
-        pricingOptionId,
-        userPassId
-      }
-    })
+// const bookSlot = async (
+//   slot: OfferingSlot,
+//   pricingOptionId: string | null,
+//   userPassId: string | null
+// ) => {
+//   try {
+//     // await $fetch(`/api/slots/${slot.id}/book`, {
+//     //   method: 'POST',
+//     //   body: {
+//     //     ...slot
+//     //   }
+//     // })
+//     await $fetch(`/api/bookings/${slot.id}`, {
+//       method: 'POST',
+//       body: {
+//         pricingOptionId,
+//         userPassId
+//       }
+//     })
 
-    toast.success('Slot booked successfully!', {
-      description:
-        'Your session has been booked. Check your dashboard for details.',
-      duration: 5000,
-      action: {
-        label: 'View Bookings',
-        onClick: () => navigateTo('/profile/bookings')
-      }
-    })
-  } catch (err) {
-    toast.error(`Error booking slot: ${(err as Error).message}`)
-  }
-}
+//     toast.success('Slot booked successfully!', {
+//       description:
+//         'Your session has been booked. Check your dashboard for details.',
+//       duration: 5000,
+//       action: {
+//         label: 'View Bookings',
+//         onClick: () => navigateTo('/profile/bookings')
+//       }
+//     })
+//   } catch (err) {
+//     toast.error(`Error booking slot: ${(err as Error).message}`)
+//   }
+// }
 </script>
 
 <template>
@@ -116,7 +115,7 @@ const bookSlot = async (
   >
     <div class="md:col-span-2 space-y-6">
       <h1 class="text-4xl font-bold">{{ offering?.name }}</h1>
-      <p class="text-gray-600 text-lg">{{ offering?.description }}</p>
+      <p class="text-muted-foreground">{{ offering?.description }}</p>
     </div>
 
     <div class="bg-white/10 p-6 rounded-2xl border sticky top-8">
@@ -161,112 +160,29 @@ const bookSlot = async (
                   <DialogHeader>
                     <DialogTitle>
                       <p class="leading-6">
-                        Book the {{ offering?.name }}
+                        Book
+                        <span class="font-normal">{{ offering?.name }}</span>
                         <br />
                         on
-                        {{
-                          format(new Date(slot.startTime), 'MMMM d, yyyy HH:mm')
-                        }}
+                        <span class="font-normal">
+                          {{
+                            format(
+                              new Date(slot.startTime),
+                              'MMMM d, yyyy HH:mm'
+                            )
+                          }}
+                        </span>
                       </p>
                     </DialogTitle>
                     <DialogDescription>
-                      Choose from the available booking options below:
+                      Choose your payment method to complete the booking.
                     </DialogDescription>
                   </DialogHeader>
 
-                  <test-modal :slug="String(offeringSlug)" :slot-id="slot.id" />
-
-                  <p
-                    v-if="isPricingOptionsPending"
-                    class="shimmer text-foreground/60"
-                  >
-                    Loading...
-                  </p>
-
-                  <div v-else-if="!dropInTickets.length && !userPasses.length">
-                    No available booking options for this slot.
-                  </div>
-
-                  <div v-else class="space-y-6">
-                    <div v-if="userPasses.length">
-                      <h5 class="font-semibold mb-2">User Passes</h5>
-                      <p class="text-sm text-muted-foreground mb-2">
-                        Use your existing passes to book this slot.
-                      </p>
-                      <ul class="space-y-2">
-                        <Button
-                          v-for="pass in userPasses"
-                          :key="pass.id"
-                          type="button"
-                          class="w-full p-0 items-baseline justify-baseline h-auto"
-                          variant="outline"
-                        >
-                          <li
-                            class="flex justify-between items-center px-4 py-2 rounded-lg grow"
-                            @click="bookSlot(slot, null, pass.id)"
-                          >
-                            <div class="flex flex-col items-start">
-                              <span class="inline-flex gap-1 items-center">
-                                <CrownIcon
-                                  v-if="pass.type === 'MEMBERSHIP'"
-                                  class="size-5"
-                                />
-                                {{ pass.name }}
-                              </span>
-                              <span
-                                v-if="pass.validUntil"
-                                class="text-xs text-muted-foreground"
-                              >
-                                Expires
-                                <NuxtTime
-                                  :datetime="pass.validUntil"
-                                  relative
-                                />
-                              </span>
-                            </div>
-                            <span class="text-sm text-muted-foreground">
-                              {{
-                                pass.remainingCredits
-                                  ? `${pass.remainingCredits} credits left`
-                                  : 'Unlimited'
-                              }}
-                            </span>
-                          </li>
-                        </Button>
-                      </ul>
-                    </div>
-                    <div v-if="dropInTickets.length">
-                      <h5 class="font-semibold mb-2">Drop-in Tickets</h5>
-                      <ul class="space-y-2">
-                        <Button
-                          v-for="ticket in dropInTickets"
-                          :key="ticket.id"
-                          type="button"
-                          class="w-full p-0 items-baseline justify-baseline h-auto"
-                          variant="outline"
-                        >
-                          <li
-                            class="flex justify-between items-center px-4 py-2 rounded-lg grow"
-                            @click="bookSlot(slot, ticket.id, null)"
-                          >
-                            <div class="flex flex-col items-start">
-                              <span class="inline-flex gap-2 items-center">
-                                <TicketIcon class="size-5" />
-                                {{ ticket.name }}
-                              </span>
-                              <span
-                                v-if="ticket.description"
-                                class="text-xs text-muted-foreground"
-                              >
-                                {{ ticket.description }}
-                              </span>
-                            </div>
-                            <span>${{ ticket.price.toFixed(2) }}</span>
-                          </li>
-                        </Button>
-                      </ul>
-                    </div>
-                  </div>
+                  <book-with-pricing-options
+                    :slug="String(offeringSlug)"
+                    :slot-id="slot.id"
+                  />
                 </DialogContent>
               </Dialog>
             </div>
