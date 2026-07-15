@@ -25,6 +25,10 @@ export default defineEventHandler(async event => {
     updateBookingSchema.parse
   )
 
+  if (!pricingOptionId) {
+    throwApiError(400, 'Pricing option is required for booking')
+  }
+
   const clientId = userData.id
   const db = useDb()
 
@@ -101,10 +105,6 @@ export default defineEventHandler(async event => {
 
           if (existingBooking) {
             throwApiError(400, 'You have already booked this session')
-          }
-
-          if (!pricingOptionId) {
-            throwApiError(400, 'Pricing option is required for booking')
           }
 
           // Fetch the pricing option to ensure it belongs to the same offering and studio

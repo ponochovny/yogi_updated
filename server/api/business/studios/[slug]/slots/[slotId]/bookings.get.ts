@@ -1,20 +1,14 @@
 import { bookings } from '~~/server/db/schema/booking'
 import { offeringSlots, pricingOptions } from '~~/server/db/schema/offering'
 import { user } from '~~/server/db/schema/auth-schema'
-import { and, eq, sql } from 'drizzle-orm'
+import { and, desc, eq, sql } from 'drizzle-orm'
 import { userRoles } from '~~/server/auth/config'
-import { MediaEntityTypeEnum, MediaTypeEnum } from '~~/server/db/schema/_other'
+import {
+  MediaEntityTypeEnum,
+  mediaFiles,
+  MediaTypeEnum
+} from '~~/server/db/schema/_other'
 import { transactions, userPasses } from '~~/server/db/schema/payment'
-
-const userImg = sql`(
-    SELECT url
-    FROM media_files
-    WHERE entity_id = ${user.id}::text
-      AND entity_type = ${MediaEntityTypeEnum.USER}
-      AND type = ${MediaTypeEnum.AVATAR}
-    ORDER BY created_at DESC
-    LIMIT 1
-  ) user_img`
 
 export default defineEventHandler(async event => {
   const userData = await requireAuthenticatedUser(event)
@@ -49,6 +43,22 @@ export default defineEventHandler(async event => {
       'Forbidden: You can only view bookings for your own classes'
     )
   }
+
+  const userImg = db
+    .select({
+      url: mediaFiles.url
+    })
+    .from(mediaFiles)
+    .where(
+      and(
+        eq(mediaFiles.entityId, user.id),
+        eq(mediaFiles.entityType, MediaEntityTypeEnum.USER),
+        eq(mediaFiles.type, MediaTypeEnum.AVATAR)
+      )
+    )
+    .orderBy(desc(mediaFiles.createdAt))
+    .limit(1)
+    .as('user_img')
 
   const conditions = []
 
