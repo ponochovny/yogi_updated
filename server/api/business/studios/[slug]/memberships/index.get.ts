@@ -1,6 +1,7 @@
-import { and, eq } from 'drizzle-orm'
+import { and, eq, inArray } from 'drizzle-orm'
 import { priceOptionsType } from '~/entities/membership/schema'
 import { userRoles } from '~~/server/auth/config'
+import { globalCategories } from '~~/server/db/schema/global'
 import { pricingOptions } from '~~/server/db/schema/offering'
 import { studios } from '~~/server/db/schema/studio'
 
@@ -30,14 +31,33 @@ export default defineEventHandler(async event => {
       .where(
         and(
           eq(pricingOptions.studioId, studio.id),
-          eq(pricingOptions.type, priceOptionsType.MEMBERSHIP)
+          inArray(pricingOptions.type, [
+            priceOptionsType.MEMBERSHIP,
+            priceOptionsType.PACK
+          ])
         )
       )
 
-    return { success: true, memberships }
-  } catch (error: unknown) {
+    const categoryIds = memberships.flatMap(m => m.applicableCategoryIds || [])
+    const globalCategoriesData = categoryIds.length
+      ? await db
+          .select()
+          .from(globalCategories)
+          .where(inArray(globalCategories.id, categoryIds))
+      : []
+
+    return {
+      success: true,
+      memberships: memberships.map(membership => ({
+        ...membership,
+        applicableCategories: globalCategoriesData
+          .filter(cat => membership.applicableCategoryIds?.includes(cat.id))
+          .map(cat => cat.name)
+      }))
+    }
+  } catch (error) {
     if (isApiError(error)) throw error
-    console.error('Failed to create membership', error)
-    throwApiError(500, 'Failed to create membership')
+    console.error('Failed to fetch memberships', error)
+    throwApiError(500, 'Failed to fetch memberships')
   }
 })

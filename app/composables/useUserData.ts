@@ -10,6 +10,15 @@ export interface IWorkSpace {
   }
 }
 
+export const getWorkspaceRoles = (
+  workspaces: ReadonlyArray<IWorkSpace> | undefined,
+  slug?: string
+): UserRole[] => {
+  return (workspaces ?? [])
+    .filter(workspace => !slug || workspace.studio.slug === slug)
+    .map(workspace => workspace.role)
+}
+
 const emptyUserData = {
   name: '',
   email: '',
@@ -30,9 +39,8 @@ export const useUserData = () => {
         return
       }
 
-      const workspaceRoles =
-        (newUser?.workspaces as { role: UserRole }[])?.map(el => el.role) ?? []
-      const userRoles = (newUser?.role as UserRole[]) ?? []
+      const workspaceRoles = getWorkspaceRoles(newUser?.workspaces)
+      const userRoles = (newUser?.role as UserRole[] | undefined) ?? []
 
       userData.value = {
         name: newUser.name || '',
@@ -45,13 +53,9 @@ export const useUserData = () => {
   )
 
   const getRolesInStudio = (slug: string): UserRole[] => {
-    const workspaces =
-      (session.value?.data?.user?.workspaces as IWorkSpace[]) ?? []
+    if (session.value?.isPending) return []
 
-    const roles = workspaces
-      .filter(w => w.studio.slug === slug)
-      .map(w => w.role)
-    return roles.length > 0 ? roles : []
+    return getWorkspaceRoles(session.value?.data?.user?.workspaces, slug)
   }
 
   return { userData, getRolesInStudio, session }

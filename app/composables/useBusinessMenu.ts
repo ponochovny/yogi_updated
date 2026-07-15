@@ -12,7 +12,8 @@ import {
   type LucideIcon
 } from '@lucide/vue'
 import { PagesConfig } from '~/config/pages.config'
-import { userRoles, type UserRole } from '~~/server/auth/config'
+import { getWorkspaceRoles } from '~/composables/useUserData'
+import { userRoles } from '~~/server/auth/config'
 
 interface Menu {
   group: string
@@ -129,25 +130,12 @@ export const useBusinessMenu = () => {
   }))
 
   const visibleMenu = computed<Menu[]>(() => {
-    // type WorkspaceRole = {
-    // 	studio: {
-    // 		slug: string
-    // 	}
-    // 	role: (typeof userRoles)[keyof typeof userRoles]
-    // }
+    const workspaces = computed(() => user.value?.workspaces ?? [])
 
-    const workspaceRoles =
-      (user.value?.workspaces as IWorkSpace[])?.map(el => el.role) ?? []
-    const uRoles = (user.value?.role as UserRole[]) ?? []
+    const workspaceRoles = getWorkspaceRoles(workspaces.value)
+    const uRoles = user.value?.role ?? []
 
     const roles = [...new Set([...workspaceRoles, ...uRoles])]
-
-    // const workspaceRoles = (user.value?.workspaces ?? []) as WorkspaceRole[]
-    // const roles = slug.value
-    // 	? workspaceRoles
-    // 			.filter((w) => w.studio.slug === slug.value)
-    // 			.map((w) => w.role)
-    // 	: workspaceRoles.map((w) => w.role)
 
     const isJustUser = roles.length === 1 && roles.includes(userRoles.USER)
     if (isJustUser) return notMemberMenu
@@ -163,7 +151,7 @@ export const useBusinessMenu = () => {
     const filteredMenuByStudioSlug = () => {
       const studioSlug = slug.value
 
-      const workspace = (user.value?.workspaces as IWorkSpace[])?.find(
+      const workspace = workspaces.value?.find(
         w => w.studio.slug === studioSlug
       )
       const isSuperAdmin = uRoles.includes(userRoles.SUPER_ADMIN)

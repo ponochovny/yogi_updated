@@ -8,6 +8,7 @@ import {
   globalCurrencies,
   globalTypes
 } from '~~/server/db/schema/global'
+import { resolveStudioMetadata } from '~~/server/utils/studio-metadata'
 
 export default defineEventHandler(async event => {
   const userData = await requireAuthenticatedUser(event)
@@ -51,24 +52,27 @@ export default defineEventHandler(async event => {
           )
           .orderBy(mediaFiles.order),
         db
-          .select({ name: globalCategories.name })
+          .select()
           .from(globalCategories)
           .where(inArray(globalCategories.id, studio.categories || [])),
         db
-          .select({ name: globalTypes.name })
+          .select()
           .from(globalTypes)
           .where(inArray(globalTypes.id, studio.types || [])),
         db
-          .select({ name: globalCurrencies.name })
+          .select()
           .from(globalCurrencies)
           .where(eq(globalCurrencies.id, studio.currency))
       ])
 
     const logo = media.find(file => file.type === MediaTypeEnum.LOGO) || null
     const gallery = media.filter(file => file.type === MediaTypeEnum.GALLERY)
-    const categoryNames = categoriesData.map(c => c.name)
-    const typeNames = typesData.map(c => c.name)
-    const currencyName = currenciesData[0]?.name
+    const { categories, types, currency } = resolveStudioMetadata(
+      studio,
+      categoriesData,
+      typesData,
+      currenciesData
+    )
 
     return {
       success: true,
@@ -85,9 +89,9 @@ export default defineEventHandler(async event => {
           url: file.url
           // providerPublicId: file.providerPublicId,
         })),
-        categories: categoryNames,
-        types: typeNames,
-        currency: currencyName
+        categories,
+        types,
+        currency
       }
     }
   } catch (error) {

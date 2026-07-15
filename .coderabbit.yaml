@@ -1,0 +1,3 @@
+path_filters:
+  - '!app/shared/ui/**'
+  - '!servers/utils/db/migrations/**'

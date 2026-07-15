@@ -2,10 +2,8 @@ import { offeringSlots, offerings } from '~~/server/db/schema/offering'
 import { and, eq } from 'drizzle-orm'
 import { parse } from 'date-fns'
 import { fromZonedTime } from 'date-fns-tz'
-import {
-  createSlotSchema,
-  offeringSlotStatus
-} from '~/entities/offering/schema'
+import { offeringSlotStatus } from '~/entities/offering/schema'
+import { scheduleSchema } from '~/entities/schedule/schema'
 import { studios } from '~~/server/db/schema/studio'
 
 export default defineEventHandler(async event => {
@@ -50,7 +48,7 @@ export default defineEventHandler(async event => {
   //   ]
   // }
 
-  const body = await readValidatedBody(event, createSlotSchema.parse)
+  const body = await readValidatedBody(event, scheduleSchema.parse)
   const { startDate, endDate, rules } = body
 
   try {
@@ -104,11 +102,10 @@ export default defineEventHandler(async event => {
     }
 
     if (slotsToInsert.length === 0) {
-      return {
-        success: false,
-        message:
-          'In the selected range, there are no matches by days of the week'
-      }
+      throwApiError(
+        400,
+        'No slots generated. Please check your rules and date range.'
+      )
     }
 
     // 3. Batch Insert - very fast in Drizzle

@@ -10,7 +10,8 @@ export const bookingStatusEnum = pgEnum('booking_status', [
   BookingStatus.ATTENDED,
   BookingStatus.NO_SHOW,
   BookingStatus.ACTIVE,
-  BookingStatus.COMPLETED
+  BookingStatus.COMPLETED,
+  BookingStatus.PENDING
 ])
 
 export const bookings = pgTable('bookings', {

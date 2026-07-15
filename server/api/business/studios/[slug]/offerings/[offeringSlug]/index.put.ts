@@ -1,4 +1,8 @@
-import { offerings, offeringPractitioners } from '~~/server/db/schema/offering'
+import {
+  offerings,
+  offeringPractitioners,
+  pricingOptions
+} from '~~/server/db/schema/offering'
 import {
   studioLocations,
   studioPractitioners,
@@ -9,8 +13,10 @@ import {
   mediaFiles,
   MediaTypeEnum
 } from '~~/server/db/schema/_other'
-import { and, eq, inArray } from 'drizzle-orm'
-import { createOfferingSchema } from '~/entities/offering/schema'
+import { userPasses } from '~~/server/db/schema/payment'
+import { and, eq, inArray, sql } from 'drizzle-orm'
+import { updateOfferingSchema } from '~/entities/offering/schema'
+import { priceOptionsType } from '~/entities/membership/schema'
 
 export default defineEventHandler(async event => {
   const userData = await requireAuthenticatedUser(event)
@@ -44,7 +50,7 @@ export default defineEventHandler(async event => {
     throwApiError(404, 'Offering not found in this studio')
   }
 
-  const body = await readValidatedBody(event, createOfferingSchema.parse)
+  const body = await readValidatedBody(event, updateOfferingSchema.parse)
 
   // Validate location belongs to the studio
   if (body.locationId) {
@@ -133,6 +139,92 @@ export default defineEventHandler(async event => {
             }))
           )
         }
+      }
+
+      // Update / Create tickets (pricing options)
+      const submittedTicketIds = body.tickets
+        .map(ticket => ticket.id)
+        .filter((id): id is string => Boolean(id))
+
+      const validOwnedTicketIds =
+        submittedTicketIds.length > 0
+          ? await tx
+              .select({ id: pricingOptions.id })
+              .from(pricingOptions)
+              .where(
+                and(
+                  eq(pricingOptions.offeringId, offering.id),
+                  eq(pricingOptions.studioId, studio.id),
+                  inArray(pricingOptions.id, submittedTicketIds)
+                )
+              )
+          : []
+
+      const validOwnedTicketIdSet = new Set(
+        validOwnedTicketIds.map(ticket => ticket.id)
+      )
+
+      const existingOfferingTickets = await tx
+        .select({ id: pricingOptions.id })
+        .from(pricingOptions)
+        .where(
+          and(
+            eq(pricingOptions.offeringId, offering.id),
+            eq(pricingOptions.studioId, studio.id)
+          )
+        )
+
+      const ticketsToRemove = existingOfferingTickets.filter(
+        ticket => !validOwnedTicketIdSet.has(ticket.id)
+      )
+
+      if (ticketsToRemove.length > 0) {
+        const protectedTicketIds = await tx
+          .select({ id: userPasses.pricingOptionId })
+          .from(userPasses)
+          .where(
+            inArray(
+              userPasses.pricingOptionId,
+              ticketsToRemove.map(ticket => ticket.id)
+            )
+          )
+
+        const removableTicketIds = ticketsToRemove
+          .map(ticket => ticket.id)
+          .filter(id => !protectedTicketIds.some(pass => pass.id === id))
+
+        if (removableTicketIds.length > 0) {
+          await tx
+            .delete(pricingOptions)
+            .where(inArray(pricingOptions.id, removableTicketIds))
+        }
+      }
+
+      const allTicketsPayload = body.tickets.map(ticket => ({
+        id:
+          ticket.id && validOwnedTicketIdSet.has(ticket.id)
+            ? ticket.id
+            : undefined,
+        studioId: studio.id,
+        offeringId: offering.id,
+        name: ticket.name,
+        price: Math.round(ticket.price * 100),
+        description: ticket.description,
+        type: priceOptionsType.DROP_IN,
+        durationDays: 1
+      }))
+      if (allTicketsPayload.length > 0) {
+        await tx
+          .insert(pricingOptions)
+          .values(allTicketsPayload)
+          .onConflictDoUpdate({
+            target: pricingOptions.id,
+            set: {
+              name: sql`EXCLUDED.name`,
+              price: sql`EXCLUDED.price`,
+              description: sql`EXCLUDED.description`
+            }
+          })
       }
 
       // Fetch the updated offering with associated practitioners and gallery media

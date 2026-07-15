@@ -1,14 +1,17 @@
 # YOGI APP
 
-## Stack:
+## Tech stack:
 
 - Nuxt 4
 - TailwindCSS
-- Shadcn
-- NeonDB (Postgres)
-- Drizzle (ORM)
-- Better Auth
-- Cloudinary
+- (UI) Shadcn
+- (Postgres DB) NeonDB
+- (ORM) Drizzle
+- (Auth) Better Auth
+- (Payment) Stripe
+- (Email) Resend
+- (Media) Cloudinary
+- (Error logger) Sentry
 
 ## Services:
 

@@ -1,8 +1,14 @@
 import { bookings } from '~~/server/db/schema/booking'
-import { offeringSlots } from '~~/server/db/schema/offering'
+import { offeringSlots, pricingOptions } from '~~/server/db/schema/offering'
 import { user } from '~~/server/db/schema/auth-schema'
-import { and, eq } from 'drizzle-orm'
+import { and, desc, eq, sql } from 'drizzle-orm'
 import { userRoles } from '~~/server/auth/config'
+import {
+  MediaEntityTypeEnum,
+  mediaFiles,
+  MediaTypeEnum
+} from '~~/server/db/schema/_other'
+import { transactions, userPasses } from '~~/server/db/schema/payment'
 
 export default defineEventHandler(async event => {
   const userData = await requireAuthenticatedUser(event)
@@ -38,6 +44,22 @@ export default defineEventHandler(async event => {
     )
   }
 
+  const userImg = db
+    .select({
+      url: mediaFiles.url
+    })
+    .from(mediaFiles)
+    .where(
+      and(
+        eq(mediaFiles.entityId, user.id),
+        eq(mediaFiles.entityType, MediaEntityTypeEnum.USER),
+        eq(mediaFiles.type, MediaTypeEnum.AVATAR)
+      )
+    )
+    .orderBy(desc(mediaFiles.createdAt))
+    .limit(1)
+    .as('user_img')
+
   const conditions = []
 
   const generalConditions = eq(bookings.slotId, slotId)
@@ -65,11 +87,25 @@ export default defineEventHandler(async event => {
         id: user.id,
         name: user.name,
         email: user.email,
-        image: user.image
+        image: sql<string>`user_img.url`
+      },
+      transaction: {
+        provider: transactions.provider,
+        status: transactions.status
+      },
+      userPass: {
+        name: pricingOptions.name,
+        type: pricingOptions.type
       }
     })
     .from(bookings)
     .innerJoin(user, eq(bookings.userId, user.id))
+    .leftJoinLateral(userImg, sql`TRUE`)
+    .leftJoin(transactions, eq(bookings.transactionId, transactions.id))
+
+    .leftJoin(userPasses, eq(bookings.userPassId, userPasses.id))
+    .leftJoin(pricingOptions, eq(userPasses.pricingOptionId, pricingOptions.id))
+
     .innerJoin(offeringSlots, eq(bookings.slotId, offeringSlots.id))
     .where(and(...conditions))
 

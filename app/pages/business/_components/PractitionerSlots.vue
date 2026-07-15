@@ -1,0 +1,68 @@
+<script lang="ts" setup>
+import { format } from 'date-fns'
+const route = useRoute()
+const studioSlug = route.params.slug ? String(route.params.slug) : undefined
+
+const {
+  data: practitionerSlots,
+  pending,
+  error
+} = await useFetch('/api/practitioner/slots', {
+  method: 'GET',
+  query: { studioSlug }
+})
+</script>
+
+<template>
+  <div class="space-y-8">
+    <h2 class="text-2xl font-semibold">Practitioner Dashboard</h2>
+    <p v-if="pending" class="text-foreground/60 shimmer">Loading slots...</p>
+    <p v-if="error" class="text-red-500">
+      Error loading slots: {{ error.message }}
+    </p>
+    <p
+      v-if="
+        !pending &&
+        !error &&
+        (!practitionerSlots || practitionerSlots.length === 0)
+      "
+      class="text-muted-foreground"
+    >
+      No slots available. Please check back later or contact your studio
+      administrator.
+    </p>
+    <div v-if="practitionerSlots?.length" class="space-y-4">
+      <h3 class="text-xl font-medium">My Slots</h3>
+      <ul class="space-y-2">
+        <li
+          v-for="slot in practitionerSlots"
+          :key="slot.id"
+          class="rounded-lg border p-4 hover:bg-white/5"
+        >
+          <NuxtLink
+            :to="`/business/${slot.studio.slug}/slots/${slot.id}/bookings`"
+            class="block"
+          >
+            <div class="flex items-center justify-between">
+              <div>
+                <p class="text-sm font-medium">
+                  {{ slot.offering.name }} - {{ slot.studio.name }}
+                </p>
+                <ClientOnly>
+                  <p class="text-xs text-gray-500">
+                    {{ format(new Date(slot.startTime), 'MMM dd, yyyy HH:mm') }}
+                    -
+                    {{ format(new Date(slot.endTime), 'HH:mm') }}
+                  </p>
+                </ClientOnly>
+              </div>
+              <div class="text-sm text-gray-700">
+                {{ slot.bookedCount }} / {{ slot.capacity }} booked
+              </div>
+            </div>
+          </NuxtLink>
+        </li>
+      </ul>
+    </div>
+  </div>
+</template>

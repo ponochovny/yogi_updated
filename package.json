@@ -24,7 +24,7 @@
     "db:auth:generate": "npx auth@latest generate --config server/utils/auth/index.ts --output server/db/schema/auth-schema.ts"
   },
   "dependencies": {
-    "@lucide/vue": "^1.23.0",
+    "@lucide/vue": "^1.24.0",
     "@neondatabase/neon-js": "^0.6.1-beta",
     "@neondatabase/serverless": "^1.1.0",
     "@nuxt/a11y": "^1.0.0-alpha.1",
@@ -39,6 +39,7 @@
     "@nuxtjs/seo": "^5.1.3",
     "@nuxtjs/tailwindcss": "^6.14.0",
     "@pinia/nuxt": "^0.11.3",
+    "@sentry/nuxt": "^10.63.0",
     "@tailwindcss/vite": "^4.3.0",
     "@tanstack/vue-table": "^8.21.3",
     "@vee-validate/zod": "^4.15.1",
@@ -54,12 +55,15 @@
     "nuxt-vitalizer": "^2.0.0",
     "pg": "^8.21.0",
     "pinia": "^3.0.4",
-    "reka-ui": "^2.9.9",
+    "reka-ui": "^2.10.1",
     "resend": "^6.12.4",
     "shadcn-nuxt": "^2.7.3",
     "slugify": "^1.6.9",
+    "stripe": "^22.3.0",
     "tailwind-merge": "^3.6.0",
     "tailwindcss": "^4.3.0",
+    "tw-shimmer": "^0.4.11",
+    "uuid": "^14.0.1",
     "vee-validate": "^4.15.1",
     "vue": "^3.5.34",
     "vue-router": "^5.0.7",
@@ -72,6 +76,7 @@
     "@tailwindcss/postcss": "^4.3.0",
     "@types/node": "^25.9.1",
     "@types/pg": "^8.20.0",
+    "@types/uuid": "^10.0.0",
     "@types/ws": "^8.18.1",
     "@vitest/coverage-v8": "^4.1.7",
     "@vue/test-utils": "^2.4.10",
@@ -89,6 +94,7 @@
       "@better-auth/core": "$@better-auth/core",
       "better-auth": "$better-auth"
     },
-    "better-auth": "$better-auth"
+    "better-auth": "$better-auth",
+    "@vercel/nft": "^0.27.4"
   }
 }

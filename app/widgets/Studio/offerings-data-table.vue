@@ -1,6 +1,7 @@
 <script lang="ts" setup>
 import {
   ArrowUpDown,
+  CalendarClockIcon,
   ChevronDownIcon,
   MoreHorizontalIcon,
   PencilSparklesIcon
@@ -75,28 +76,47 @@ const columns: ColumnDef<OfferingItemBusiness>[] = [
   {
     accessorKey: 'activityType',
     header: 'Activity Type',
-    cell: ({ row }) =>
-      h(
+    cell: ({ row }) => {
+      const activityType = row.getValue('activityType') as string
+      return h(
         'div',
         h(
           Badge,
           {
             variant: 'secondary',
-            class:
-              'inline-block lowercase first-letter:uppercase font-medium bg-amber-100 text-amber-800 dark:bg-amber-700 dark:text-amber-100'
+            class: {
+              'bg-amber-100 text-amber-800 dark:bg-amber-700 dark:text-amber-100':
+                activityType === 'EVENT',
+              'bg-blue-100 text-blue-800 dark:bg-blue-700 dark:text-blue-100':
+                activityType === 'CLASS',
+              'inline-block lowercase first-letter:uppercase font-medium': true
+            }
           },
           () => row.getValue('activityType')
         )
       )
+    }
   },
   {
     accessorKey: 'location',
     header: 'Location',
     cell: ({ row }) => {
-      const location: string = row.getValue('location')
-        ? row.getValue('location')
-        : 'Online'
-      return h('div', location)
+      const locationValue = row.getValue('location') as {
+        name: string
+        address: string
+        city: string
+        country: string
+      } | null
+      const location: string = locationValue ? locationValue.name : 'Online'
+      return h(
+        'div',
+        {
+          title: locationValue
+            ? `${locationValue.address}, ${locationValue.city}, ${locationValue.country}`
+            : ''
+        },
+        location
+      )
     }
   },
   {
@@ -189,6 +209,15 @@ const table = useVueTable({
             "
           >
             <PencilSparklesIcon /> Edit
+          </DropdownMenuItem>
+          <DropdownMenuItem
+            @click="
+              $router.push(
+                `/business/${route.params.slug}/offerings/${offering.slug}/schedule`
+              )
+            "
+          >
+            <CalendarClockIcon /> Schedule
           </DropdownMenuItem>
         </DropdownMenuContent>
       </DropdownMenu>

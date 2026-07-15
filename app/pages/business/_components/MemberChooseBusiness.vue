@@ -1,4 +1,6 @@
 <script lang="ts" setup>
+import { PlusIcon } from '@lucide/vue'
+
 const { data: memberStudiosData, pending: memberStudiosPending } =
   useFetch(`/api/member/studios`)
 const memberStudios = computed(() => memberStudiosData.value?.studios)

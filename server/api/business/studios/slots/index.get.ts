@@ -1,0 +1,78 @@
+import { offeringSlots, offerings } from '~~/server/db/schema/offering'
+import { studios, studioPractitioners } from '~~/server/db/schema/studio'
+import { eq, and, sql } from 'drizzle-orm'
+import { bookings } from '~~/server/db/schema/booking'
+import { BookingStatus } from '~/entities/booking/schema'
+import { user } from '~~/server/db/schema/auth-schema'
+
+export default defineEventHandler(async event => {
+  const userData = await requireAuthenticatedUser(event)
+
+  // We get an optional parameter from the URL, for example: /api/practitioner/slots?studioSlug=yoga-center
+  const query = getQuery(event)
+  const slug = query.studioSlug as string | undefined
+  const db = useDb()
+
+  // Restrict to studios the caller is authorized to manage
+  const conditions = [eq(studioPractitioners.userId, userData.id)]
+  // If the frontend requested a specific studio, we add a filter to the conditions array.
+  if (slug) {
+    conditions.push(eq(studios.slug, slug))
+  }
+
+  const slots = await db
+    .select({
+      id: offeringSlots.id,
+      startTime: offeringSlots.startTime,
+      endTime: offeringSlots.endTime,
+      status: offeringSlots.status,
+      capacity: sql<
+        number | null
+      >`NULLIF(COALESCE(${offeringSlots.capacityOverride}, ${offerings.capacity}), 0)`,
+      bookedCount: sql<number>`(
+				SELECT count(${bookings.id})::int
+				FROM ${bookings}
+				WHERE ${bookings.slotId} = ${offeringSlots.id}
+				AND ${bookings.status} IN (
+					${BookingStatus.CONFIRMED}, 
+					${BookingStatus.ATTENDED}, 
+					${BookingStatus.PENDING}, 
+					${BookingStatus.NO_SHOW}
+				)
+			)`,
+      // We are collecting information about the offering
+      offering: {
+        id: offerings.id,
+        name: offerings.name,
+        slug: offerings.slug,
+        timezone: offerings.timezone
+      },
+      // We are collecting information about the studio
+      studio: {
+        id: studios.id,
+        name: studios.name,
+        slug: studios.slug
+      },
+      practitioner: {
+        id: studioPractitioners.id,
+        name: user.name,
+        email: user.email
+      }
+    })
+    .from(offeringSlots)
+    // 1. Binding a trainer to a slot
+    .innerJoin(
+      studioPractitioners,
+      eq(offeringSlots.practitionerId, studioPractitioners.id)
+    )
+    .leftJoin(user, eq(studioPractitioners.userId, user.id))
+    // 2. Binding an offering to a slot
+    .innerJoin(offerings, eq(offeringSlots.offeringId, offerings.id))
+    // 3. Binding a studio to an offering
+    .innerJoin(studios, eq(offerings.studioId, studios.id))
+    // We apply all our conditions
+    .where(and(...conditions))
+    .orderBy(offeringSlots.startTime) // Sort by time
+
+  return slots
+})

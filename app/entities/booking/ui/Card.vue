@@ -26,44 +26,56 @@ defineEmits<{
             : ''
     "
   >
-    <div class="h-22 bg-gray-200 rounded-md flex shrink-0">
+    <div class="relative h-22 rounded-md flex shrink-0">
       <NuxtImg
         :src="booking.offering.coverImage || placeholderImageUrl"
         alt="Offering Image"
-        class="w-full h-full object-cover rounded-md"
+        class="w-full h-full object-cover rounded-md opacity-20"
+        width="150"
+        height="100"
+        provider="cloudinary"
       />
+      <div
+        class="absolute inset-0 w-full h-full bg-linear-to-t from-black/50 to-transparent rounded-md flex items-center justify-center text-white text-sm font-semibold"
+      >
+        <div class="flex flex-col">
+          <p class="">
+            {{ format(new Date(booking.slot.startTime), 'MMM d, yyyy') }}
+          </p>
+          <p class="text-2xl">
+            {{ format(new Date(booking.slot.startTime), 'h:mm a') }}
+          </p>
+        </div>
+      </div>
     </div>
-    <div class="flex-1">
-      <div class="flex gap-1.5 items-center mb-1">
+    <div class="flex-1 items-center flex">
+      <div class="flex flex-col gap-1.5">
         <NuxtLink
           :to="`/offerings/${booking.offering.slug}`"
           class="font-semibold"
         >
-          <h3 class="font-semibold">{{ booking.offering.name }}</h3>
+          <h3 class="text-2xl font-semibold">{{ booking.offering.name }}</h3>
         </NuxtLink>
-        <span>at</span>
-        <NuxtLink :to="`/studios/${booking.studio.slug}`" class="text-sm">
-          {{ booking.studio.name }}
-        </NuxtLink>
-        with
-        <div class="inline-flex gap-1 items-center">
-          <NuxtImg
-            :src="booking.practitioner.avatar || placeholderImageUrl"
-            alt="Coach Avatar"
-            class="w-5 h-5 rounded-full object-cover"
-          />
-          <span class="text-sm">
-            {{ booking.practitioner.name }}
-          </span>
+        <div class="flex gap-1 items-center text-sm text-muted-foreground">
+          <span>at</span>
+          <NuxtLink
+            :to="`/studios/${booking.studio.slug}`"
+            class="font-semibold"
+          >
+            {{ booking.studio.name }}
+          </NuxtLink>
+          with
+          <div class="inline-flex gap-1 items-center">
+            <NuxtImg
+              :src="booking.practitioner.avatar || placeholderImageUrl"
+              alt="Coach Avatar"
+              class="w-5 h-5 rounded-full object-cover"
+            />
+            <span>
+              {{ booking.practitioner.name }}
+            </span>
+          </div>
         </div>
-      </div>
-      <div class="flex flex-col">
-        <p class="text-base text-gray-500">
-          {{ format(booking.slot.startTime, 'MMM d, yyyy') }}
-        </p>
-        <p class="text-2xl text-gray-500 font-semibold">
-          {{ format(booking.slot.startTime, 'h:mm a') }}
-        </p>
       </div>
     </div>
     <div class="flex flex-col gap-2 self-center">

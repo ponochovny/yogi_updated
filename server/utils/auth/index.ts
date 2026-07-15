@@ -12,7 +12,14 @@ import {
 import { user as userSchema } from '~~/server/db/schema/auth-schema'
 import { studioMembers, studios } from '~~/server/db/schema/studio'
 
+if (!process.env.GOOGLE_CLIENT_ID || !process.env.GOOGLE_CLIENT_SECRET) {
+  throw new Error(
+    'Missing GOOGLE_CLIENT_ID/GOOGLE_CLIENT_SECRET environment variables'
+  )
+}
+
 export const auth = betterAuth({
+  baseURL: process.env.BETTER_AUTH_URL,
   database: drizzleAdapter(useDb(), {
     provider: 'pg'
   }),
@@ -50,6 +57,12 @@ export const auth = betterAuth({
         .where(eq(userSchema.id, user.id))
 
       console.log(`Email verified for user: ${user.id} post-reset.`)
+    }
+  },
+  socialProviders: {
+    google: {
+      clientId: process.env.GOOGLE_CLIENT_ID,
+      clientSecret: process.env.GOOGLE_CLIENT_SECRET
     }
   },
   advanced: {

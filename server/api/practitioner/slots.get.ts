@@ -5,8 +5,7 @@ import { bookings } from '~~/server/db/schema/booking'
 import { BookingStatus } from '~/entities/booking/schema'
 
 export default defineEventHandler(async event => {
-  const session = await auth.api.getSession({ headers: event.headers })
-  if (!session) throw createError({ statusCode: 401, message: 'Unauthorized' })
+  const userData = await requireAuthenticatedUser(event)
 
   // We get an optional parameter from the URL, for example: /api/practitioner/slots?studioSlug=yoga-center
   const query = getQuery(event)
@@ -14,7 +13,7 @@ export default defineEventHandler(async event => {
   const db = useDb()
 
   // Basic conditions: the practitioner must be linked to the current user
-  const conditions = [eq(studioPractitioners.userId, session.user.id)]
+  const conditions = [eq(studioPractitioners.userId, userData.id)]
 
   // If the frontend requested a specific studio, we add a filter to the conditions array.
   if (slug) {
@@ -36,7 +35,8 @@ export default defineEventHandler(async event => {
 				WHERE ${bookings.slotId} = ${offeringSlots.id}
 				AND ${bookings.status} IN (
 					${BookingStatus.CONFIRMED}, 
-					${BookingStatus.ATTENDED}, 
+					${BookingStatus.ATTENDED},
+          ${BookingStatus.PENDING}, 
 					${BookingStatus.NO_SHOW}
 				)
 			)`,

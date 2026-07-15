@@ -1,1 +1,0 @@
-ALTER TABLE "studio_members" ADD CONSTRAINT "studio_members_studio_id_user_id_unique" UNIQUE("studio_id","user_id");

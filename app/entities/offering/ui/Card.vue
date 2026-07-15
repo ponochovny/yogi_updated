@@ -59,7 +59,7 @@ defineProps<{
             :src="
               offering.studio.logo?.replace(
                 '/upload/',
-                '/upload/w_64,h_64,c_fill/'
+                '/upload/w_64,h_64,c_thumb,g_custom/'
               ) || placeholderImageUrl
             "
             alt="Avatar"

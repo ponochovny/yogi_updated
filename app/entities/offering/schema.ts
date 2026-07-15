@@ -65,6 +65,17 @@ export const createOfferingSchema = z.object({
   )
 })
 
+export const updateOfferingSchema = createOfferingSchema.extend({
+  tickets: z.array(
+    z.object({
+      id: z.string(),
+      name: z.string().min(1, 'Ticket name is required'),
+      price: z.number().min(0, 'Ticket price must be a positive number'),
+      description: z.string().optional()
+    })
+  )
+})
+export type UpdateOfferingInput = z.infer<typeof updateOfferingSchema>
 export type CreateOfferingInput = z.infer<typeof createOfferingSchema>
 
 export const createSlotSchema = z.object({

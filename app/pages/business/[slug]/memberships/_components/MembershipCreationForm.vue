@@ -12,31 +12,43 @@ const props = defineProps<{
   studioSlug: string
 }>()
 
+const emit = defineEmits<{
+  (e: 'membershipCreated'): void
+}>()
+
 const { data: paramsData } = await useFetch('/api/params', {
   method: 'GET'
 })
 
 const categories = computed(() => paramsData.value?.params.categories || [])
 
-const { isSubmitting, handleSubmit, resetForm } = useForm({
-  validationSchema: toTypedSchema(createMembershipSchema),
-  initialValues: {
-    name: '',
-    description: '',
-    type: priceOptionsType.DROP_IN,
-    price: 0,
-    credits: 0,
-    durationDays: 1,
-    isActive: true,
-    applicableCategoryIds: []
-  }
-})
+const { isSubmitting, handleSubmit, resetForm, values, setFieldValue } =
+  useForm({
+    validationSchema: toTypedSchema(createMembershipSchema),
+    initialValues: {
+      name: '',
+      description: '',
+      type: priceOptionsType.MEMBERSHIP,
+      price: 0,
+      credits: 0,
+      durationDays: 1,
+      isActive: true,
+      applicableCategoryIds: []
+    }
+  })
 
+watch(
+  () => values.type,
+  newType => {
+    if (newType === priceOptionsType.DROP_IN) {
+      setFieldValue('credits', 1)
+    } else if (newType === priceOptionsType.MEMBERSHIP) {
+      setFieldValue('credits', 0)
+    }
+  }
+)
 
 const createMembership = async (values: CreateMembershipInput) => {
-  // errorMsg.value = ''
-  // isProcessing.value = true
-
   try {
     const response = await $fetch(
       `/api/business/studios/${props.studioSlug}/memberships`,
@@ -49,7 +61,7 @@ const createMembership = async (values: CreateMembershipInput) => {
     if (response.membership) {
       toast.success('Membership created successfully!')
       resetForm()
-      // navigateTo(`/business/${props.studioSlug}`)
+      emit('membershipCreated')
     }
   } catch (error) {
     toast.error('Failed to create membership. Please try again', {
@@ -63,7 +75,7 @@ const submit = handleSubmit(createMembership)
 <template>
   <div>
     <form class="space-y-6" @submit.prevent="submit">
-      <div class="grid grid-cols-2 gap-4">
+      <div class="flex flex-col gap-4">
         <FormField v-slot="{ componentField }" name="name">
           <FormItem class="col-span-2">
             <FormLabel>Name</FormLabel>
@@ -99,9 +111,6 @@ const submit = handleSubmit(createMembership)
                   <SelectValue placeholder="Select membership type" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem :value="priceOptionsType.DROP_IN">
-                    Drop-in
-                  </SelectItem>
                   <SelectItem :value="priceOptionsType.PACK">
                     Class Pack
                   </SelectItem>
@@ -132,7 +141,7 @@ const submit = handleSubmit(createMembership)
         </FormField>
         <FormField v-slot="{ componentField }" name="credits">
           <FormItem>
-            <FormLabel>Credits (leave blank for unlimited)</FormLabel>
+            <FormLabel>Credits</FormLabel>
             <FormControl>
               <Input
                 placeholder="Example: 10"
@@ -141,6 +150,10 @@ const submit = handleSubmit(createMembership)
                 type="number"
                 step="0.01"
                 min="0"
+                :disabled="
+                  values.type === priceOptionsType.MEMBERSHIP ||
+                  values.type === priceOptionsType.DROP_IN
+                "
               />
             </FormControl>
             <FormMessage />
@@ -200,9 +213,10 @@ const submit = handleSubmit(createMembership)
           </FormItem>
         </FormField>
       </div>
-      <Button type="submit" class="w-full" :disabled="isSubmitting"
-        >Create Membership</Button
-      >
+      <Button type="submit" class="w-full" :disabled="isSubmitting">
+        <Spinner v-if="isSubmitting" class="animate-spin" />
+        Create Membership
+      </Button>
     </form>
   </div>
 </template>

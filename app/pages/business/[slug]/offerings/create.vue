@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { XIcon } from '@lucide/vue'
+import { Trash2Icon, XIcon } from '@lucide/vue'
 import { toTypedSchema } from '@vee-validate/zod'
 import { useFieldArray, useForm } from 'vee-validate'
 import { toast } from 'vue-sonner'
@@ -146,7 +146,7 @@ const removeFromGallery = (index: number) => {
 			</div>
 		</div> -->
 
-    <div class="bg-white/10 rounded-xl shadow-sm border p-6">
+    <Item class="">
       <div v-if="pending" class="py-10 text-center">Loading data...</div>
 
       <form v-else class="space-y-6" @submit.prevent="submitOffering">
@@ -310,8 +310,9 @@ const removeFromGallery = (index: number) => {
             <div class="mb-2">
               <label
                 class="text-base font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
-                >Tickets (drop-in)</label
               >
+                Tickets (drop-in)
+              </label>
               <p class="text-[0.8rem] text-muted-foreground mt-2">
                 Create single-use tickets for this class (for example: Standard,
                 Student, VIP)
@@ -324,16 +325,7 @@ const removeFromGallery = (index: number) => {
                 :key="field.key"
                 class="flex flex-col gap-3 p-4 border rounded-lg bg-white/5 hover:bg-white/10 relative"
               >
-                <button
-                  v-if="fields.length > 1"
-                  type="button"
-                  class="absolute top-2 right-2 text-sm text-red-500 hover:text-red-700"
-                  @click="remove(idx)"
-                >
-                  Delete
-                </button>
-
-                <div class="grid grid-cols-3 gap-4 mt-2">
+                <div class="grid grid-cols-[1fr_1fr_1fr_auto] gap-2 mt-2">
                   <FormField
                     v-slot="{ componentField }"
                     :name="`tickets[${idx}].name`"
@@ -367,21 +359,40 @@ const removeFromGallery = (index: number) => {
                   </FormField>
 
                   <FormField
-                    v-slot="{ componentField }"
+                    v-slot="{ componentField, errorMessage }"
                     :name="`tickets[${idx}].price`"
                   >
                     <FormItem>
                       <FormControl>
-                        <Input
-                          placeholder="Price"
-                          v-bind="componentField"
-                          autocomplete="off"
-                          type="number"
-                        />
+                        <InputGroup>
+                          <InputGroupAddon>
+                            <InputGroupText>$</InputGroupText>
+                          </InputGroupAddon>
+                          <InputGroupInput
+                            v-bind="componentField"
+                            :aria-invalid="!!errorMessage"
+                            placeholder="0.00"
+                            type="number"
+                            step="any"
+                          />
+                          <InputGroupAddon align="inline-end">
+                            <InputGroupText>USD</InputGroupText>
+                          </InputGroupAddon>
+                        </InputGroup>
                       </FormControl>
                       <FormMessage />
                     </FormItem>
                   </FormField>
+
+                  <Button
+                    v-if="fields.length > 1"
+                    type="button"
+                    class="text-red-700 text-sm w-fit"
+                    variant="ghost"
+                    @click="remove(idx)"
+                  >
+                    <Trash2Icon />
+                  </Button>
                 </div>
               </div>
             </div>
@@ -445,7 +456,7 @@ const removeFromGallery = (index: number) => {
                       :src="
                         prac.avatar?.replace(
                           '/upload/',
-                          '/upload/w_44,h_44,c_fill/'
+                          '/upload/w_44,h_44,c_thumb,g_custom/'
                         ) || placeholderImageUrl
                       "
                       class="w-6 h-6 rounded-full m-0"
@@ -479,6 +490,6 @@ const removeFromGallery = (index: number) => {
           {{ errorMsg }}
         </p>
       </form>
-    </div>
+    </Item>
   </div>
 </template>

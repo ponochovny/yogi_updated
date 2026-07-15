@@ -1,6 +1,9 @@
 <script setup lang="ts">
 import { format } from 'date-fns'
+import type { BookingOptions, OfferingSlot } from '~/entities/booking/schema'
 import { toast } from 'vue-sonner'
+import BookWithPricingOptions from './_components/BookWithPricingOptions.vue'
+
 const route = useRoute()
 const offeringSlug = route.params.slug
 
@@ -13,8 +16,18 @@ const [{ data: offeringsData }, { data: offeringsSlots }] = await Promise.all([
 ])
 
 const offering = computed(() => offeringsData.value?.offering || null)
-
 const rawSlots = computed(() => offeringsSlots.value?.slots || [])
+
+useHead({
+  title: offering.value?.name || 'Offering',
+  meta: [
+    {
+      name: 'description',
+      content:
+        offering.value?.description || 'Offering details and available slots'
+    }
+  ]
+})
 
 // Group slots by date for UI presentation
 const groupedSlots = computed(() => {
@@ -33,29 +46,67 @@ const groupedSlots = computed(() => {
   )
 })
 
-// TODO: Set slot type properly instead of current type
-const bookSlot = async (slot: { id: string }) => {
-  try {
-    await $fetch(`/api/slots/${slot.id}/book`, {
-      method: 'POST',
-      body: {
-        ...slot
-      }
-    })
+const isPricingOptionsPending = ref(false)
+const selectedSlot = ref<OfferingSlot | null>(null)
+const dropInTickets = ref<BookingOptions['dropInTickets']>([])
+const userPasses = ref<BookingOptions['userPasses']>([])
 
-    toast.success('Slot booked successfully!', {
-      description:
-        'Your session has been booked. Check your dashboard for details.',
-      duration: 5000,
-      action: {
-        label: 'View Bookings',
-        onClick: () => navigateTo('/profile/bookings')
-      }
-    })
+/** Fetch available pricing options for a given slot */
+const checkAvailablePricingOptions = async (slot: OfferingSlot) => {
+  selectedSlot.value = slot
+  dropInTickets.value = []
+  userPasses.value = []
+  try {
+    isPricingOptionsPending.value = true
+
+    const pricingOptions = await $fetch(`/api/bookings/${slot.id}/options`)
+    if (selectedSlot.value?.id !== slot.id) return // stale response guard
+    dropInTickets.value = pricingOptions.options.dropInTickets
+    userPasses.value = pricingOptions.options.userPasses
   } catch (err) {
-    toast.error(`Error booking slot: ${(err as Error).message}`)
+    if (selectedSlot.value?.id !== slot.id) return // stale response guard
+    const message =
+      (err as { data?: { message?: string } })?.data?.message ?? 'Unknown error'
+    toast.error(`Error fetching pricing options: ${message}`)
+  } finally {
+    isPricingOptionsPending.value = false
   }
 }
+
+/** Book a selected slot */
+// const bookSlot = async (
+//   slot: OfferingSlot,
+//   pricingOptionId: string | null,
+//   userPassId: string | null
+// ) => {
+//   try {
+//     // await $fetch(`/api/slots/${slot.id}/book`, {
+//     //   method: 'POST',
+//     //   body: {
+//     //     ...slot
+//     //   }
+//     // })
+//     await $fetch(`/api/bookings/${slot.id}`, {
+//       method: 'POST',
+//       body: {
+//         pricingOptionId,
+//         userPassId
+//       }
+//     })
+
+//     toast.success('Slot booked successfully!', {
+//       description:
+//         'Your session has been booked. Check your dashboard for details.',
+//       duration: 5000,
+//       action: {
+//         label: 'View Bookings',
+//         onClick: () => navigateTo('/profile/bookings')
+//       }
+//     })
+//   } catch (err) {
+//     toast.error(`Error booking slot: ${(err as Error).message}`)
+//   }
+// }
 </script>
 
 <template>
@@ -64,7 +115,7 @@ const bookSlot = async (slot: { id: string }) => {
   >
     <div class="md:col-span-2 space-y-6">
       <h1 class="text-4xl font-bold">{{ offering?.name }}</h1>
-      <p class="text-gray-600 text-lg">{{ offering?.description }}</p>
+      <p class="text-muted-foreground">{{ offering?.description }}</p>
     </div>
 
     <div class="bg-white/10 p-6 rounded-2xl border sticky top-8">
@@ -94,9 +145,46 @@ const bookSlot = async (slot: { id: string }) => {
                   Coach: {{ slot.practitioner.name }}
                 </div>
               </div>
-              <Button variant="outline" size="sm" @click="() => bookSlot(slot)">
-                Book Now
-              </Button>
+
+              <Dialog>
+                <DialogTrigger as-child>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    @click="checkAvailablePricingOptions(slot)"
+                  >
+                    Book Now
+                  </Button>
+                </DialogTrigger>
+                <DialogContent>
+                  <DialogHeader>
+                    <DialogTitle>
+                      <p class="leading-6">
+                        Book
+                        <span class="font-normal">{{ offering?.name }}</span>
+                        <br />
+                        on
+                        <span class="font-normal">
+                          {{
+                            format(
+                              new Date(slot.startTime),
+                              'MMMM d, yyyy HH:mm'
+                            )
+                          }}
+                        </span>
+                      </p>
+                    </DialogTitle>
+                    <DialogDescription>
+                      Choose your payment method to complete the booking.
+                    </DialogDescription>
+                  </DialogHeader>
+
+                  <book-with-pricing-options
+                    :slug="String(offeringSlug)"
+                    :slot-id="slot.id"
+                  />
+                </DialogContent>
+              </Dialog>
             </div>
           </div>
         </div>

@@ -1,6 +1,7 @@
 <script lang="ts" setup>
 import { format } from 'date-fns'
 import { toast } from 'vue-sonner'
+import { TransactionProvider } from '~~/server/db/schema/payment'
 
 const route = useRoute()
 const slug = computed(() => route.params.slug as string)
@@ -48,15 +49,27 @@ const updateBookingStatus = async (bookingId: string, status: string) => {
         >
           <div class="flex flex-col gap-1">
             <div class="flex gap-2 items-center">
+              <NuxtImg
+                v-if="booking.user.image"
+                :src="booking.user.image"
+                alt="User Image"
+                class="size-8 object-cover rounded-full"
+              />
+              <div v-else class="size-8 rounded-full bg-gray-500" />
               <p class="text-sm font-medium">
                 {{ booking.user.name }}
               </p>
+              <Badge v-if="booking.status === 'PENDING'">Pending</Badge>
               <Badge
+                v-else
                 class="text-sm"
                 :class="{
                   'bg-gray-500':
                     booking.status !== 'ATTENDED' &&
-                    booking.status !== 'CANCELLED',
+                    booking.status !== 'CANCELLED' &&
+                    booking.status !== 'CONFIRMED',
+                  'bg-green-400/20 text-green-700':
+                    booking.status === 'CONFIRMED',
                   'bg-rose-500/20 text-rose-700':
                     booking.status === 'CANCELLED',
                   'bg-blue-400': booking.status === 'ATTENDED'
@@ -65,9 +78,8 @@ const updateBookingStatus = async (bookingId: string, status: string) => {
                 {{
                   booking.status === 'CANCELLED'
                     ? 'Cancelled'
-                    : booking.status !== 'ATTENDED' &&
-                        booking.status !== 'NO_SHOW'
-                      ? 'No status'
+                    : booking.status === 'CONFIRMED'
+                      ? 'PAID'
                       : booking.status === 'ATTENDED'
                         ? 'Attended'
                         : 'No Show'
@@ -79,7 +91,18 @@ const updateBookingStatus = async (bookingId: string, status: string) => {
               {{ format(new Date(booking.createdAt), 'MMM dd, yyyy HH:mm') }}
             </p>
           </div>
-          <div v-if="booking.status !== 'CANCELLED'" class="space-x-2">
+          <Button
+            v-if="
+              booking.transaction?.provider === TransactionProvider.CASH &&
+              booking.status === 'PENDING'
+            "
+            class="bg-yellow-400 hover:bg-yellow-500!"
+            variant="ghost"
+            @click="updateBookingStatus(booking.id, 'CONFIRMED')"
+          >
+            Confirm
+          </Button>
+          <div v-else-if="booking.status !== 'CANCELLED'" class="space-x-2">
             <Button
               class="bg-blue-400 hover:bg-blue-500!"
               variant="ghost"
