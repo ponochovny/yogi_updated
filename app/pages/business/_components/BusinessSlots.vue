@@ -51,6 +51,6 @@ const { data: allSlots, error } = await useFetch(
         </li>
       </ul>
     </div>
-    <div v-else class="text-gray-500">No slots available.</div>
+    <div v-else-if="!error" class="text-gray-500">No slots available.</div>
   </div>
 </template>

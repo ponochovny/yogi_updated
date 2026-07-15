@@ -70,7 +70,7 @@ const columns: ColumnDef<MembershipItemBusiness>[] = [
     accessorKey: 'durationDays',
     header: 'Duration',
     cell: ({ row }) => {
-      const duration = row.getValue('durationDays') as number | null
+      const duration = row.original.durationDays
       return h('div', duration ? `${duration} days` : 'Unlimited')
     }
   },
@@ -78,7 +78,7 @@ const columns: ColumnDef<MembershipItemBusiness>[] = [
     accessorKey: 'credits',
     header: 'Credits',
     cell: ({ row }) => {
-      const credits = row.getValue('credits') as string | null
+      const credits = row.original.credits
       return h('div', credits ? `${credits} credits` : 'Unlimited')
     }
   },
@@ -86,7 +86,7 @@ const columns: ColumnDef<MembershipItemBusiness>[] = [
     accessorKey: 'price',
     header: () => h('div', { class: 'text-right' }, 'Price'),
     cell: ({ row }) => {
-      const price = row.getValue('price') as number
+      const price = row.original.price
       const text = price === 0 ? 'Free' : `$${(price / 100).toFixed(2)}`
       return h('div', { class: 'text-right font-medium' }, text)
     }

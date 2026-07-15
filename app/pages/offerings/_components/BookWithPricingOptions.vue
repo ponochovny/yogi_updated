@@ -296,7 +296,7 @@ async function handleConfirmBooking() {
                       Pay Online
                       <RadioGroupItem
                         value="ONLINE"
-                        class="col-span-1 hidden"
+                        class="col-span-1 sr-only"
                       />
                     </Label>
                     <Label
@@ -308,7 +308,7 @@ async function handleConfirmBooking() {
                     >
                       <BanknoteIcon class="size-5" />
                       Pay in Cash
-                      <RadioGroupItem value="CASH" class="col-span-1 hidden" />
+                      <RadioGroupItem value="CASH" class="col-span-1 sr-only" />
                     </Label>
                   </RadioGroup>
                 </div>
