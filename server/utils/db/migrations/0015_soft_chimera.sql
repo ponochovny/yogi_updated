@@ -1,1 +1,0 @@
-ALTER TABLE "studios" ALTER COLUMN "currency" SET DATA TYPE text;

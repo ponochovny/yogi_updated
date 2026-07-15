@@ -1,5 +1,5 @@
 {
-  "id": "c6f46dcf-cf5d-42eb-9ee7-0df8805feb13",
+  "id": "a758eba6-8884-4653-89e7-60078d684118",
   "prevId": "00000000-0000-0000-0000-000000000000",
   "version": "7",
   "dialect": "postgresql",
@@ -66,14 +66,110 @@
           "name": "studio_locations_studio_id_studios_id_fk",
           "tableFrom": "studio_locations",
           "tableTo": "studios",
-          "columnsFrom": ["studio_id"],
-          "columnsTo": ["id"],
+          "columnsFrom": [
+            "studio_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
       },
       "compositePrimaryKeys": {},
-      "uniqueConstraints": {},
+      "uniqueConstraints": {
+        "studio_locations_id_studio_id_unique": {
+          "name": "studio_locations_id_studio_id_unique",
+          "nullsNotDistinct": false,
+          "columns": [
+            "id",
+            "studio_id"
+          ]
+        }
+      },
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.studio_members": {
+      "name": "studio_members",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true,
+          "default": "gen_random_uuid()"
+        },
+        "studio_id": {
+          "name": "studio_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "user_id": {
+          "name": "user_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "role": {
+          "name": "role",
+          "type": "studio_role",
+          "typeSchema": "public",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "studio_members_studio_id_studios_id_fk": {
+          "name": "studio_members_studio_id_studios_id_fk",
+          "tableFrom": "studio_members",
+          "tableTo": "studios",
+          "columnsFrom": [
+            "studio_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        },
+        "studio_members_user_id_user_id_fk": {
+          "name": "studio_members_user_id_user_id_fk",
+          "tableFrom": "studio_members",
+          "tableTo": "user",
+          "columnsFrom": [
+            "user_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {
+        "studio_members_studio_id_user_id_role_unique": {
+          "name": "studio_members_studio_id_user_id_role_unique",
+          "nullsNotDistinct": false,
+          "columns": [
+            "studio_id",
+            "user_id",
+            "role"
+          ]
+        }
+      },
       "policies": {},
       "checkConstraints": {},
       "isRLSEnabled": false
@@ -137,8 +233,12 @@
           "name": "studio_practitioners_studio_id_studios_id_fk",
           "tableFrom": "studio_practitioners",
           "tableTo": "studios",
-          "columnsFrom": ["studio_id"],
-          "columnsTo": ["id"],
+          "columnsFrom": [
+            "studio_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
           "onDelete": "cascade",
           "onUpdate": "no action"
         },
@@ -146,8 +246,12 @@
           "name": "studio_practitioners_user_id_user_id_fk",
           "tableFrom": "studio_practitioners",
           "tableTo": "user",
-          "columnsFrom": ["user_id"],
-          "columnsTo": ["id"],
+          "columnsFrom": [
+            "user_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -157,7 +261,10 @@
         "studio_practitioners_studio_id_user_id_unique": {
           "name": "studio_practitioners_studio_id_user_id_unique",
           "nullsNotDistinct": false,
-          "columns": ["studio_id", "user_id"]
+          "columns": [
+            "studio_id",
+            "user_id"
+          ]
         }
       },
       "policies": {},
@@ -220,13 +327,13 @@
         },
         "categories": {
           "name": "categories",
-          "type": "text[]",
+          "type": "uuid[]",
           "primaryKey": false,
           "notNull": false
         },
         "types": {
           "name": "types",
-          "type": "text[]",
+          "type": "uuid[]",
           "primaryKey": false,
           "notNull": false
         },
@@ -251,8 +358,12 @@
           "name": "studios_owner_id_user_id_fk",
           "tableFrom": "studios",
           "tableTo": "user",
-          "columnsFrom": ["owner_id"],
-          "columnsTo": ["id"],
+          "columnsFrom": [
+            "owner_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -262,7 +373,9 @@
         "studios_slug_unique": {
           "name": "studios_slug_unique",
           "nullsNotDistinct": false,
-          "columns": ["slug"]
+          "columns": [
+            "slug"
+          ]
         }
       },
       "policies": {},
@@ -375,8 +488,12 @@
           "name": "account_user_id_user_id_fk",
           "tableFrom": "account",
           "tableTo": "user",
-          "columnsFrom": ["user_id"],
-          "columnsTo": ["id"],
+          "columnsFrom": [
+            "user_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -463,8 +580,12 @@
           "name": "session_user_id_user_id_fk",
           "tableFrom": "session",
           "tableTo": "user",
-          "columnsFrom": ["user_id"],
-          "columnsTo": ["id"],
+          "columnsFrom": [
+            "user_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -474,7 +595,9 @@
         "session_token_unique": {
           "name": "session_token_unique",
           "nullsNotDistinct": false,
-          "columns": ["token"]
+          "columns": [
+            "token"
+          ]
         }
       },
       "policies": {},
@@ -550,7 +673,9 @@
         "user_email_unique": {
           "name": "user_email_unique",
           "nullsNotDistinct": false,
-          "columns": ["email"]
+          "columns": [
+            "email"
+          ]
         }
       },
       "policies": {},
@@ -624,55 +749,6 @@
       "checkConstraints": {},
       "isRLSEnabled": false
     },
-    "public.offering_categories": {
-      "name": "offering_categories",
-      "schema": "",
-      "columns": {
-        "id": {
-          "name": "id",
-          "type": "uuid",
-          "primaryKey": true,
-          "notNull": true,
-          "default": "gen_random_uuid()"
-        },
-        "studio_id": {
-          "name": "studio_id",
-          "type": "uuid",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "name": {
-          "name": "name",
-          "type": "varchar",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "color": {
-          "name": "color",
-          "type": "varchar",
-          "primaryKey": false,
-          "notNull": false,
-          "default": "'#000000'"
-        }
-      },
-      "indexes": {},
-      "foreignKeys": {
-        "offering_categories_studio_id_studios_id_fk": {
-          "name": "offering_categories_studio_id_studios_id_fk",
-          "tableFrom": "offering_categories",
-          "tableTo": "studios",
-          "columnsFrom": ["studio_id"],
-          "columnsTo": ["id"],
-          "onDelete": "cascade",
-          "onUpdate": "no action"
-        }
-      },
-      "compositePrimaryKeys": {},
-      "uniqueConstraints": {},
-      "policies": {},
-      "checkConstraints": {},
-      "isRLSEnabled": false
-    },
     "public.offering_practitioners": {
       "name": "offering_practitioners",
       "schema": "",
@@ -703,8 +779,12 @@
           "name": "offering_practitioners_offering_id_offerings_id_fk",
           "tableFrom": "offering_practitioners",
           "tableTo": "offerings",
-          "columnsFrom": ["offering_id"],
-          "columnsTo": ["id"],
+          "columnsFrom": [
+            "offering_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
           "onDelete": "cascade",
           "onUpdate": "no action"
         },
@@ -712,9 +792,111 @@
           "name": "offering_practitioners_practitioner_id_studio_practitioners_id_fk",
           "tableFrom": "offering_practitioners",
           "tableTo": "studio_practitioners",
-          "columnsFrom": ["practitioner_id"],
-          "columnsTo": ["id"],
+          "columnsFrom": [
+            "practitioner_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
           "onDelete": "cascade",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.offering_slots": {
+      "name": "offering_slots",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true,
+          "default": "gen_random_uuid()"
+        },
+        "offering_id": {
+          "name": "offering_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "practitioner_id": {
+          "name": "practitioner_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "start_time": {
+          "name": "start_time",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "end_time": {
+          "name": "end_time",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "status": {
+          "name": "status",
+          "type": "offering_slot_status",
+          "typeSchema": "public",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "'ACTIVE'"
+        },
+        "google_event_id": {
+          "name": "google_event_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "capacity_override": {
+          "name": "capacity_override",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "offering_slots_offering_id_offerings_id_fk": {
+          "name": "offering_slots_offering_id_offerings_id_fk",
+          "tableFrom": "offering_slots",
+          "tableTo": "offerings",
+          "columnsFrom": [
+            "offering_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        },
+        "offering_slots_practitioner_id_studio_practitioners_id_fk": {
+          "name": "offering_slots_practitioner_id_studio_practitioners_id_fk",
+          "tableFrom": "offering_slots",
+          "tableTo": "studio_practitioners",
+          "columnsFrom": [
+            "practitioner_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
           "onUpdate": "no action"
         }
       },
@@ -747,12 +929,6 @@
           "primaryKey": false,
           "notNull": true
         },
-        "category_id": {
-          "name": "category_id",
-          "type": "uuid",
-          "primaryKey": false,
-          "notNull": false
-        },
         "name": {
           "name": "name",
           "type": "varchar",
@@ -771,6 +947,18 @@
           "primaryKey": false,
           "notNull": false,
           "default": "'{}'"
+        },
+        "categories": {
+          "name": "categories",
+          "type": "uuid[]",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "types": {
+          "name": "types",
+          "type": "uuid[]",
+          "primaryKey": false,
+          "notNull": false
         },
         "activity_type": {
           "name": "activity_type",
@@ -848,26 +1036,25 @@
           "name": "offerings_studio_id_studios_id_fk",
           "tableFrom": "offerings",
           "tableTo": "studios",
-          "columnsFrom": ["studio_id"],
-          "columnsTo": ["id"],
+          "columnsFrom": [
+            "studio_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
           "onDelete": "cascade",
-          "onUpdate": "no action"
-        },
-        "offerings_category_id_offering_categories_id_fk": {
-          "name": "offerings_category_id_offering_categories_id_fk",
-          "tableFrom": "offerings",
-          "tableTo": "offering_categories",
-          "columnsFrom": ["category_id"],
-          "columnsTo": ["id"],
-          "onDelete": "set null",
           "onUpdate": "no action"
         },
         "offerings_location_id_studio_locations_id_fk": {
           "name": "offerings_location_id_studio_locations_id_fk",
           "tableFrom": "offerings",
           "tableTo": "studio_locations",
-          "columnsFrom": ["location_id"],
-          "columnsTo": ["id"],
+          "columnsFrom": [
+            "location_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
           "onDelete": "set null",
           "onUpdate": "no action"
         }
@@ -877,7 +1064,9 @@
         "offerings_slug_unique": {
           "name": "offerings_slug_unique",
           "nullsNotDistinct": false,
-          "columns": ["slug"]
+          "columns": [
+            "slug"
+          ]
         }
       },
       "policies": {},
@@ -901,9 +1090,15 @@
           "primaryKey": false,
           "notNull": true
         },
-        "category_id": {
-          "name": "category_id",
+        "offering_id": {
+          "name": "offering_id",
           "type": "uuid",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "applicable_category_ids": {
+          "name": "applicable_category_ids",
+          "type": "uuid[]",
           "primaryKey": false,
           "notNull": false
         },
@@ -965,18 +1160,394 @@
           "name": "pricing_options_studio_id_studios_id_fk",
           "tableFrom": "pricing_options",
           "tableTo": "studios",
-          "columnsFrom": ["studio_id"],
-          "columnsTo": ["id"],
+          "columnsFrom": [
+            "studio_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
           "onDelete": "cascade",
           "onUpdate": "no action"
         },
-        "pricing_options_category_id_offering_categories_id_fk": {
-          "name": "pricing_options_category_id_offering_categories_id_fk",
+        "pricing_options_offering_id_offerings_id_fk": {
+          "name": "pricing_options_offering_id_offerings_id_fk",
           "tableFrom": "pricing_options",
-          "tableTo": "offering_categories",
-          "columnsFrom": ["category_id"],
-          "columnsTo": ["id"],
-          "onDelete": "set null",
+          "tableTo": "offerings",
+          "columnsFrom": [
+            "offering_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "restrict",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.bookings": {
+      "name": "bookings",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true,
+          "default": "gen_random_uuid()"
+        },
+        "slot_id": {
+          "name": "slot_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "user_id": {
+          "name": "user_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "status": {
+          "name": "status",
+          "type": "booking_status",
+          "typeSchema": "public",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "'CONFIRMED'"
+        },
+        "google_event_id": {
+          "name": "google_event_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "user_pass_id": {
+          "name": "user_pass_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "transaction_id": {
+          "name": "transaction_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        },
+        "updated_at": {
+          "name": "updated_at",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "bookings_slot_id_offering_slots_id_fk": {
+          "name": "bookings_slot_id_offering_slots_id_fk",
+          "tableFrom": "bookings",
+          "tableTo": "offering_slots",
+          "columnsFrom": [
+            "slot_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        },
+        "bookings_user_id_user_id_fk": {
+          "name": "bookings_user_id_user_id_fk",
+          "tableFrom": "bookings",
+          "tableTo": "user",
+          "columnsFrom": [
+            "user_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        },
+        "bookings_user_pass_id_user_passes_id_fk": {
+          "name": "bookings_user_pass_id_user_passes_id_fk",
+          "tableFrom": "bookings",
+          "tableTo": "user_passes",
+          "columnsFrom": [
+            "user_pass_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        },
+        "bookings_transaction_id_transactions_id_fk": {
+          "name": "bookings_transaction_id_transactions_id_fk",
+          "tableFrom": "bookings",
+          "tableTo": "transactions",
+          "columnsFrom": [
+            "transaction_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.transactions": {
+      "name": "transactions",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true,
+          "default": "gen_random_uuid()"
+        },
+        "user_id": {
+          "name": "user_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "studio_id": {
+          "name": "studio_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "amount": {
+          "name": "amount",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "currency": {
+          "name": "currency",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "provider": {
+          "name": "provider",
+          "type": "payment_provider",
+          "typeSchema": "public",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "provider_transaction_id": {
+          "name": "provider_transaction_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "status": {
+          "name": "status",
+          "type": "transaction_status",
+          "typeSchema": "public",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "'PENDING'"
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        },
+        "updated_at": {
+          "name": "updated_at",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "transactions_user_id_user_id_fk": {
+          "name": "transactions_user_id_user_id_fk",
+          "tableFrom": "transactions",
+          "tableTo": "user",
+          "columnsFrom": [
+            "user_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        },
+        "transactions_studio_id_studios_id_fk": {
+          "name": "transactions_studio_id_studios_id_fk",
+          "tableFrom": "transactions",
+          "tableTo": "studios",
+          "columnsFrom": [
+            "studio_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.user_passes": {
+      "name": "user_passes",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true,
+          "default": "gen_random_uuid()"
+        },
+        "user_id": {
+          "name": "user_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "studio_id": {
+          "name": "studio_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "pricing_option_id": {
+          "name": "pricing_option_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "transaction_id": {
+          "name": "transaction_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "status": {
+          "name": "status",
+          "type": "pass_status",
+          "typeSchema": "public",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "'ACTIVE'"
+        },
+        "remaining_credits": {
+          "name": "remaining_credits",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "valid_from": {
+          "name": "valid_from",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "valid_until": {
+          "name": "valid_until",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        },
+        "updated_at": {
+          "name": "updated_at",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "user_passes_user_id_user_id_fk": {
+          "name": "user_passes_user_id_user_id_fk",
+          "tableFrom": "user_passes",
+          "tableTo": "user",
+          "columnsFrom": [
+            "user_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        },
+        "user_passes_studio_id_studios_id_fk": {
+          "name": "user_passes_studio_id_studios_id_fk",
+          "tableFrom": "user_passes",
+          "tableTo": "studios",
+          "columnsFrom": [
+            "studio_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        },
+        "user_passes_pricing_option_id_pricing_options_id_fk": {
+          "name": "user_passes_pricing_option_id_pricing_options_id_fk",
+          "tableFrom": "user_passes",
+          "tableTo": "pricing_options",
+          "columnsFrom": [
+            "pricing_option_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        },
+        "user_passes_transaction_id_transactions_id_fk": {
+          "name": "user_passes_transaction_id_transactions_id_fk",
+          "tableFrom": "user_passes",
+          "tableTo": "transactions",
+          "columnsFrom": [
+            "transaction_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
           "onUpdate": "no action"
         }
       },
@@ -1051,38 +1622,235 @@
       "policies": {},
       "checkConstraints": {},
       "isRLSEnabled": false
+    },
+    "public.global_categories": {
+      "name": "global_categories",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true,
+          "default": "gen_random_uuid()"
+        },
+        "name": {
+          "name": "name",
+          "type": "varchar(100)",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "slug": {
+          "name": "slug",
+          "type": "varchar(100)",
+          "primaryKey": false,
+          "notNull": true
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {},
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {
+        "global_categories_slug_unique": {
+          "name": "global_categories_slug_unique",
+          "nullsNotDistinct": false,
+          "columns": [
+            "slug"
+          ]
+        }
+      },
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.global_currencies": {
+      "name": "global_currencies",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true,
+          "default": "gen_random_uuid()"
+        },
+        "name": {
+          "name": "name",
+          "type": "varchar(100)",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "slug": {
+          "name": "slug",
+          "type": "varchar(100)",
+          "primaryKey": false,
+          "notNull": true
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {},
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {
+        "global_currencies_slug_unique": {
+          "name": "global_currencies_slug_unique",
+          "nullsNotDistinct": false,
+          "columns": [
+            "slug"
+          ]
+        }
+      },
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.global_types": {
+      "name": "global_types",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true,
+          "default": "gen_random_uuid()"
+        },
+        "name": {
+          "name": "name",
+          "type": "varchar(100)",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "slug": {
+          "name": "slug",
+          "type": "varchar(100)",
+          "primaryKey": false,
+          "notNull": true
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {},
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {
+        "global_types_slug_unique": {
+          "name": "global_types_slug_unique",
+          "nullsNotDistinct": false,
+          "columns": [
+            "slug"
+          ]
+        }
+      },
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
     }
   },
   "enums": {
     "public.studio_role": {
       "name": "studio_role",
       "schema": "public",
-      "values": ["MANAGER", "PRACTITIONER", "OWNER"]
+      "values": [
+        "MANAGER",
+        "PRACTITIONER",
+        "BUSINESS"
+      ]
     },
     "public.activity_type": {
       "name": "activity_type",
       "schema": "public",
-      "values": ["CLASS", "APPOINTMENT", "EVENT"]
+      "values": [
+        "CLASS",
+        "APPOINTMENT",
+        "EVENT"
+      ]
+    },
+    "public.offering_slot_status": {
+      "name": "offering_slot_status",
+      "schema": "public",
+      "values": [
+        "ACTIVE",
+        "COMPLETED",
+        "CANCELLED"
+      ]
     },
     "public.offering_type": {
       "name": "offering_type",
       "schema": "public",
-      "values": ["GROUP", "PRIVATE"]
+      "values": [
+        "GROUP",
+        "PRIVATE"
+      ]
     },
     "public.pricing_type": {
       "name": "pricing_type",
       "schema": "public",
-      "values": ["DROP_IN", "PACK", "MEMBERSHIP"]
+      "values": [
+        "DROP_IN",
+        "PACK",
+        "MEMBERSHIP"
+      ]
+    },
+    "public.booking_status": {
+      "name": "booking_status",
+      "schema": "public",
+      "values": [
+        "CONFIRMED",
+        "CANCELLED",
+        "ATTENDED",
+        "NO_SHOW",
+        "ACTIVE",
+        "COMPLETED",
+        "PENDING"
+      ]
+    },
+    "public.pass_status": {
+      "name": "pass_status",
+      "schema": "public",
+      "values": [
+        "ACTIVE",
+        "EXPIRED",
+        "EXHAUSTED",
+        "CANCELLED"
+      ]
+    },
+    "public.payment_provider": {
+      "name": "payment_provider",
+      "schema": "public",
+      "values": [
+        "STRIPE",
+        "LIQPAY",
+        "HUTKO",
+        "MONOPAY",
+        "CASH",
+        "FREE"
+      ]
+    },
+    "public.transaction_status": {
+      "name": "transaction_status",
+      "schema": "public",
+      "values": [
+        "PENDING",
+        "SUCCESS",
+        "FAILED",
+        "REFUNDED"
+      ]
     },
     "public.media_entity_type": {
       "name": "media_entity_type",
       "schema": "public",
-      "values": ["OFFERING", "STUDIO", "USER"]
+      "values": [
+        "OFFERING",
+        "STUDIO",
+        "USER"
+      ]
     },
     "public.media_type": {
       "name": "media_type",
       "schema": "public",
-      "values": ["GALLERY", "LOGO", "AVATAR"]
+      "values": [
+        "GALLERY",
+        "LOGO",
+        "AVATAR"
+      ]
     }
   },
   "schemas": {},
