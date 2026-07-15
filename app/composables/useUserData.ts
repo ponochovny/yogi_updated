@@ -10,6 +10,15 @@ export interface IWorkSpace {
   }
 }
 
+export const getWorkspaceRoles = (
+  workspaces: ReadonlyArray<IWorkSpace> | undefined,
+  slug?: string
+): UserRole[] => {
+  return (workspaces ?? [])
+    .filter(workspace => !slug || workspace.studio.slug === slug)
+    .map(workspace => workspace.role)
+}
+
 const emptyUserData = {
   name: '',
   email: '',
@@ -30,10 +39,8 @@ export const useUserData = () => {
         return
       }
 
-      const workspaceRoles =
-        // @ts-expect-error: workspaces is not typed in the session object, but we know it exists
-        (newUser?.workspaces as { role: UserRole }[])?.map(el => el.role) ?? []
-      const userRoles = (newUser?.role as UserRole[]) ?? []
+      const workspaceRoles = getWorkspaceRoles(newUser?.workspaces)
+      const userRoles = (newUser?.role as UserRole[] | undefined) ?? []
 
       userData.value = {
         name: newUser.name || '',
@@ -48,14 +55,7 @@ export const useUserData = () => {
   const getRolesInStudio = (slug: string): UserRole[] => {
     if (session.value?.isPending) return []
 
-    // @ts-expect-error: workspaces is not typed in the session object, but we know it exists
-    const userWorkspaces = session.value?.data?.user?.workspaces as
-      | IWorkSpace[]
-      | undefined
-
-    const workspaces = userWorkspaces ?? []
-
-    return workspaces.filter(w => w.studio.slug === slug).map(w => w.role)
+    return getWorkspaceRoles(session.value?.data?.user?.workspaces, slug)
   }
 
   return { userData, getRolesInStudio, session }
