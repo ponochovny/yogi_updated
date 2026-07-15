@@ -6,14 +6,15 @@ import { BookingStatus } from '~/entities/booking/schema'
 import { user } from '~~/server/db/schema/auth-schema'
 
 export default defineEventHandler(async event => {
-  await requireAuthenticatedUser(event)
+  const userData = await requireAuthenticatedUser(event)
 
   // We get an optional parameter from the URL, for example: /api/practitioner/slots?studioSlug=yoga-center
   const query = getQuery(event)
   const slug = query.studioSlug as string | undefined
   const db = useDb()
 
-  const conditions = []
+  // Restrict to studios the caller is authorized to manage
+  const conditions = [eq(studioPractitioners.userId, userData.id)]
   // If the frontend requested a specific studio, we add a filter to the conditions array.
   if (slug) {
     conditions.push(eq(studios.slug, slug))

@@ -112,10 +112,7 @@ export default defineEventHandler(async event => {
   return {
     success: true,
     options: {
-      dropInTickets: dropInTickets.map(ticket => ({
-        ...ticket,
-        price: ticket.price / 100 // Convert cents to dollars
-      })),
+      dropInTickets,
       userPasses: availableUserPasses
     }
   }

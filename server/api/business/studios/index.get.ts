@@ -11,6 +11,7 @@ import {
   globalTypes
 } from '~~/server/db/schema/global'
 import { resolveStudioMetadata } from '~~/server/utils/studio-metadata'
+import { getCachedReferenceData } from '~~/server/utils/reference-data-cache'
 
 export default defineEventHandler(async event => {
   const userData = await requireAuthenticatedUser(event)
@@ -30,17 +31,16 @@ export default defineEventHandler(async event => {
     const studioIds = userStudios.map(s => s.id)
     const referenceDataCache = ((
       globalThis as typeof globalThis & {
-        __studioReferenceDataCache?: {
-          categories: Array<{ id: string; name: string; slug?: string }> | null
-          types: Array<{ id: string; name: string; slug?: string }> | null
-          currencies: Array<{ id: string; name: string; slug?: string }> | null
-        }
+        __studioReferenceDataCache?: Record<
+          string,
+          {
+            value?: unknown
+            expiresAt: number
+            promise?: Promise<unknown> | null
+          }
+        >
       }
-    ).__studioReferenceDataCache ??= {
-      categories: null,
-      types: null,
-      currencies: null
-    })
+    ).__studioReferenceDataCache ??= {})
 
     const [locations, media, categoriesData, typesData, currenciesData] =
       await Promise.all([
@@ -57,30 +57,24 @@ export default defineEventHandler(async event => {
               eq(mediaFiles.entityType, MediaEntityTypeEnum.STUDIO)
             )
           ),
-        referenceDataCache.categories ??
-          db
-            .select()
-            .from(globalCategories)
-            .then(result => {
-              referenceDataCache.categories = result
-              return result
-            }),
-        referenceDataCache.types ??
-          db
-            .select()
-            .from(globalTypes)
-            .then(result => {
-              referenceDataCache.types = result
-              return result
-            }),
-        referenceDataCache.currencies ??
-          db
-            .select()
-            .from(globalCurrencies)
-            .then(result => {
-              referenceDataCache.currencies = result
-              return result
-            })
+        getCachedReferenceData<(typeof globalCategories.$inferSelect)[]>(
+          // @ts-expect-error: TypeScript doesn't know the type of the cached data, but we know it will be the correct type based on the loader function.
+          referenceDataCache,
+          'categories',
+          () => db.select().from(globalCategories)
+        ),
+        getCachedReferenceData<(typeof globalTypes.$inferSelect)[]>(
+          // @ts-expect-error: TypeScript doesn't know the type of the cached data, but we know it will be the correct type based on the loader function.
+          referenceDataCache,
+          'types',
+          () => db.select().from(globalTypes)
+        ),
+        getCachedReferenceData<(typeof globalCurrencies.$inferSelect)[]>(
+          // @ts-expect-error: TypeScript doesn't know the type of the cached data, but we know it will be the correct type based on the loader function.
+          referenceDataCache,
+          'currencies',
+          () => db.select().from(globalCurrencies)
+        )
       ])
 
     const studiosWithDetails = userStudios.map(studio => {

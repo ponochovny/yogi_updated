@@ -3,7 +3,11 @@ import { format } from 'date-fns'
 const route = useRoute()
 const studioSlug = route.params.slug ? String(route.params.slug) : undefined
 
-const { data: practitionerSlots } = await useFetch('/api/practitioner/slots', {
+const {
+  data: practitionerSlots,
+  pending,
+  error
+} = await useFetch('/api/practitioner/slots', {
   method: 'GET',
   query: { studioSlug }
 })
@@ -12,6 +16,21 @@ const { data: practitionerSlots } = await useFetch('/api/practitioner/slots', {
 <template>
   <div class="space-y-8">
     <h2 class="text-2xl font-semibold">Practitioner Dashboard</h2>
+    <p v-if="pending" class="text-foreground/60 shimmer">Loading slots...</p>
+    <p v-if="error" class="text-red-500">
+      Error loading slots: {{ error.message }}
+    </p>
+    <p
+      v-if="
+        !pending &&
+        !error &&
+        (!practitionerSlots || practitionerSlots.length === 0)
+      "
+      class="text-muted-foreground"
+    >
+      No slots available. Please check back later or contact your studio
+      administrator.
+    </p>
     <div v-if="practitionerSlots?.length" class="space-y-4">
       <h3 class="text-xl font-medium">My Slots</h3>
       <ul class="space-y-2">

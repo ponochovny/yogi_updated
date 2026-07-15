@@ -42,7 +42,7 @@ const { data: studioData, error: studioError } = await useFetch(
   `/api/studios/${route.params.slug}`
 )
 if (studioError.value) {
-  navigateTo('/404')
+  await navigateTo('/404')
 }
 const studio = computed(() => studioData.value?.studio || null)
 </script>
@@ -168,9 +168,13 @@ const studio = computed(() => studioData.value?.studio || null)
                   </template>
                   <template v-else> all categories </template>
                 </div>
-                <Button type="button" @click="buyMembership(membership.id)"
-                  >Buy membership</Button
+                <Button
+                  type="button"
+                  :disabled="isProcessing"
+                  @click="buyMembership(membership.id)"
                 >
+                  Buy membership
+                </Button>
               </li>
             </ul>
           </div>

@@ -22,17 +22,17 @@ const { handleSubmit, isSubmitting } = useForm<FormValues>({
 })
 
 const handleLogin = async (values: FormValues) => {
-  try {
-    await signIn.email({
-      email: values.email,
-      password: values.password
-    })
-    navigateTo('/profile/settings')
-  } catch (error) {
+  const { error } = await signIn.email({
+    email: values.email,
+    password: values.password
+  })
+  if (error) {
     toast.error('Failed to login', {
-      description: `${(error as { data: { message: string } }).data.message}`
+      description: error.message || 'Unknown error.'
     })
+    return
   }
+  await navigateTo('/profile/settings')
 }
 const submit = handleSubmit(handleLogin)
 </script>

@@ -151,10 +151,10 @@ const updateOffering = async (values: CreateOfferingInput) => {
 }
 
 const submitOffering = handleSubmit(updateOffering, ({ errors }) => {
-  console.log('Validation errors:', errors)
-  const firstError = Object.keys(errors)[0]
-  toast.error(`Please fix the field: ${firstError}`, {
-    description: firstError || 'Unknown error.'
+  const [firstField] = Object.keys(errors)
+  toast.error(`Please fix the highlighted fields`, {
+    // @ts-expect-error: errors is a Record<string, string> but TS doesn't know that
+    description: firstField ? String(errors[firstField]) : 'Validation failed.'
   })
 })
 function togglePractitioner(id: string) {

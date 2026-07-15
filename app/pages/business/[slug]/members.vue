@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { PlusIcon } from '@lucide/vue'
+import { toast } from 'vue-sonner'
 import MembersDataTable from '~/widgets/Studio/members-data-table.vue'
 import { userRoles } from '~~/server/auth/config'
 
@@ -18,6 +19,9 @@ const form = ref({
 })
 
 const isSubmitting = ref(false)
+const membersTableRef = ref<{ refresh: () => Promise<void> | void } | null>(
+  null
+)
 
 const addTeamMember = async () => {
   if (!form.value.email || !form.value.name) return
@@ -32,9 +36,9 @@ const addTeamMember = async () => {
     form.value.name = ''
     form.value.email = ''
     isSheetOpen.value = false
-    // refresh the members list after adding a new member
+    await membersTableRef.value?.refresh()
   } catch (error) {
-    alert((error as Error).message || 'Error adding team member')
+    toast.error((error as Error).message || 'Error adding team member')
   } finally {
     isSubmitting.value = false
   }
@@ -107,6 +111,6 @@ useHead({
       </SheetContent>
     </Sheet>
 
-    <members-data-table />
+    <members-data-table ref="membersTableRef" />
   </div>
 </template>

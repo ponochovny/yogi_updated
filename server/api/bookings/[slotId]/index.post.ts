@@ -70,7 +70,7 @@ export default defineEventHandler(async event => {
 
     const maxCapacity = slot.capacityOverride ?? offering?.capacity ?? 999999
 
-    // 3. Count currently confirmed/attended/no-show bookings for this slot
+    // 3. Count bookings that currently occupy capacity for this slot
     const [activeBookingsCount] = await tx
       .select({ count: sql<number>`count(*)` })
       .from(bookings)
@@ -80,7 +80,8 @@ export default defineEventHandler(async event => {
           inArray(bookings.status, [
             BookingStatus.CONFIRMED,
             BookingStatus.ATTENDED,
-            BookingStatus.NO_SHOW
+            BookingStatus.NO_SHOW,
+            BookingStatus.PENDING
           ])
         )
       )

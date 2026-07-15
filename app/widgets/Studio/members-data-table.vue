@@ -25,7 +25,15 @@ import { placeholderImageUrl } from '~/config/constants'
 const route = useRoute()
 const slug = route.params.slug as string
 
-const { data } = await useFetch(`/api/business/studios/${slug}/members`)
+const refreshMembers = async () => {
+  await refresh()
+}
+
+defineExpose({ refresh: refreshMembers })
+
+const { data, refresh } = await useFetch(
+  `/api/business/studios/${slug}/members`
+)
 const team = computed(() => data.value?.team || [])
 
 const columns: ColumnDef<StudioMemberItem>[] = [

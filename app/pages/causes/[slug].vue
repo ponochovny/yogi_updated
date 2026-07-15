@@ -177,10 +177,11 @@ const onSubmit = (event: Event) => {
                               </InputGroupAddon>
                               <InputGroupInput
                                 id="donation-amount-modal"
-                                v-model="modelValue"
+                                v-model.number="modelValue"
                                 placeholder="0.00"
                                 step="0.1"
                                 type="number"
+                                min="1"
                               />
                               <InputGroupAddon align="inline-end">
                                 <InputGroupText>USD</InputGroupText>
@@ -253,7 +254,7 @@ const onSubmit = (event: Event) => {
                     </InputGroupAddon>
                     <InputGroupInput
                       id="donation-amount"
-                      v-model="modelValue"
+                      v-model.number="modelValue"
                       placeholder="0.00"
                       step="0.1"
                       type="number"

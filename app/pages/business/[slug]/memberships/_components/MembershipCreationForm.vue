@@ -22,27 +22,28 @@ const { data: paramsData } = await useFetch('/api/params', {
 
 const categories = computed(() => paramsData.value?.params.categories || [])
 
-const { isSubmitting, handleSubmit, resetForm, values } = useForm({
-  validationSchema: toTypedSchema(createMembershipSchema),
-  initialValues: {
-    name: '',
-    description: '',
-    type: priceOptionsType.MEMBERSHIP,
-    price: 0,
-    credits: 0,
-    durationDays: 1,
-    isActive: true,
-    applicableCategoryIds: []
-  }
-})
+const { isSubmitting, handleSubmit, resetForm, values, setFieldValue } =
+  useForm({
+    validationSchema: toTypedSchema(createMembershipSchema),
+    initialValues: {
+      name: '',
+      description: '',
+      type: priceOptionsType.MEMBERSHIP,
+      price: 0,
+      credits: 0,
+      durationDays: 1,
+      isActive: true,
+      applicableCategoryIds: []
+    }
+  })
 
 watch(
   () => values.type,
   newType => {
     if (newType === priceOptionsType.DROP_IN) {
-      values.credits = 1
+      setFieldValue('credits', 1)
     } else if (newType === priceOptionsType.MEMBERSHIP) {
-      values.credits = 0
+      setFieldValue('credits', 0)
     }
   }
 )

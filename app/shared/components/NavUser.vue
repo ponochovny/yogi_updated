@@ -23,6 +23,7 @@ import {
 } from '@/shared/ui/sidebar'
 import { signOut } from '@/utils/auth-client'
 import { userRoles, type UserRole } from '~~/server/auth/config'
+import { placeholderImageUrl } from '~/config/constants'
 
 defineProps<{
   user: {
@@ -54,7 +55,7 @@ const signOutHandler = async () => {
                     user.avatar?.replace(
                       '/upload/',
                       '/upload/w_100,h_100,c_thumb,g_custom/'
-                    )
+                    ) || placeholderImageUrl
                   "
                   :alt="user.name"
                   class="object-cover"

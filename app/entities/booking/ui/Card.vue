@@ -84,10 +84,10 @@ defineEmits<{
           class="text-xl"
           :class="
             booking.status === BookingStatus.CONFIRMED
-              ? 'text-green-400/50'
+              ? 'text-green-700/50'
               : booking.status === BookingStatus.CANCELLED
-                ? 'text-red-400/50'
-                : 'text-blue-400/50'
+                ? 'text-red-700/50'
+                : 'text-blue-700/50'
           "
         >
           {{ booking.status }}

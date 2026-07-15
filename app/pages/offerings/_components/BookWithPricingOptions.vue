@@ -1,6 +1,6 @@
 <script setup lang="ts">
-import { ref, computed } from 'vue'
 import { CreditCardIcon, BanknoteIcon, Loader2Icon } from '@lucide/vue'
+import { toast } from 'vue-sonner'
 
 // TS Interface for response mapping from /api/bookings/options
 interface PricingOption {
@@ -82,7 +82,7 @@ async function handleConfirmBooking() {
     // 1. SCENARIO A: Booking using existing Membership/Pack Credit
     if (paymentFlowMode.value === 'PASS' && selectedPassId.value) {
       const response = await $fetch<{ success: boolean; message: string }>(
-        '/api/bookings/create',
+        `/api/bookings/${props.slotId}`,
         {
           method: 'POST',
           body: {
@@ -100,11 +100,10 @@ async function handleConfirmBooking() {
       if (paymentMethod.value === 'CASH') {
         // Cash on site -> Create Booking right away with status CONFIRMED (but Transaction PENDING)
         const response = await $fetch<{ success: boolean; message: string }>(
-          '/api/bookings/create',
+          `/api/bookings/${props.slotId}`,
           {
             method: 'POST',
             body: {
-              slotId: props.slotId,
               pricingOptionId: selectedTicketId.value
             }
           }
@@ -130,9 +129,9 @@ async function handleConfirmBooking() {
       }
     }
   } catch (error) {
-    alert(
+    toast.error(
       (error as { data: { message: string } }).data?.message ||
-        'Что-то пошло не так при обработке записи.'
+        'Something went wrong while processing your booking.'
     )
   } finally {
     isSubmitting.value = false
@@ -154,10 +153,16 @@ async function handleConfirmBooking() {
 
       <!-- Booking content options -->
       <div v-else class="space-y-6">
-        <div v-if="hasPasses">
-          <Tabs v-model="paymentFlowMode" default-value="PASS" class="mb-4">
+        <div>
+          <Tabs
+            v-model="paymentFlowMode"
+            :default-value="hasPasses ? 'PASS' : 'TICKET'"
+            class="mb-4"
+          >
             <TabsList>
-              <TabsTrigger value="PASS"> Use Membership / Pack </TabsTrigger>
+              <TabsTrigger value="PASS" :disabled="!hasPasses">
+                Use Membership / Pack
+              </TabsTrigger>
               <TabsTrigger value="TICKET"> Use Drop-in Ticket </TabsTrigger>
             </TabsList>
             <TabsContent value="PASS">
@@ -261,7 +266,7 @@ async function handleConfirmBooking() {
                         </div>
 
                         <div :id="ticket.id" class="text-muted-foreground">
-                          ${{ ticket.price.toFixed(2) }}
+                          ${{ ticket.price / 100 }}
                         </div>
                       </div>
                     </div>

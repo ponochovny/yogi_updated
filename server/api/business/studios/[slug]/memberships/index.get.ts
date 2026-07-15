@@ -57,7 +57,7 @@ export default defineEventHandler(async event => {
     }
   } catch (error) {
     if (isApiError(error)) throw error
-    console.error('Failed to create membership', error)
-    throwApiError(500, 'Failed to create membership')
+    console.error('Failed to fetch memberships', error)
+    throwApiError(500, 'Failed to fetch memberships')
   }
 })

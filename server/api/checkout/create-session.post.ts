@@ -36,48 +36,22 @@ import { eq, and, sql } from 'drizzle-orm'
 import Stripe from 'stripe'
 import { BookingStatus } from '~/entities/booking/schema'
 import { offeringSlotStatus, pricingType } from '~/entities/offering/schema'
+import {
+  cleanupExpiredPendingCheckoutState,
+  revertPendingCheckoutState
+} from '~~/server/utils/checkout'
 
 // Initialize Stripe with the private key (normally fetched from runtime config)
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY || '', {
   apiVersion: '2026-06-24.dahlia' // or latest stable version
 })
 
-const revertPendingCheckoutState = async (
-  db: ReturnType<typeof useDb>,
-  transactionId: string | null,
-  bookingId: string | null
-) => {
-  if (!transactionId) {
-    return
-  }
-
-  await db.transaction(async tx => {
-    await tx
-      .update(transactions)
-      .set({
-        status: TransactionStatus.FAILED,
-        providerTransactionId: null,
-        updatedAt: new Date()
-      })
-      .where(eq(transactions.id, transactionId))
-
-    if (bookingId) {
-      await tx
-        .update(bookings)
-        .set({
-          status: BookingStatus.CANCELLED,
-          updatedAt: new Date()
-        })
-        .where(eq(bookings.id, bookingId))
-    }
-  })
-}
-
 export default defineEventHandler(async event => {
   const userData = await requireAuthenticatedUser(event)
   /** If slotId is provided, it's a Drop-In. Otherwise, it's a Pass purchase. */
   const body = await readValidatedBody(event, createSessionSchema.parse)
   const db = useDb()
+  await cleanupExpiredPendingCheckoutState(db)
   const { pricingOptionId, slotId } = body
 
   let checkoutUrl: string | null = null

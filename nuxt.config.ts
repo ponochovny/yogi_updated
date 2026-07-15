@@ -50,7 +50,7 @@ export default defineNuxtConfig({
 
   image: {
     cloudinary: {
-      baseURL: `https://res.cloudinary.com/${process.env.CLOUDINARY_CLOUD_NAME}/image/fetch`
+      baseURL: `https://res.cloudinary.com/${process.env.CLOUDINARY_CLOUD_NAME ?? ''}/image/fetch`
     }
   },
 

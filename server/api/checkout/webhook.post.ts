@@ -27,6 +27,10 @@ import { eq } from 'drizzle-orm'
 import Stripe from 'stripe'
 import { BookingStatus } from '~/entities/booking/schema'
 import { PaymentMetadataSchema } from '~/entities/payment/schema'
+import {
+  revertPendingCheckoutState,
+  cleanupExpiredPendingCheckoutState
+} from '~~/server/utils/checkout'
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY || '', {
   apiVersion: '2026-06-24.dahlia'
@@ -60,7 +64,37 @@ export default defineEventHandler(async event => {
     })
   }
 
-  // Handle successful payments
+  const db = useDb()
+
+  if (stripeEvent.type === 'checkout.session.expired') {
+    const session = stripeEvent.data.object as Stripe.Checkout.Session
+    const rawMetadata = session.metadata
+
+    if (!rawMetadata || !rawMetadata.transactionId) {
+      return { received: true }
+    }
+
+    const metadataResult = PaymentMetadataSchema.safeParse(rawMetadata)
+
+    if (!metadataResult.success) {
+      const sanitizedMetadata = {
+        transactionId: rawMetadata.transactionId,
+        pricingOptionId: rawMetadata.pricingOptionId,
+        hasBookingId: Boolean(rawMetadata.bookingId)
+      }
+
+      Sentry.captureException(metadataResult.error, {
+        extra: { sanitizedMetadata }
+      })
+
+      return { received: true, error: 'Metadata mismatch logged' }
+    }
+
+    const { transactionId, bookingId } = metadataResult.data
+    await revertPendingCheckoutState(db, transactionId, bookingId)
+    return { received: true }
+  }
+
   if (stripeEvent.type === 'checkout.session.completed') {
     const session = stripeEvent.data.object as Stripe.Checkout.Session
     const rawMetadata = session.metadata
@@ -94,7 +128,8 @@ export default defineEventHandler(async event => {
 
     const { transactionId, bookingId, pricingOptionId, userId } =
       metadataResult.data
-    const db = useDb()
+
+    await cleanupExpiredPendingCheckoutState(db)
 
     // Execute everything safely within a database transaction
     await db.transaction(async tx => {
@@ -106,7 +141,7 @@ export default defineEventHandler(async event => {
         .for('update')
 
       // Guard: prevent processing double webhooks (idempotency)
-      if (!dbTx || dbTx.status === TransactionStatus.SUCCESS) return
+      if (!dbTx || dbTx.status !== TransactionStatus.PENDING) return
 
       // 2. Mark Transaction as Paid
       await tx

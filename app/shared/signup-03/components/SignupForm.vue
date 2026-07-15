@@ -34,20 +34,21 @@ const { handleSubmit, isSubmitting } = useForm<FormValues>({
   }
 })
 const handleRegister = async (values: FormValues) => {
-  try {
-    await signUp.email({
-      name: values.name,
-      email: values.email,
-      password: values.password,
-      callbackURL: '/profile/settings'
-    })
-
-    navigateTo('/profile/settings')
-  } catch (error) {
+  const { error } = await signUp.email({
+    name: values.name,
+    email: values.email,
+    password: values.password,
+    callbackURL: '/profile/settings'
+  })
+  if (error) {
     toast.error('Failed to sign up', {
-      description: `${(error as { data: { message: string } }).data.message}`
+      description:
+        (error as { data?: { message?: string } })?.data?.message ??
+        'Unknown error occurred'
     })
+    return
   }
+  await navigateTo('/profile/settings')
 }
 const submit = handleSubmit(handleRegister)
 const loginWithGoogle = async () => {
