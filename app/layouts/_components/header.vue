@@ -4,7 +4,8 @@ import {
   XIcon,
   GlobeIcon,
   CoinsIcon,
-  ChevronDownIcon
+  ChevronDownIcon,
+  CompassIcon
 } from '@lucide/vue'
 import { signOut, useSession } from '@/utils/auth-client'
 import Darkmodetoggle from '~/features/darkmodetoggle.vue'
@@ -55,19 +56,33 @@ if (import.meta.client) {
   >
     <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
       <div class="flex h-16 items-center justify-between gap-4">
-        <!-- Logo -->
-        <NuxtLinkLocale
-          to="/"
-          class="shrink-0 transition-opacity hover:opacity-80"
-        >
-          <NuxtImg
-            src="/img/logoBg.svg"
-            width="48"
-            height="48"
-            alt="Yogi App"
-            class="h-12 w-12"
-          />
-        </NuxtLinkLocale>
+        <div class="flex items-center gap-6">
+          <!-- Logo -->
+          <NuxtLinkLocale
+            to="/"
+            class="shrink-0 transition-opacity hover:opacity-80"
+          >
+            <NuxtImg
+              src="/img/logoBg.svg"
+              width="48"
+              height="48"
+              alt="Yogi App"
+              class="h-12 w-12"
+            />
+          </NuxtLinkLocale>
+
+          <!-- Desktop Navigation -->
+          <nav class="hidden md:flex items-center gap-1">
+            <NuxtLinkLocale
+              to="/explore"
+              class="inline-flex items-center gap-2 text-sm font-medium text-muted-foreground hover:text-foreground transition-colors py-2 px-3 rounded-xl hover:bg-muted/50"
+              active-class="text-primary font-semibold bg-primary/10"
+            >
+              <CompassIcon class="size-4" />
+              {{ $t('header.explore') }}
+            </NuxtLinkLocale>
+          </nav>
+        </div>
 
         <!-- Desktop Controls -->
         <div class="hidden md:flex items-center gap-1.5">
@@ -219,6 +234,21 @@ if (import.meta.client) {
 
                 <!-- Mobile Menu Content -->
                 <div class="flex-1 overflow-y-auto p-4 space-y-6">
+                  <!-- Navigation -->
+                  <div class="space-y-1">
+                    <NuxtLinkLocale
+                      to="/explore"
+                      class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium hover:bg-muted transition-colors"
+                      active-class="bg-primary/10 text-primary font-semibold"
+                      @click="mobileMenuOpen = false"
+                    >
+                      <CompassIcon class="size-4 text-primary" />
+                      {{ $t('header.explore') }}
+                    </NuxtLinkLocale>
+                  </div>
+
+                  <Separator />
+
                   <!-- Language -->
                   <div class="space-y-2">
                     <p
@@ -299,7 +329,7 @@ if (import.meta.client) {
                         variant="outline"
                         class="w-full"
                         @click="
-                          $router.push('/profile/settings')
+                          $router.push('/profile/settings');
                           mobileMenuOpen = false
                         "
                       >

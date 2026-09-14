@@ -5,7 +5,7 @@ export const PagesConfig = {
   REGISTER: '/register',
   RESET_PASSWORD: '/reset-password',
 
-  SEARCH: '/search',
+  EXPLORE: '/explore',
 
   PROFILE_SETTINGS: '/profile/settings',
   PROFILE_BOOKINGS: '/profile/bookings',

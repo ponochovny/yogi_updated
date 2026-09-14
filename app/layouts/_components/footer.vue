@@ -45,6 +45,14 @@ import { HeartIcon } from '@lucide/vue'
             </li>
             <li>
               <NuxtLinkLocale
+                to="/explore"
+                class="text-sm text-muted-foreground hover:text-primary transition-colors duration-200"
+              >
+                {{ $t('header.explore') }}
+              </NuxtLinkLocale>
+            </li>
+            <li>
+              <NuxtLinkLocale
                 to="/studios"
                 class="text-sm text-muted-foreground hover:text-primary transition-colors duration-200"
               >

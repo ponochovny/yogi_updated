@@ -121,6 +121,11 @@ export const pageSeoPresets = {
     title: 'Yoga Studios Directory',
     description:
       'Browse premier yoga studios, wellness spaces, and certified instructors near you.'
+  },
+  explore: {
+    title: 'Explore Classes, Studios & Practitioners',
+    description:
+      'Search and filter yoga classes, wellness studios, and certified practitioners. Find the perfect match for your practice.'
   }
 } as const
 

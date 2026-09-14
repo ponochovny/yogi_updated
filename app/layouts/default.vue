@@ -15,7 +15,7 @@ import LayoutFooter from './_components/footer.vue'
       </div>
     </DevOnly>
     <LayoutHeader />
-    <main class="flex-1 pt-20 px-4 sm:px-6 lg:px-8 mx-auto w-full max-w-7xl">
+    <main class="flex-1 pt-20">
       <slot />
     </main>
     <LayoutFooter />

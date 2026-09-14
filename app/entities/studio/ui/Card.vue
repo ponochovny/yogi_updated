@@ -1,37 +1,78 @@
 <script lang="ts" setup>
+import { MapPinIcon, LayersIcon } from '@lucide/vue'
 import { placeholderImageUrl } from '~/config/constants'
 import type { StudioItem } from '../schema'
 
 defineProps<{
-  studio: StudioItem
+  studio: StudioItem & {
+    offeringCount?: number
+  }
 }>()
 </script>
 
 <template>
   <div
-    class="flex flex-col rounded-3xl border border-muted bg-popover hover:shadow-orange-600/30 hover:shadow-xl hover:border-orange-600/20 transition-all duration-300"
+    class="group relative flex flex-col rounded-2xl border border-border bg-card overflow-hidden transition-all duration-300 hover:shadow-xl hover:shadow-primary/10 hover:border-primary/30 hover:-translate-y-0.5"
   >
-    <div class="p-2 pb-0">
+    <!-- Image -->
+    <div class="relative overflow-hidden">
       <NuxtImg
         :src="studio.gallery?.[0] || placeholderImageUrl"
         alt="Image"
-        class="aspect-video h-full w-full rounded-2xl object-cover"
+        class="aspect-16/10 h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
       />
+      <!-- Logo overlay -->
+      <div v-if="studio.logo" class="absolute -bottom-5 left-4 z-10">
+        <NuxtImg
+          :src="
+            studio.logo.replace?.(
+              '/upload/',
+              '/upload/w_56,h_56,c_thumb,g_custom/'
+            ) || placeholderImageUrl
+          "
+          alt="Logo"
+          class="size-12 rounded-xl border-2 border-card object-cover shadow-md bg-card"
+        />
+      </div>
     </div>
-    <div class="flex flex-1 flex-col p-4 items-start">
-      <NuxtLink :to="`/studios/${studio.slug}`" class="hover:underline">
-        <h3 class="text-lg font-bold">{{ studio.name }}</h3>
+
+    <!-- Content -->
+    <div
+      class="flex flex-1 flex-col p-4 gap-2"
+      :class="studio.logo ? 'pt-8' : ''"
+    >
+      <NuxtLink :to="`/studios/${studio.slug}`" class="group/link">
+        <h3
+          class="text-base font-bold leading-tight group-hover/link:text-primary transition-colors line-clamp-1"
+        >
+          {{ studio.name }}
+        </h3>
       </NuxtLink>
-      <p class="text-muted-foreground line-clamp-4">
+
+      <p class="text-sm text-muted-foreground line-clamp-2">
         {{ studio.bio }}
       </p>
-      <p
-        v-if="studio.locations && studio.locations[0]"
-        class="mt-2 flex-1 truncate text-xs text-muted-foreground max-w-full"
+
+      <!-- Meta -->
+      <div
+        class="flex items-center flex-wrap gap-x-3 gap-y-1 text-xs text-muted-foreground mt-auto pt-2"
       >
-        {{ studio.locations[0].address }}, {{ studio.locations[0].city }},
-        {{ studio.locations[0].country }}
-      </p>
+        <span
+          v-if="studio.locations && studio.locations[0]"
+          class="inline-flex items-center gap-1 truncate max-w-[60%]"
+        >
+          <MapPinIcon class="size-3.5 shrink-0" />
+          {{ studio.locations[0].city }}, {{ studio.locations[0].country }}
+        </span>
+        <span
+          v-if="studio.offeringCount != null"
+          class="inline-flex items-center gap-1"
+        >
+          <LayersIcon class="size-3.5" />
+          {{ studio.offeringCount }}
+          {{ studio.offeringCount === 1 ? 'class' : 'classes' }}
+        </span>
+      </div>
     </div>
   </div>
 </template>
