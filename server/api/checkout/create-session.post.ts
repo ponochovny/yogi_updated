@@ -40,6 +40,7 @@ import {
   cleanupExpiredPendingCheckoutState,
   revertPendingCheckoutState
 } from '~~/server/utils/checkout'
+import { globalCurrencies } from '~~/server/db/schema/global'
 
 // Initialize Stripe with the private key (normally fetched from runtime config)
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY || '', {
@@ -52,6 +53,7 @@ export default defineEventHandler(async event => {
   const body = await readValidatedBody(event, createSessionSchema.parse)
   const db = useDb()
   await cleanupExpiredPendingCheckoutState(db)
+
   const { pricingOptionId, slotId } = body
 
   let checkoutUrl: string | null = null
@@ -84,11 +86,20 @@ export default defineEventHandler(async event => {
         throwApiError(404, 'Pricing option not found or inactive')
       }
 
+      /** Currency */
+      const [currencyData] = await db
+        .select()
+        .from(globalCurrencies)
+        .where(eq(globalCurrencies.id, pricing.currency))
+      if (!currencyData) {
+        throwApiError(404, 'Currency not found for the selected pricing option')
+      }
+
       let bookingId: string | null = null
       /** Inside our DB, table "transactions" */
       let transactionId: string | null = null
       let lineItemName = pricing.name
-      const checkoutCurrency = (pricing.currency || 'USD').toUpperCase()
+      const checkoutCurrency = (currencyData.name || 'USD').toUpperCase()
 
       // CASE A: DIRECT SLOT BOOKING (DROP-IN ONLINE PAYMENT)
       if (slotId) {
@@ -106,7 +117,9 @@ export default defineEventHandler(async event => {
             id: offeringSlots.id,
             capacityOverride: offeringSlots.capacityOverride,
             status: offeringSlots.status,
-            offeringId: offeringSlots.offeringId
+            offeringId: offeringSlots.offeringId,
+            startTime: offeringSlots.startTime,
+            endTime: offeringSlots.endTime
           })
           .from(offeringSlots)
           .where(eq(offeringSlots.id, slotId))
@@ -128,7 +141,7 @@ export default defineEventHandler(async event => {
           throwApiError(404, 'Offering not found for the selected slot')
         }
 
-        lineItemName = `${offering.name} - Slot Booking`
+        lineItemName = `${offering.name} - Slot Booking | 🎫 ${pricing.name} | 📅 ${slot.startTime.toLocaleString()} - ${slot.endTime.toLocaleString()}`
 
         // Verify slot is not overbooked
         const maxCapacity = slot.capacityOverride ?? offering?.capacity ?? 9999
@@ -226,6 +239,9 @@ export default defineEventHandler(async event => {
     // 4. Generate Stripe Checkout Session
     const stripeSession = await stripe.checkout.sessions.create({
       payment_method_types: ['card'],
+
+      billing_address_collection: 'auto',
+
       line_items: [
         {
           price_data: {
@@ -240,8 +256,20 @@ export default defineEventHandler(async event => {
         }
       ],
       mode: 'payment',
-      success_url: `${process.env.APP_URL || 'http://localhost:3000'}/checkout/success?transactionId=${transactionId}`,
-      cancel_url: `${process.env.APP_URL || 'http://localhost:3000'}/checkout/cancel?transactionId=${transactionId}`,
+      success_url: `${process.env.VITE_BASE_URL || 'http://localhost:3000'}/checkout/success?transactionId=${transactionId}`,
+      cancel_url: `${process.env.VITE_BASE_URL || 'http://localhost:3000'}/checkout/cancel?transactionId=${transactionId}`,
+
+      customer_email: userData.email || undefined,
+      name_collection: {
+        individual: {
+          enabled: true,
+          optional: true // Can be 'required' or 'optional'
+        },
+        business: {
+          enabled: false // Set to true if you need to collect business names
+        }
+      },
+
       // Crucial: metadata carries database references to identify the invoice on webhook reception
       metadata: {
         transactionId: transactionId,

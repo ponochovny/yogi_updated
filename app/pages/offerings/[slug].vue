@@ -182,6 +182,18 @@ const checkAvailablePricingOptions = async (slot: OfferingSlot) => {
                   <book-with-pricing-options
                     :slug="String(offeringSlug)"
                     :slot-id="slot.id"
+                    @success="
+                      payload => {
+                        toast.success('Booking successful!', {
+                          description: payload.message,
+                          duration: 5000,
+                          action: {
+                            label: 'View Bookings',
+                            onClick: () => navigateTo('/profile/bookings')
+                          }
+                        })
+                      }
+                    "
                   />
                 </DialogContent>
               </Dialog>

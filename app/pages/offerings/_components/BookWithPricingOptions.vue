@@ -99,15 +99,13 @@ async function handleConfirmBooking() {
     else if (paymentFlowMode.value === 'TICKET' && selectedTicketId.value) {
       if (paymentMethod.value === 'CASH') {
         // Cash on site -> Create Booking right away with status CONFIRMED (but Transaction PENDING)
-        const response = await $fetch<{ success: boolean; message: string }>(
-          `/api/bookings/${props.slotId}`,
-          {
-            method: 'POST',
-            body: {
-              pricingOptionId: selectedTicketId.value
-            }
+        const response = await $fetch(`/api/bookings/${props.slotId}`, {
+          method: 'POST',
+          body: {
+            pricingOptionId: selectedTicketId.value,
+            userPassId: null
           }
-        )
+        })
         if (response.success) {
           emit('success', { mode: 'CASH', message: response.message })
         }

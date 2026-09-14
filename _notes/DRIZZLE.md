@@ -97,3 +97,13 @@ await db.transaction(async (tx) => {
 import { bookings } from '~~/server/db/schema/booking' // <-- Drizzle Schema
 typeof bookings.$inferSelect // <-- Type of schema. Schema converted into type
 ```
+
+## 🖼️ Visual Database schema Diagrams
+
+### Generate interactive diagrams
+
+`npx @liam-hq/cli erd build --format drizzle --input "server/db/schema/*.ts"`
+
+### Run generated content
+
+`npx serve dist/ `

@@ -37,6 +37,6 @@ export default defineNuxtRouteMiddleware(async (to, _) => {
 
   // @ts-expect-error: user field
   if (!session || !session.user) {
-    return navigateTo(route.fullPath)
+    return navigateTo(route?.fullPath || '/login', { external: true })
   }
 })
