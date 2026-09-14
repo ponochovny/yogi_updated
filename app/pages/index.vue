@@ -130,12 +130,12 @@
             v-for="(cat, index) in homeData.popularCategories"
             :key="cat.id"
             :to="`/explore?category=${cat.id}`"
-            class="group relative overflow-hidden rounded-2xl aspect-[4/3] border border-border/50 hover:border-primary/40 transition-all duration-300 hover:shadow-xl hover:shadow-primary/10 hover:-translate-y-1"
+            class="group relative overflow-hidden rounded-2xl aspect-[4/3] border border-border/50 hover:border-primary/40 transition-all duration-300 hover:shadow-xl hover:shadow-primary/10"
           >
             <img
               :src="getCategoryImage(cat.slug, index)"
               :alt="cat.name"
-              class="absolute inset-0 w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
+              class="absolute inset-0 w-full h-full object-cover transition-transform duration-500"
             />
             <div
               class="absolute inset-0 bg-gradient-to-t from-black/85 via-black/35 to-transparent"
@@ -144,7 +144,7 @@
               class="relative z-10 flex flex-col justify-end h-full p-4 text-white"
             >
               <h3
-                class="text-sm sm:text-base font-bold text-white group-hover:text-primary-foreground transition-colors line-clamp-1"
+                class="text-sm sm:text-base font-bold text-white group-hover:text-primary transition-colors line-clamp-1"
               >
                 {{ cat.name }}
               </h3>

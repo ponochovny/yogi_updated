@@ -12,14 +12,14 @@ defineProps<{
 
 <template>
   <div
-    class="group relative flex flex-col rounded-2xl border border-border bg-card overflow-hidden transition-all duration-300 hover:shadow-xl hover:shadow-primary/10 hover:border-primary/30 hover:-translate-y-0.5"
+    class="group relative flex flex-col rounded-2xl border border-border bg-card overflow-hidden transition-all duration-300 hover:shadow-xl hover:shadow-primary/10 hover:border-primary/30"
   >
     <!-- Image -->
     <div class="relative overflow-hidden">
       <NuxtImg
         :src="studio.gallery?.[0] || placeholderImageUrl"
         alt="Image"
-        class="aspect-16/10 h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
+        class="aspect-16/10 h-full w-full object-cover transition-transform duration-500"
       />
       <!-- Logo overlay -->
       <div v-if="studio.logo" class="absolute -bottom-5 left-4 z-10">

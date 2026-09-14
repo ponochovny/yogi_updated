@@ -23,6 +23,10 @@ export default defineNuxtConfig({
 
   css: ['@/assets/css/main.css'],
 
+  colorMode: {
+    classSuffix: ''
+  },
+
   vite: {
     plugins: [tailwindcss()],
     optimizeDeps: {

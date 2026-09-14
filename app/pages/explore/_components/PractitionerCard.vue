@@ -27,10 +27,12 @@ defineProps<{
 
 <template>
   <div
-    class="group relative flex flex-col rounded-2xl border border-border bg-card overflow-hidden transition-all duration-300 hover:shadow-xl hover:shadow-primary/10 hover:border-primary/30 hover:-translate-y-0.5"
+    class="group relative flex flex-col rounded-2xl border border-border bg-card overflow-hidden transition-all duration-300 hover:shadow-xl hover:shadow-primary/10 hover:border-primary/30"
   >
     <!-- Top banner / header with decorative gradient -->
-    <div class="h-20 bg-gradient-to-r from-primary/15 via-accent/10 to-primary/5 relative">
+    <div
+      class="h-20 bg-gradient-to-r from-primary/15 via-accent/10 to-primary/5 relative"
+    >
       <!-- Role Badge -->
       <div class="absolute top-3 right-3">
         <span
@@ -44,7 +46,9 @@ defineProps<{
 
     <!-- Avatar overlapping banner -->
     <div class="px-5 -mt-10 flex items-end justify-between">
-      <Avatar class="size-18 rounded-2xl border-4 border-card shadow-md bg-card ring-2 ring-primary/10">
+      <Avatar
+        class="size-18 rounded-2xl border-4 border-card shadow-md bg-card ring-2 ring-primary/10"
+      >
         <AvatarImage
           :src="
             practitioner.avatar?.replace(
@@ -57,7 +61,9 @@ defineProps<{
           :alt="practitioner.name"
           class="object-cover"
         />
-        <AvatarFallback class="rounded-2xl text-lg font-bold bg-primary/10 text-primary">
+        <AvatarFallback
+          class="rounded-2xl text-lg font-bold bg-primary/10 text-primary"
+        >
           {{ practitioner.name?.slice(0, 2).toUpperCase() || 'PR' }}
         </AvatarFallback>
       </Avatar>
@@ -66,7 +72,9 @@ defineProps<{
     <!-- Body -->
     <div class="flex flex-1 flex-col p-5 gap-2.5">
       <div>
-        <h3 class="text-base font-bold text-foreground group-hover:text-primary transition-colors line-clamp-1">
+        <h3
+          class="text-base font-bold text-foreground group-hover:text-primary transition-colors line-clamp-1"
+        >
           {{ practitioner.name }}
         </h3>
         <!-- Studio connection -->
@@ -75,16 +83,26 @@ defineProps<{
           class="inline-flex items-center gap-1.5 text-xs text-muted-foreground hover:text-primary transition-colors mt-0.5"
         >
           <BuildingIcon class="size-3.5 shrink-0" />
-          <span class="truncate font-medium">{{ practitioner.studio.name }}</span>
+          <span class="truncate font-medium">{{
+            practitioner.studio.name
+          }}</span>
         </NuxtLink>
       </div>
 
       <!-- Bio -->
-      <p v-if="practitioner.bio" class="text-sm text-muted-foreground line-clamp-2 leading-relaxed">
+      <p
+        v-if="practitioner.bio"
+        class="text-sm text-muted-foreground line-clamp-2 leading-relaxed"
+      >
         {{ practitioner.bio }}
       </p>
       <p v-else class="text-sm text-muted-foreground/60 italic">
-        {{ $t('explore.noBioProvided', 'Certified yoga instructor and wellness guide.') }}
+        {{
+          $t(
+            'explore.noBioProvided',
+            'Certified yoga instructor and wellness guide.'
+          )
+        }}
       </p>
 
       <!-- Locations footer -->
@@ -94,7 +112,8 @@ defineProps<{
       >
         <MapPinIcon class="size-3.5 shrink-0 text-primary" />
         <span class="truncate">
-          {{ practitioner.studioLocations[0].city }}, {{ practitioner.studioLocations[0].country }}
+          {{ practitioner.studioLocations[0].city }},
+          {{ practitioner.studioLocations[0].country }}
         </span>
       </div>
     </div>

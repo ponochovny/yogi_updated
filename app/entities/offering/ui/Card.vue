@@ -18,8 +18,13 @@ const props = defineProps<{
 const isOnline = computed(() => !props.offering.location?.name)
 
 const spotsPercent = computed(() => {
-  if (!props.offering.spotsTotal || props.offering.spotsRemaining == null) return null
-  return Math.round(((props.offering.spotsTotal - (props.offering.spotsRemaining ?? 0)) / props.offering.spotsTotal) * 100)
+  if (!props.offering.spotsTotal || props.offering.spotsRemaining == null)
+    return null
+  return Math.round(
+    ((props.offering.spotsTotal - (props.offering.spotsRemaining ?? 0)) /
+      props.offering.spotsTotal) *
+      100
+  )
 })
 
 const spotsBarColor = computed(() => {
@@ -44,14 +49,14 @@ const formattedPrice = computed(() => {
 
 <template>
   <div
-    class="group relative flex flex-col rounded-2xl border border-border bg-card overflow-hidden transition-all duration-300 hover:shadow-xl hover:shadow-primary/10 hover:border-primary/30 hover:-translate-y-0.5"
+    class="group relative flex flex-col rounded-2xl border border-border bg-card overflow-hidden transition-all duration-300 hover:shadow-xl hover:shadow-primary/10 hover:border-primary/30"
   >
     <!-- Image -->
     <div class="relative overflow-hidden">
       <NuxtImg
         :src="offering.gallery?.[0] || placeholderImageUrl"
         alt="Image"
-        class="aspect-[16/10] h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
+        class="aspect-[16/10] h-full w-full object-cover transition-transform duration-500"
       />
       <!-- Overlay badges -->
       <div class="absolute top-3 left-3 flex gap-1.5">
@@ -80,7 +85,9 @@ const formattedPrice = computed(() => {
     <!-- Content -->
     <div class="flex flex-1 flex-col p-4 gap-2">
       <NuxtLink :to="`/offerings/${offering.slug}`" class="group/link">
-        <h3 class="text-base font-bold leading-tight group-hover/link:text-primary transition-colors line-clamp-1">
+        <h3
+          class="text-base font-bold leading-tight group-hover/link:text-primary transition-colors line-clamp-1"
+        >
           {{ offering.name }}
         </h3>
       </NuxtLink>
@@ -90,7 +97,9 @@ const formattedPrice = computed(() => {
       </p>
 
       <!-- Meta info -->
-      <div class="flex items-center flex-wrap gap-x-3 gap-y-1 text-xs text-muted-foreground mt-1">
+      <div
+        class="flex items-center flex-wrap gap-x-3 gap-y-1 text-xs text-muted-foreground mt-1"
+      >
         <span class="inline-flex items-center gap-1">
           <ClockIcon class="size-3.5" />
           {{ offering.duration }} min
@@ -114,7 +123,14 @@ const formattedPrice = computed(() => {
         class="mt-2 space-y-1"
       >
         <div class="flex justify-between text-xs">
-          <span class="font-medium" :class="(offering.spotsRemaining ?? 0) <= 3 ? 'text-red-500' : 'text-muted-foreground'">
+          <span
+            class="font-medium"
+            :class="
+              (offering.spotsRemaining ?? 0) <= 3
+                ? 'text-red-500'
+                : 'text-muted-foreground'
+            "
+          >
             {{ offering.spotsRemaining }} spots left
           </span>
           <span class="text-muted-foreground">
@@ -145,9 +161,13 @@ const formattedPrice = computed(() => {
             "
             alt="Avatar"
           />
-          <AvatarFallback class="text-xs">{{ offering.studio.name[0] }}</AvatarFallback>
+          <AvatarFallback class="text-xs">{{
+            offering.studio.name[0]
+          }}</AvatarFallback>
         </Avatar>
-        <span class="text-xs text-muted-foreground group-hover/studio:text-primary transition-colors truncate">
+        <span
+          class="text-xs text-muted-foreground group-hover/studio:text-primary transition-colors truncate"
+        >
           {{ offering.studio.name }}
         </span>
       </NuxtLink>
