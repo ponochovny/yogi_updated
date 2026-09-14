@@ -32,7 +32,9 @@ usePageSeo('checkoutSuccess')
 
 const route = useRoute()
 const router = useRouter()
-const transactionId = computed(() => (route.query.transactionId as string) || '')
+const transactionId = computed(
+  () => (route.query.transactionId as string) || ''
+)
 
 // Handle missing transaction ID
 const hasTransactionId = computed(() => Boolean(transactionId.value))
@@ -60,21 +62,27 @@ const isPendingConfirmation = computed(() => {
   )
 })
 
+const scheduleNextPoll = () => {
+  if (!isPendingConfirmation.value || pollCount.value >= maxPolls) return
+  pollTimer = setTimeout(async () => {
+    pollCount.value++
+    await refresh()
+    scheduleNextPoll()
+  }, 2500)
+}
+
 watch(
   isPendingConfirmation,
   isPending => {
-    if (isPending && pollCount.value < maxPolls) {
-      pollTimer = setTimeout(async () => {
-        pollCount.value++
-        await refresh()
-      }, 2500)
-    }
+    if (pollTimer) clearTimeout(pollTimer)
+    if (isPending) scheduleNextPoll()
   },
   { immediate: true }
 )
 
-onUnmounted(() => {
+onScopeDispose(() => {
   if (pollTimer) clearTimeout(pollTimer)
+  pollTimer = null
 })
 
 // Convenience getters
@@ -127,7 +135,8 @@ const formatMoney = (amountInCents?: number, currency: string = 'USD') => {
 
 // Calendar links
 const googleCalendarUrl = computed(() => {
-  if (!booking.value?.slot?.startTime || !booking.value?.slot?.endTime) return '#'
+  if (!booking.value?.slot?.startTime || !booking.value?.slot?.endTime)
+    return '#'
   const start = new Date(booking.value.slot.startTime)
     .toISOString()
     .replace(/-|:|\.\d\d\d/g, '')
@@ -214,7 +223,9 @@ const googleMapsUrl = computed(() => {
 </script>
 
 <template>
-  <div class="relative min-h-[85vh] py-10 px-4 sm:px-6 lg:px-8 max-w-5xl mx-auto print:p-0 print:m-0 print:max-w-none">
+  <div
+    class="relative min-h-[85vh] py-10 px-4 sm:px-6 lg:px-8 max-w-5xl mx-auto print:p-0 print:m-0 print:max-w-none"
+  >
     <!-- Ambient Background Lighting -->
     <div
       aria-hidden="true"
@@ -230,12 +241,15 @@ const googleMapsUrl = computed(() => {
       v-if="!hasTransactionId"
       class="max-w-md mx-auto my-16 p-8 border rounded-2xl bg-card shadow-sm text-center"
     >
-      <div class="size-16 rounded-full bg-amber-500/10 text-amber-600 flex items-center justify-center mx-auto mb-4">
+      <div
+        class="size-16 rounded-full bg-amber-500/10 text-amber-600 flex items-center justify-center mx-auto mb-4"
+      >
         <AlertCircleIcon class="size-8" />
       </div>
       <h2 class="text-2xl font-bold mb-2">No Transaction Found</h2>
       <p class="text-muted-foreground mb-6 text-sm">
-        It looks like you reached this page directly without a valid transaction reference.
+        It looks like you reached this page directly without a valid transaction
+        reference.
       </p>
       <div class="flex flex-col sm:flex-row gap-3 justify-center">
         <Button @click="router.push('/profile/bookings')">
@@ -248,7 +262,10 @@ const googleMapsUrl = computed(() => {
     </div>
 
     <!-- Loading Skeleton -->
-    <div v-else-if="pending" class="space-y-8 animate-pulse max-w-4xl mx-auto py-8">
+    <div
+      v-else-if="pending"
+      class="space-y-8 animate-pulse max-w-4xl mx-auto py-8"
+    >
       <div class="text-center space-y-3">
         <div class="size-20 rounded-full bg-muted mx-auto" />
         <div class="h-8 w-64 bg-muted mx-auto rounded-lg" />
@@ -265,12 +282,17 @@ const googleMapsUrl = computed(() => {
       v-else-if="error || !checkoutData?.success"
       class="max-w-lg mx-auto my-16 p-8 border rounded-2xl bg-card shadow-sm text-center"
     >
-      <div class="size-16 rounded-full bg-red-500/10 text-red-600 flex items-center justify-center mx-auto mb-4">
+      <div
+        class="size-16 rounded-full bg-red-500/10 text-red-600 flex items-center justify-center mx-auto mb-4"
+      >
         <AlertCircleIcon class="size-8" />
       </div>
       <h2 class="text-2xl font-bold mb-2">Unable to Load Transaction</h2>
       <p class="text-muted-foreground mb-6 text-sm">
-        {{ error?.message || 'We could not find the details for this transaction. If you believe this is an error, please reach out to support.' }}
+        {{
+          error?.message ||
+          'We could not find the details for this transaction. If you believe this is an error, please reach out to support.'
+        }}
       </p>
       <div class="flex flex-col sm:flex-row gap-3 justify-center">
         <Button variant="default" @click="refresh()">
@@ -300,31 +322,40 @@ const googleMapsUrl = computed(() => {
         </div>
 
         <div>
-          <div class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 text-xs font-semibold mb-2">
+          <div
+            class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 text-xs font-semibold mb-2"
+          >
             <SparklesIcon class="size-3.5" />
             <span v-if="orderType === 'BOOKING'">Booking Confirmed</span>
             <span v-else-if="orderType === 'PASS'">Pass Activated</span>
             <span v-else>Payment Complete</span>
           </div>
 
-          <h1 class="text-3xl sm:text-4xl font-extrabold tracking-tight text-foreground">
+          <h1
+            class="text-3xl sm:text-4xl font-extrabold tracking-tight text-foreground"
+          >
             <template v-if="orderType === 'BOOKING'">
               You're Booked & Ready to Flow!
             </template>
             <template v-else-if="orderType === 'PASS'">
               Your Pass is Ready to Use!
             </template>
-            <template v-else>
-              Thank You for Your Payment!
-            </template>
+            <template v-else> Thank You for Your Payment! </template>
           </h1>
 
           <p class="mt-2 text-base text-muted-foreground max-w-xl mx-auto">
             <template v-if="customer?.name">
-              Thank you, <span class="font-medium text-foreground">{{ customer.name }}</span>!
+              Thank you,
+              <span class="font-medium text-foreground">{{
+                customer.name
+              }}</span
+              >!
             </template>
             A confirmation receipt has been sent to
-            <span class="font-medium text-foreground underline decoration-muted-foreground/40">{{ customer?.email }}</span>.
+            <span
+              class="font-medium text-foreground underline decoration-muted-foreground/40"
+              >{{ customer?.email }}</span
+            >.
           </p>
         </div>
 
@@ -335,9 +366,17 @@ const googleMapsUrl = computed(() => {
         >
           <div class="flex items-center gap-2">
             <RefreshCwIcon class="size-4 animate-spin shrink-0" />
-            <span>Finalizing confirmation with payment provider. Refreshing automatically...</span>
+            <span
+              >Finalizing confirmation with payment provider. Refreshing
+              automatically...</span
+            >
           </div>
-          <Button size="sm" variant="ghost" class="h-7 text-xs px-2" @click="refresh()">
+          <Button
+            size="sm"
+            variant="ghost"
+            class="h-7 text-xs px-2"
+            @click="refresh()"
+          >
             Refresh
           </Button>
         </div>
@@ -354,7 +393,9 @@ const googleMapsUrl = computed(() => {
           >
             <!-- Offering Header with Media -->
             <div class="flex flex-col sm:flex-row gap-5 items-start">
-              <div class="relative w-full sm:w-36 h-28 shrink-0 rounded-xl overflow-hidden bg-muted">
+              <div
+                class="relative w-full sm:w-36 h-28 shrink-0 rounded-xl overflow-hidden bg-muted"
+              >
                 <NuxtImg
                   :src="booking.offering?.coverImage || placeholderImageUrl"
                   :alt="booking.offering?.name || 'Class Cover'"
@@ -379,17 +420,19 @@ const googleMapsUrl = computed(() => {
                 >
                   {{ booking.offering?.name }}
                 </NuxtLink>
-                <p v-if="booking.offering?.description" class="text-xs text-muted-foreground line-clamp-2">
+                <p
+                  v-if="booking.offering?.description"
+                  class="text-xs text-muted-foreground line-clamp-2"
+                >
                   {{ booking.offering.description }}
                 </p>
                 <div class="flex flex-wrap items-center gap-2 pt-1">
-                  <span class="inline-flex items-center px-2 py-0.5 rounded-md bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 text-xs font-medium">
+                  <span
+                    class="inline-flex items-center px-2 py-0.5 rounded-md bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 text-xs font-medium"
+                  >
                     Confirmed Seat
                   </span>
-                  <span
-                    v-if="booking.id"
-                    class="text-xs text-muted-foreground"
-                  >
+                  <span v-if="booking.id" class="text-xs text-muted-foreground">
                     Booking #{{ booking.id.slice(0, 8).toUpperCase() }}
                   </span>
                 </div>
@@ -401,19 +444,36 @@ const googleMapsUrl = computed(() => {
             <!-- Key Details Row: Time, Instructor, Studio -->
             <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <!-- Date & Time -->
-              <div class="p-4 rounded-xl bg-accent/30 border border-border/60 flex items-start gap-3">
-                <div class="size-10 rounded-lg bg-primary/10 text-primary flex items-center justify-center shrink-0">
+              <div
+                class="p-4 rounded-xl bg-accent/30 border border-border/60 flex items-start gap-3"
+              >
+                <div
+                  class="size-10 rounded-lg bg-primary/10 text-primary flex items-center justify-center shrink-0"
+                >
                   <CalendarIcon class="size-5" />
                 </div>
                 <div>
-                  <p class="text-xs font-medium text-muted-foreground uppercase tracking-wider">
+                  <p
+                    class="text-xs font-medium text-muted-foreground uppercase tracking-wider"
+                  >
                     Date & Time
                   </p>
                   <p class="font-semibold text-sm mt-0.5">
-                    {{ booking.slot?.startTime ? format(new Date(booking.slot.startTime), 'EEEE, MMM d, yyyy') : 'Date TBA' }}
+                    {{
+                      booking.slot?.startTime
+                        ? format(
+                            new Date(booking.slot.startTime),
+                            'EEEE, MMM d, yyyy'
+                          )
+                        : 'Date TBA'
+                    }}
                   </p>
                   <p class="text-xs text-muted-foreground mt-0.5">
-                    {{ booking.slot?.startTime ? format(new Date(booking.slot.startTime), 'h:mm a') : '' }}
+                    {{
+                      booking.slot?.startTime
+                        ? format(new Date(booking.slot.startTime), 'h:mm a')
+                        : ''
+                    }}
                     <span v-if="booking.slot?.endTime">
                       - {{ format(new Date(booking.slot.endTime), 'h:mm a') }}
                     </span>
@@ -422,20 +482,29 @@ const googleMapsUrl = computed(() => {
               </div>
 
               <!-- Instructor -->
-              <div class="p-4 rounded-xl bg-accent/30 border border-border/60 flex items-start gap-3">
-                <div class="size-10 rounded-full overflow-hidden bg-muted shrink-0 border">
+              <div
+                class="p-4 rounded-xl bg-accent/30 border border-border/60 flex items-start gap-3"
+              >
+                <div
+                  class="size-10 rounded-full overflow-hidden bg-muted shrink-0 border"
+                >
                   <NuxtImg
                     v-if="booking.practitioner?.avatar"
                     :src="booking.practitioner.avatar"
                     :alt="booking.practitioner.name || 'Instructor'"
                     class="w-full h-full object-cover"
                   />
-                  <div v-else class="w-full h-full flex items-center justify-center text-muted-foreground">
+                  <div
+                    v-else
+                    class="w-full h-full flex items-center justify-center text-muted-foreground"
+                  >
                     <UserIcon class="size-5" />
                   </div>
                 </div>
                 <div>
-                  <p class="text-xs font-medium text-muted-foreground uppercase tracking-wider">
+                  <p
+                    class="text-xs font-medium text-muted-foreground uppercase tracking-wider"
+                  >
                     Instructor
                   </p>
                   <p class="font-semibold text-sm mt-0.5">
@@ -449,9 +518,13 @@ const googleMapsUrl = computed(() => {
             </div>
 
             <!-- Studio Location -->
-            <div class="p-4 rounded-xl bg-accent/30 border border-border/60 flex flex-col sm:flex-row justify-between sm:items-center gap-3">
+            <div
+              class="p-4 rounded-xl bg-accent/30 border border-border/60 flex flex-col sm:flex-row justify-between sm:items-center gap-3"
+            >
               <div class="flex items-start gap-3">
-                <div class="size-10 rounded-lg bg-rose-500/10 text-rose-600 flex items-center justify-center shrink-0">
+                <div
+                  class="size-10 rounded-lg bg-rose-500/10 text-rose-600 flex items-center justify-center shrink-0"
+                >
                   <MapPinIcon class="size-5" />
                 </div>
                 <div>
@@ -466,7 +539,11 @@ const googleMapsUrl = computed(() => {
                     {{ booking.studio?.name || 'Studio' }}
                   </span>
                   <p class="text-xs text-muted-foreground mt-0.5">
-                    {{ [booking.studio?.address, booking.studio?.city].filter(Boolean).join(', ') || 'Address provided by studio' }}
+                    {{
+                      [booking.studio?.address, booking.studio?.city]
+                        .filter(Boolean)
+                        .join(', ') || 'Address provided by studio'
+                    }}
                   </p>
                 </div>
               </div>
@@ -484,7 +561,9 @@ const googleMapsUrl = computed(() => {
 
             <!-- Add to Calendar Buttons -->
             <div class="pt-2 print:hidden">
-              <p class="text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-3">
+              <p
+                class="text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-3"
+              >
                 Add to your schedule
               </p>
               <div class="flex flex-wrap gap-2.5">
@@ -516,17 +595,28 @@ const googleMapsUrl = computed(() => {
             class="bg-card border border-border rounded-2xl p-6 sm:p-7 shadow-sm space-y-6"
           >
             <div class="flex items-start gap-4">
-              <div class="size-14 rounded-2xl bg-primary/10 text-primary flex items-center justify-center shrink-0">
+              <div
+                class="size-14 rounded-2xl bg-primary/10 text-primary flex items-center justify-center shrink-0"
+              >
                 <TicketIcon class="size-8" />
               </div>
               <div class="space-y-1 flex-1">
-                <div class="inline-flex items-center px-2 py-0.5 rounded-md bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 text-xs font-semibold">
-                  {{ pass.pricingOption?.type === 'MEMBERSHIP' ? 'Active Membership' : 'Active Class Pack' }}
+                <div
+                  class="inline-flex items-center px-2 py-0.5 rounded-md bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 text-xs font-semibold"
+                >
+                  {{
+                    pass.pricingOption?.type === 'MEMBERSHIP'
+                      ? 'Active Membership'
+                      : 'Active Class Pack'
+                  }}
                 </div>
                 <h2 class="text-2xl font-bold text-foreground">
                   {{ pass.pricingOption?.name }}
                 </h2>
-                <p v-if="pass.pricingOption?.description" class="text-xs text-muted-foreground">
+                <p
+                  v-if="pass.pricingOption?.description"
+                  class="text-xs text-muted-foreground"
+                >
                   {{ pass.pricingOption.description }}
                 </p>
               </div>
@@ -537,11 +627,17 @@ const googleMapsUrl = computed(() => {
             <!-- Pass Attributes Grid -->
             <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div class="p-4 rounded-xl bg-accent/30 border border-border/60">
-                <p class="text-xs font-medium text-muted-foreground uppercase tracking-wider">
+                <p
+                  class="text-xs font-medium text-muted-foreground uppercase tracking-wider"
+                >
                   Remaining Credits
                 </p>
                 <p class="text-xl font-bold mt-1 text-primary">
-                  {{ pass.remainingCredits !== null ? `${pass.remainingCredits} Classes` : 'Unlimited Sessions' }}
+                  {{
+                    pass.remainingCredits !== null
+                      ? `${pass.remainingCredits} Classes`
+                      : 'Unlimited Sessions'
+                  }}
                 </p>
                 <p class="text-xs text-muted-foreground mt-0.5">
                   Available in your user wallet
@@ -549,22 +645,39 @@ const googleMapsUrl = computed(() => {
               </div>
 
               <div class="p-4 rounded-xl bg-accent/30 border border-border/60">
-                <p class="text-xs font-medium text-muted-foreground uppercase tracking-wider">
+                <p
+                  class="text-xs font-medium text-muted-foreground uppercase tracking-wider"
+                >
                   Validity Period
                 </p>
                 <p class="text-sm font-semibold mt-1">
-                  Until {{ pass.validUntil ? format(new Date(pass.validUntil), 'MMM d, yyyy') : 'N/A' }}
+                  Until
+                  {{
+                    pass.validUntil
+                      ? format(new Date(pass.validUntil), 'MMM d, yyyy')
+                      : 'N/A'
+                  }}
                 </p>
                 <p class="text-xs text-muted-foreground mt-0.5">
-                  Activated on {{ pass.validFrom ? format(new Date(pass.validFrom), 'MMM d, yyyy') : 'today' }}
+                  Activated on
+                  {{
+                    pass.validFrom
+                      ? format(new Date(pass.validFrom), 'MMM d, yyyy')
+                      : 'today'
+                  }}
                 </p>
               </div>
             </div>
 
             <!-- Studio Linked to Pass -->
-            <div v-if="studio" class="p-4 rounded-xl bg-accent/30 border border-border/60 flex items-center justify-between gap-3">
+            <div
+              v-if="studio"
+              class="p-4 rounded-xl bg-accent/30 border border-border/60 flex items-center justify-between gap-3"
+            >
               <div class="flex items-center gap-3">
-                <div class="size-9 rounded-lg bg-rose-500/10 text-rose-600 flex items-center justify-center shrink-0">
+                <div
+                  class="size-9 rounded-lg bg-rose-500/10 text-rose-600 flex items-center justify-center shrink-0"
+                >
                   <MapPinIcon class="size-4" />
                 </div>
                 <div>
@@ -585,28 +698,55 @@ const googleMapsUrl = computed(() => {
           </div>
 
           <!-- Helpful Prep Guide Card ("Before You Arrive") -->
-          <div class="bg-card border border-border rounded-2xl p-6 shadow-sm print:hidden">
-            <h3 class="text-sm font-bold uppercase tracking-wider text-muted-foreground mb-4 flex items-center gap-2">
+          <div
+            class="bg-card border border-border rounded-2xl p-6 shadow-sm print:hidden"
+          >
+            <h3
+              class="text-sm font-bold uppercase tracking-wider text-muted-foreground mb-4 flex items-center gap-2"
+            >
               <InfoIcon class="size-4 text-primary" />
               <span>Good to Know Before Your Visit</span>
             </h3>
 
             <ul class="space-y-3 text-xs text-muted-foreground">
               <li class="flex items-start gap-2.5">
-                <span class="size-1.5 rounded-full bg-primary mt-1.5 shrink-0" />
-                <span><strong class="text-foreground">Early Arrival:</strong> Please arrive 10 to 15 minutes before the session to check in and prepare calmly.</span>
+                <span
+                  class="size-1.5 rounded-full bg-primary mt-1.5 shrink-0"
+                />
+                <span
+                  ><strong class="text-foreground">Early Arrival:</strong>
+                  Please arrive 10 to 15 minutes before the session to check in
+                  and prepare calmly.</span
+                >
               </li>
               <li class="flex items-start gap-2.5">
-                <span class="size-1.5 rounded-full bg-primary mt-1.5 shrink-0" />
-                <span><strong class="text-foreground">What to Wear:</strong> Breathable, comfortable clothing that allows full freedom of movement.</span>
+                <span
+                  class="size-1.5 rounded-full bg-primary mt-1.5 shrink-0"
+                />
+                <span
+                  ><strong class="text-foreground">What to Wear:</strong>
+                  Breathable, comfortable clothing that allows full freedom of
+                  movement.</span
+                >
               </li>
               <li class="flex items-start gap-2.5">
-                <span class="size-1.5 rounded-full bg-primary mt-1.5 shrink-0" />
-                <span><strong class="text-foreground">Equipment:</strong> Mats, blocks, and straps are available on site, though you are welcome to bring your personal mat.</span>
+                <span
+                  class="size-1.5 rounded-full bg-primary mt-1.5 shrink-0"
+                />
+                <span
+                  ><strong class="text-foreground">Equipment:</strong> Mats,
+                  blocks, and straps are available on site, though you are
+                  welcome to bring your personal mat.</span
+                >
               </li>
               <li class="flex items-start gap-2.5">
-                <span class="size-1.5 rounded-full bg-primary mt-1.5 shrink-0" />
-                <span><strong class="text-foreground">Check-in:</strong> Just state your name or display this confirmation upon walking in.</span>
+                <span
+                  class="size-1.5 rounded-full bg-primary mt-1.5 shrink-0"
+                />
+                <span
+                  ><strong class="text-foreground">Check-in:</strong> Just state
+                  your name or display this confirmation upon walking in.</span
+                >
               </li>
             </ul>
           </div>
@@ -638,9 +778,13 @@ const googleMapsUrl = computed(() => {
             </div>
 
             <!-- Transaction Reference Code with Copy -->
-            <div class="p-3 rounded-xl bg-accent/40 border border-dashed border-border flex items-center justify-between gap-2">
+            <div
+              class="p-3 rounded-xl bg-accent/40 border border-dashed border-border flex items-center justify-between gap-2"
+            >
               <div>
-                <p class="text-[11px] uppercase tracking-wider text-muted-foreground font-medium">
+                <p
+                  class="text-[11px] uppercase tracking-wider text-muted-foreground font-medium"
+                >
                   Transaction Reference
                 </p>
                 <p class="font-mono text-sm font-semibold text-foreground">
@@ -665,7 +809,14 @@ const googleMapsUrl = computed(() => {
               <div class="flex justify-between text-muted-foreground">
                 <span>Date & Time</span>
                 <span class="text-foreground font-medium">
-                  {{ transaction?.createdAt ? format(new Date(transaction.createdAt), 'dd MMM yyyy, HH:mm') : 'Just now' }}
+                  {{
+                    transaction?.createdAt
+                      ? format(
+                          new Date(transaction.createdAt),
+                          'dd MMM yyyy, HH:mm'
+                        )
+                      : 'Just now'
+                  }}
                 </span>
               </div>
 
@@ -678,7 +829,9 @@ const googleMapsUrl = computed(() => {
 
               <div class="flex justify-between text-muted-foreground">
                 <span>Billed To</span>
-                <span class="text-foreground font-medium text-right truncate max-w-[180px]">
+                <span
+                  class="text-foreground font-medium text-right truncate max-w-[180px]"
+                >
                   {{ customer?.name || customer?.email }}
                 </span>
               </div>
@@ -695,13 +848,9 @@ const googleMapsUrl = computed(() => {
                     <template v-else-if="orderType === 'PASS'">
                       {{ pass?.pricingOption?.name || 'Pass Purchase' }}
                     </template>
-                    <template v-else>
-                      Studio Service
-                    </template>
+                    <template v-else> Studio Service </template>
                   </p>
-                  <p class="text-muted-foreground text-[11px]">
-                    Qty: 1
-                  </p>
+                  <p class="text-muted-foreground text-[11px]">Qty: 1</p>
                 </div>
                 <p class="font-semibold text-foreground text-sm">
                   {{ formatMoney(transaction?.amount, transaction?.currency) }}
@@ -713,7 +862,9 @@ const googleMapsUrl = computed(() => {
               <!-- Total Row -->
               <div class="flex justify-between items-center text-base pt-1">
                 <span class="font-bold text-foreground">Total Paid</span>
-                <span class="font-extrabold text-foreground text-lg text-emerald-600 dark:text-emerald-400">
+                <span
+                  class="font-extrabold text-foreground text-lg text-emerald-600 dark:text-emerald-400"
+                >
                   {{ formatMoney(transaction?.amount, transaction?.currency) }}
                 </span>
               </div>
@@ -733,8 +884,12 @@ const googleMapsUrl = computed(() => {
           </div>
 
           <!-- Quick Actions & Navigation Box -->
-          <div class="bg-card border border-border rounded-2xl p-6 shadow-sm space-y-3 print:hidden">
-            <h4 class="text-xs font-bold uppercase tracking-wider text-muted-foreground mb-1">
+          <div
+            class="bg-card border border-border rounded-2xl p-6 shadow-sm space-y-3 print:hidden"
+          >
+            <h4
+              class="text-xs font-bold uppercase tracking-wider text-muted-foreground mb-1"
+            >
               Next Steps
             </h4>
 
@@ -766,11 +921,21 @@ const googleMapsUrl = computed(() => {
           </div>
 
           <!-- Support & Help Card -->
-          <div class="p-4 rounded-xl bg-accent/20 border border-border text-xs text-muted-foreground space-y-1.5 print:hidden">
-            <p class="font-semibold text-foreground">Need help or wish to reschedule?</p>
+          <div
+            class="p-4 rounded-xl bg-accent/20 border border-border text-xs text-muted-foreground space-y-1.5 print:hidden"
+          >
+            <p class="font-semibold text-foreground">
+              Need help or wish to reschedule?
+            </p>
             <p>
-              You can manage or cancel your booking up to 12 hours before class in your
-              <NuxtLink to="/profile/bookings" class="text-primary hover:underline font-medium">My Bookings</NuxtLink> dashboard.
+              You can manage or cancel your booking up to 12 hours before class
+              in your
+              <NuxtLink
+                to="/profile/bookings"
+                class="text-primary hover:underline font-medium"
+                >My Bookings</NuxtLink
+              >
+              dashboard.
             </p>
           </div>
         </div>
@@ -785,7 +950,10 @@ const googleMapsUrl = computed(() => {
     background: #fff !important;
     color: #000 !important;
   }
-  nav, header, footer, .print\:hidden {
+  nav,
+  header,
+  footer,
+  .print\:hidden {
     display: none !important;
   }
   #printable-receipt {

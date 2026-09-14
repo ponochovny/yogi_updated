@@ -68,7 +68,12 @@ export function resolveSeoConfig(
 
   const description =
     base.description?.trim() || siteSeoDefaults.defaultDescription
-  const image = base.image?.trim() || siteSeoDefaults.defaultImage
+  const imagePath = base.image?.trim() || siteSeoDefaults.defaultImage
+  const normalizedBaseUrl = options?.baseUrl?.replace(/\/$/, '') || ''
+  const image =
+    normalizedBaseUrl && !/^https?:\/\//i.test(imagePath)
+      ? new URL(imagePath, `${normalizedBaseUrl}/`).href
+      : imagePath
   const type = base.type || siteSeoDefaults.defaultType
   const twitterCard = base.twitterCard || siteSeoDefaults.defaultTwitterCard
 

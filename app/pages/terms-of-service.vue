@@ -524,7 +524,7 @@ onUnmounted(() => {
           class="mt-2 pt-2 border-t border-border max-h-60 overflow-y-auto space-y-1"
         >
           <button
-            v-for="s in sections"
+            v-for="s in filteredSections"
             :key="s.id"
             type="button"
             :class="[
@@ -1660,7 +1660,7 @@ onUnmounted(() => {
 
 <style scoped>
 @media print {
-  body {
+  :global(body) {
     background: #ffffff !important;
     color: #000000 !important;
   }

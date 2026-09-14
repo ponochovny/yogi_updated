@@ -15,12 +15,12 @@ export function useCurrency() {
   const currency = useState<CurrencyCode>('currency', () => 'USD')
 
   // Hydrate from localStorage on client
-  if (import.meta.client) {
+  onMounted(() => {
     const stored = localStorage.getItem('yogi-currency') as CurrencyCode | null
     if (stored && currencyMap[stored]) {
       currency.value = stored
     }
-  }
+  })
 
   const currencyInfo = computed(() => currencyMap[currency.value])
   const currencySymbol = computed(() => currencyInfo.value.symbol)

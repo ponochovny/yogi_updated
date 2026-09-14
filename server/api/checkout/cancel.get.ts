@@ -1,15 +1,9 @@
 import { eq, and, sql, asc } from 'drizzle-orm'
 import { z } from 'zod'
 import Stripe from 'stripe'
-import {
-  transactions,
-  TransactionStatus
-} from '~~/server/db/schema/payment'
+import { transactions, TransactionStatus } from '~~/server/db/schema/payment'
 import { bookings } from '~~/server/db/schema/booking'
-import {
-  offeringSlots,
-  offerings
-} from '~~/server/db/schema/offering'
+import { offeringSlots, offerings } from '~~/server/db/schema/offering'
 import {
   studios,
   studioPractitioners,
@@ -73,6 +67,9 @@ export default defineEventHandler(async event => {
     }
   }
 
+  let stripeStatusKnown =
+    !txRecord.providerTransactionId || !process.env.STRIPE_SECRET_KEY
+
   // 3. If transaction is PENDING, verify with Stripe to make sure it was not paid before reverting!
   if (
     txRecord.status === TransactionStatus.PENDING &&
@@ -83,6 +80,8 @@ export default defineEventHandler(async event => {
       const session = await stripe.checkout.sessions.retrieve(
         txRecord.providerTransactionId
       )
+
+      stripeStatusKnown = true
 
       if (session.payment_status === 'paid' || session.status === 'complete') {
         // Payment was completed in Stripe! Mark SUCCESS and confirm booking
@@ -118,19 +117,26 @@ export default defineEventHandler(async event => {
         }
       }
     } catch (stripeErr) {
-      console.warn('Could not verify Stripe session status on cancel check:', stripeErr)
+      console.warn(
+        'Could not verify Stripe session status on cancel check:',
+        stripeErr
+      )
     }
   }
 
   // 4. Truly cancelled/pending: release the seat/slot immediately so others or this user can re-book
-  if (txRecord.status === TransactionStatus.PENDING) {
+  if (txRecord.status === TransactionStatus.PENDING && stripeStatusKnown) {
     const [pendingBooking] = await db
       .select({ id: bookings.id })
       .from(bookings)
       .where(eq(bookings.transactionId, transactionId))
       .limit(1)
 
-    await revertPendingCheckoutState(db, transactionId, pendingBooking?.id || null)
+    await revertPendingCheckoutState(
+      db,
+      transactionId,
+      pendingBooking?.id || null
+    )
     txRecord.status = TransactionStatus.FAILED
 
     // Attempt to expire Stripe checkout session if still open
@@ -138,7 +144,10 @@ export default defineEventHandler(async event => {
       try {
         await stripe.checkout.sessions.expire(txRecord.providerTransactionId)
       } catch (stripeErr) {
-        console.warn('Could not expire Stripe session on checkout cancel:', stripeErr)
+        console.warn(
+          'Could not expire Stripe session on checkout cancel:',
+          stripeErr
+        )
       }
     }
   }
@@ -218,10 +227,7 @@ export default defineEventHandler(async event => {
     )
     .leftJoin(
       practitionerAvatar,
-      eq(
-        sql`${studioPractitioners.userId}::text`,
-        practitionerAvatar.entityId
-      )
+      eq(sql`${studioPractitioners.userId}::text`, practitionerAvatar.entityId)
     )
     .where(eq(bookings.transactionId, transactionId))
     .limit(1)

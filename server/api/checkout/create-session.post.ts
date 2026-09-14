@@ -133,7 +133,11 @@ export default defineEventHandler(async event => {
 
         // Fetch capacity from offering
         const [offering] = await tx
-          .select({ capacity: offerings.capacity, name: offerings.name })
+          .select({
+            capacity: offerings.capacity,
+            name: offerings.name,
+            timezone: offerings.timezone
+          })
           .from(offerings)
           .where(eq(offerings.id, slot.offeringId))
           .limit(1)
@@ -141,7 +145,12 @@ export default defineEventHandler(async event => {
           throwApiError(404, 'Offering not found for the selected slot')
         }
 
-        lineItemName = `${offering.name} - Slot Booking | 🎫 ${pricing.name} | 📅 ${slot.startTime.toLocaleString()} - ${slot.endTime.toLocaleString()}`
+        const timeFormat = new Intl.DateTimeFormat('en-US', {
+          dateStyle: 'medium',
+          timeStyle: 'short',
+          timeZone: offering.timezone || 'UTC'
+        })
+        lineItemName = `${offering.name} - Slot Booking | 🎫 ${pricing.name} | 📅 ${timeFormat.format(slot.startTime)} - ${timeFormat.format(slot.endTime)}`
 
         // Verify slot is not overbooked
         const maxCapacity = slot.capacityOverride ?? offering?.capacity ?? 9999
