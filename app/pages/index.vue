@@ -407,7 +407,7 @@
       <!-- ============================== -->
       <section class="py-16 lg:py-20 -mx-4 sm:-mx-6 lg:-mx-8">
         <div
-          class="relative overflow-hidden rounded-3xl mx-4 sm:mx-6 lg:mx-8 bg-gradient-to-br from-foreground to-foreground/90 dark:from-card dark:to-card/90 dark:border dark:border-border"
+          class="relative overflow-hidden rounded-3xl mx-4 sm:mx-6 lg:mx-8 bg-linear-to-br from-foreground to-foreground/90 dark:from-card dark:to-card/90 dark:border dark:border-border"
         >
           <!-- Decorative elements -->
           <div

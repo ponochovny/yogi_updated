@@ -142,7 +142,10 @@ export default defineEventHandler(async event => {
         })
       }
     } catch (stripeErr) {
-      console.warn('Could not verify Stripe session in checkout status API:', stripeErr)
+      console.warn(
+        'Could not verify Stripe session in checkout status API:',
+        stripeErr
+      )
     }
   }
 
@@ -204,6 +207,7 @@ export default defineEventHandler(async event => {
         timezone: studioLocations.timezone
       },
       practitioner: {
+        id: studioPractitioners.id,
         name: usersTable.name,
         avatar: practitionerAvatar.url
       }
@@ -224,10 +228,7 @@ export default defineEventHandler(async event => {
     )
     .leftJoin(
       practitionerAvatar,
-      eq(
-        sql`${studioPractitioners.userId}::text`,
-        practitionerAvatar.entityId
-      )
+      eq(sql`${studioPractitioners.userId}::text`, practitionerAvatar.entityId)
     )
     .where(eq(bookings.transactionId, transactionId))
     .limit(1)
@@ -278,7 +279,10 @@ export default defineEventHandler(async event => {
       }
     })
     .from(userPasses)
-    .innerJoin(pricingOptions, eq(userPasses.pricingOptionId, pricingOptions.id))
+    .innerJoin(
+      pricingOptions,
+      eq(userPasses.pricingOptionId, pricingOptions.id)
+    )
     .innerJoin(studios, eq(userPasses.studioId, studios.id))
     .where(eq(userPasses.transactionId, transactionId))
     .limit(1)

@@ -40,10 +40,10 @@ defineEmits<{
       >
         <div class="flex flex-col">
           <p class="">
-            {{ format(new Date(booking.slot.startTime), 'MMM d, yyyy') }}
+            {{ format(new Date(booking.slot?.startTime), 'MMM d, yyyy') }}
           </p>
           <p class="text-2xl">
-            {{ format(new Date(booking.slot.startTime), 'h:mm a') }}
+            {{ format(new Date(booking.slot?.startTime), 'h:mm a') }}
           </p>
         </div>
       </div>
@@ -71,9 +71,12 @@ defineEmits<{
               alt="Coach Avatar"
               class="w-5 h-5 rounded-full object-cover"
             />
-            <span>
+            <NuxtLink
+              :to="`/practitioners/${booking.practitioner.id}`"
+              class="hover:text-primary transition-colors"
+            >
               {{ booking.practitioner.name }}
-            </span>
+            </NuxtLink>
           </div>
         </div>
       </div>

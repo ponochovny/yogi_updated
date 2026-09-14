@@ -27,7 +27,9 @@ useHead({
 
 const route = useRoute()
 const router = useRouter()
-const transactionId = computed(() => (route.query.transactionId as string) || '')
+const transactionId = computed(
+  () => (route.query.transactionId as string) || ''
+)
 const hasTransactionId = computed(() => Boolean(transactionId.value))
 
 // Fetch cancellation context & release pending reservations
@@ -80,7 +82,9 @@ const formatMoney = (amountInCents?: number, currency: string = 'USD') => {
 </script>
 
 <template>
-  <div class="relative min-h-[85vh] py-10 px-4 sm:px-6 lg:px-8 max-w-4xl mx-auto">
+  <div
+    class="relative min-h-[85vh] py-10 px-4 sm:px-6 lg:px-8 max-w-4xl mx-auto"
+  >
     <!-- Ambient Background Glow -->
     <div
       aria-hidden="true"
@@ -96,12 +100,15 @@ const formatMoney = (amountInCents?: number, currency: string = 'USD') => {
       v-if="!hasTransactionId"
       class="max-w-md mx-auto my-16 p-8 border rounded-2xl bg-card shadow-sm text-center"
     >
-      <div class="size-16 rounded-full bg-amber-500/10 text-amber-600 flex items-center justify-center mx-auto mb-4">
+      <div
+        class="size-16 rounded-full bg-amber-500/10 text-amber-600 flex items-center justify-center mx-auto mb-4"
+      >
         <AlertCircleIcon class="size-8" />
       </div>
       <h2 class="text-2xl font-bold mb-2">No Active Checkout</h2>
       <p class="text-muted-foreground mb-6 text-sm">
-        No transaction reference was provided. You can continue exploring yoga classes and studios.
+        No transaction reference was provided. You can continue exploring yoga
+        classes and studios.
       </p>
       <div class="flex flex-col sm:flex-row gap-3 justify-center">
         <Button @click="router.push('/')">
@@ -112,7 +119,10 @@ const formatMoney = (amountInCents?: number, currency: string = 'USD') => {
     </div>
 
     <!-- Loading Skeleton -->
-    <div v-else-if="pending" class="space-y-8 animate-pulse max-w-2xl mx-auto py-8">
+    <div
+      v-else-if="pending"
+      class="space-y-8 animate-pulse max-w-2xl mx-auto py-8"
+    >
       <div class="text-center space-y-3">
         <div class="size-16 rounded-full bg-muted mx-auto" />
         <div class="h-8 w-56 bg-muted mx-auto rounded-lg" />
@@ -126,12 +136,17 @@ const formatMoney = (amountInCents?: number, currency: string = 'USD') => {
       v-else-if="error || !cancelData?.success"
       class="max-w-md mx-auto my-16 p-8 border rounded-2xl bg-card shadow-sm text-center"
     >
-      <div class="size-16 rounded-full bg-red-500/10 text-red-600 flex items-center justify-center mx-auto mb-4">
+      <div
+        class="size-16 rounded-full bg-red-500/10 text-red-600 flex items-center justify-center mx-auto mb-4"
+      >
         <AlertCircleIcon class="size-8" />
       </div>
       <h2 class="text-2xl font-bold mb-2">Checkout Info Unavailable</h2>
       <p class="text-muted-foreground mb-6 text-sm">
-        {{ error?.message || 'Could not load details for this cancellation. Rest assured that no payment was completed.' }}
+        {{
+          error?.message ||
+          'Could not load details for this cancellation. Rest assured that no payment was completed.'
+        }}
       </p>
       <div class="flex flex-col sm:flex-row gap-3 justify-center">
         <Button variant="default" @click="refresh()">
@@ -149,13 +164,18 @@ const formatMoney = (amountInCents?: number, currency: string = 'USD') => {
       v-else-if="isAlreadyPaid"
       class="max-w-md mx-auto my-16 p-8 border border-emerald-500/30 rounded-2xl bg-card shadow-sm text-center space-y-4"
     >
-      <div class="size-16 rounded-full bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 flex items-center justify-center mx-auto">
+      <div
+        class="size-16 rounded-full bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 flex items-center justify-center mx-auto"
+      >
         <CheckCircle2Icon class="size-8" />
       </div>
       <div>
-        <h2 class="text-2xl font-bold text-foreground">Transaction Completed</h2>
+        <h2 class="text-2xl font-bold text-foreground">
+          Transaction Completed
+        </h2>
         <p class="text-sm text-muted-foreground mt-2">
-          This transaction has already been successfully paid and confirmed. Redirecting you to your order summary...
+          This transaction has already been successfully paid and confirmed.
+          Redirecting you to your order summary...
         </p>
       </div>
       <Button
@@ -172,22 +192,31 @@ const formatMoney = (amountInCents?: number, currency: string = 'USD') => {
       <!-- Header Section -->
       <section class="text-center space-y-3">
         <div class="relative inline-flex items-center justify-center">
-          <div class="size-16 rounded-full bg-amber-500/15 text-amber-600 dark:text-amber-400 flex items-center justify-center shadow-inner">
+          <div
+            class="size-16 rounded-full bg-amber-500/15 text-amber-600 dark:text-amber-400 flex items-center justify-center shadow-inner"
+          >
             <ShoppingBagIcon class="size-8 stroke-[2]" />
           </div>
         </div>
 
         <div>
-          <div class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-amber-500/10 text-amber-700 dark:text-amber-400 text-xs font-semibold mb-2">
+          <div
+            class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-amber-500/10 text-amber-700 dark:text-amber-400 text-xs font-semibold mb-2"
+          >
             <span>Payment Incomplete</span>
           </div>
 
-          <h1 class="text-3xl sm:text-4xl font-extrabold tracking-tight text-foreground">
+          <h1
+            class="text-3xl sm:text-4xl font-extrabold tracking-tight text-foreground"
+          >
             Checkout Was Cancelled
           </h1>
 
           <p class="mt-2 text-base text-muted-foreground max-w-lg mx-auto">
-            No worries! You have <strong class="text-foreground font-semibold">not been charged</strong>. Your pending reservation seat has been released.
+            No worries! You have
+            <strong class="text-foreground font-semibold"
+              >not been charged</strong
+            >. Your pending reservation seat has been released.
           </p>
         </div>
       </section>
@@ -202,17 +231,23 @@ const formatMoney = (amountInCents?: number, currency: string = 'USD') => {
             class="bg-card border border-border rounded-2xl p-6 shadow-sm space-y-5"
           >
             <div class="flex items-center justify-between">
-              <span class="text-xs font-bold uppercase tracking-wider text-muted-foreground">
+              <span
+                class="text-xs font-bold uppercase tracking-wider text-muted-foreground"
+              >
                 Item in Cart
               </span>
-              <span class="text-xs px-2.5 py-0.5 rounded-full bg-muted text-muted-foreground font-medium">
+              <span
+                class="text-xs px-2.5 py-0.5 rounded-full bg-muted text-muted-foreground font-medium"
+              >
                 Not Charged
               </span>
             </div>
 
             <!-- Offering Info -->
             <div class="flex gap-4 items-start">
-              <div class="relative size-20 sm:size-24 shrink-0 rounded-xl overflow-hidden bg-muted">
+              <div
+                class="relative size-20 sm:size-24 shrink-0 rounded-xl overflow-hidden bg-muted"
+              >
                 <NuxtImg
                   :src="booking.offering?.coverImage || placeholderImageUrl"
                   :alt="booking.offering?.name || 'Class Cover'"
@@ -227,11 +262,18 @@ const formatMoney = (amountInCents?: number, currency: string = 'USD') => {
                 <h3 class="font-bold text-lg text-foreground leading-snug">
                   {{ booking.offering?.name || 'Class Booking' }}
                 </h3>
-                <p v-if="booking.studio?.name" class="text-xs text-muted-foreground flex items-center gap-1">
+                <p
+                  v-if="booking.studio?.name"
+                  class="text-xs text-muted-foreground flex items-center gap-1"
+                >
                   <span>at</span>
-                  <span class="font-medium text-foreground">{{ booking.studio.name }}</span>
+                  <span class="font-medium text-foreground">{{
+                    booking.studio.name
+                  }}</span>
                 </p>
-                <div class="pt-1 text-sm font-semibold text-muted-foreground line-through">
+                <div
+                  class="pt-1 text-sm font-semibold text-muted-foreground line-through"
+                >
                   {{ formatMoney(transaction?.amount, transaction?.currency) }}
                 </div>
               </div>
@@ -240,13 +282,23 @@ const formatMoney = (amountInCents?: number, currency: string = 'USD') => {
             <Separator />
 
             <!-- Time & Instructor details -->
-            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs text-muted-foreground">
-              <div v-if="booking.slot?.startTime" class="flex items-center gap-2">
+            <div
+              class="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs text-muted-foreground"
+            >
+              <div
+                v-if="booking.slot?.startTime"
+                class="flex items-center gap-2"
+              >
                 <CalendarIcon class="size-4 text-primary shrink-0" />
-                <span>{{ format(new Date(booking.slot.startTime), 'EEE, MMM d, yyyy') }}</span>
+                <span>{{
+                  format(new Date(booking.slot.startTime), 'EEE, MMM d, yyyy')
+                }}</span>
               </div>
 
-              <div v-if="booking.slot?.startTime" class="flex items-center gap-2">
+              <div
+                v-if="booking.slot?.startTime"
+                class="flex items-center gap-2"
+              >
                 <ClockIcon class="size-4 text-primary shrink-0" />
                 <span>
                   {{ format(new Date(booking.slot.startTime), 'h:mm a') }}
@@ -256,12 +308,23 @@ const formatMoney = (amountInCents?: number, currency: string = 'USD') => {
                 </span>
               </div>
 
-              <div v-if="booking.practitioner?.name" class="flex items-center gap-2">
+              <div
+                v-if="booking.practitioner?.name"
+                class="flex items-center gap-2"
+              >
                 <UserIcon class="size-4 text-primary shrink-0" />
-                <span>{{ booking.practitioner.name }}</span>
+                <NuxtLink
+                  :to="`/practitioners/${booking.practitioner.id}`"
+                  class="hover:text-primary transition-colors"
+                >
+                  {{ booking.practitioner.name }}
+                </NuxtLink>
               </div>
 
-              <div v-if="booking.studio?.address" class="flex items-center gap-2">
+              <div
+                v-if="booking.studio?.address"
+                class="flex items-center gap-2"
+              >
                 <MapPinIcon class="size-4 text-primary shrink-0" />
                 <span class="truncate">{{ booking.studio.address }}</span>
               </div>
@@ -274,39 +337,66 @@ const formatMoney = (amountInCents?: number, currency: string = 'USD') => {
             class="bg-card border border-border rounded-2xl p-6 shadow-sm space-y-3"
           >
             <div class="flex items-center justify-between">
-              <span class="text-xs font-bold uppercase tracking-wider text-muted-foreground">
+              <span
+                class="text-xs font-bold uppercase tracking-wider text-muted-foreground"
+              >
                 Transaction Status
               </span>
-              <span class="text-xs px-2.5 py-0.5 rounded-full bg-muted text-muted-foreground font-medium">
+              <span
+                class="text-xs px-2.5 py-0.5 rounded-full bg-muted text-muted-foreground font-medium"
+              >
                 Cancelled
               </span>
             </div>
             <p class="text-sm text-muted-foreground">
-              Transaction reference <span class="font-mono font-medium text-foreground">#{{ transaction.id.slice(0, 8).toUpperCase() }}</span> was cancelled before completion.
+              Transaction reference
+              <span class="font-mono font-medium text-foreground"
+                >#{{ transaction.id.slice(0, 8).toUpperCase() }}</span
+              >
+              was cancelled before completion.
             </p>
           </div>
 
           <!-- Helpful Reassurance / FAQs -->
-          <div class="bg-card border border-border rounded-2xl p-5 shadow-sm space-y-4">
-            <h4 class="text-xs font-bold uppercase tracking-wider text-muted-foreground flex items-center gap-1.5">
+          <div
+            class="bg-card border border-border rounded-2xl p-5 shadow-sm space-y-4"
+          >
+            <h4
+              class="text-xs font-bold uppercase tracking-wider text-muted-foreground flex items-center gap-1.5"
+            >
               <HelpCircleIcon class="size-4 text-primary" />
               <span>Common Questions</span>
             </h4>
 
             <div class="space-y-3 text-xs text-muted-foreground">
               <div>
-                <p class="font-semibold text-foreground mb-0.5">Was my card or account charged?</p>
-                <p>No. The payment authorization was never completed, so no funds were withdrawn.</p>
+                <p class="font-semibold text-foreground mb-0.5">
+                  Was my card or account charged?
+                </p>
+                <p>
+                  No. The payment authorization was never completed, so no funds
+                  were withdrawn.
+                </p>
               </div>
 
               <div>
-                <p class="font-semibold text-foreground mb-0.5">Can I still book this spot?</p>
-                <p>Yes! The reservation hold on your seat has been released, making it available for you to book again immediately.</p>
+                <p class="font-semibold text-foreground mb-0.5">
+                  Can I still book this spot?
+                </p>
+                <p>
+                  Yes! The reservation hold on your seat has been released,
+                  making it available for you to book again immediately.
+                </p>
               </div>
 
               <div>
-                <p class="font-semibold text-foreground mb-0.5">Experienced a payment card issue?</p>
-                <p>You may try again with another card, or check if the studio offers cash payment on-site.</p>
+                <p class="font-semibold text-foreground mb-0.5">
+                  Experienced a payment card issue?
+                </p>
+                <p>
+                  You may try again with another card, or check if the studio
+                  offers cash payment on-site.
+                </p>
               </div>
             </div>
           </div>
@@ -314,7 +404,9 @@ const formatMoney = (amountInCents?: number, currency: string = 'USD') => {
 
         <!-- RIGHT COLUMN: Action Buttons & Next Steps -->
         <div class="md:col-span-5 space-y-4">
-          <div class="bg-card border border-border rounded-2xl p-6 shadow-sm space-y-4">
+          <div
+            class="bg-card border border-border rounded-2xl p-6 shadow-sm space-y-4"
+          >
             <h3 class="font-bold text-base text-foreground">
               What would you like to do?
             </h3>
@@ -361,13 +453,16 @@ const formatMoney = (amountInCents?: number, currency: string = 'USD') => {
           </div>
 
           <!-- Need Help Banner -->
-          <div class="p-4 rounded-xl bg-accent/30 border border-border text-xs text-muted-foreground space-y-1">
+          <div
+            class="p-4 rounded-xl bg-accent/30 border border-border text-xs text-muted-foreground space-y-1"
+          >
             <p class="font-semibold text-foreground flex items-center gap-1.5">
               <CreditCardIcon class="size-3.5 text-primary" />
               <span>Having trouble with payment?</span>
             </p>
             <p>
-              Please verify your billing details or reach out to your bank. If the issue persists, contact the studio support.
+              Please verify your billing details or reach out to your bank. If
+              the issue persists, contact the studio support.
             </p>
           </div>
         </div>

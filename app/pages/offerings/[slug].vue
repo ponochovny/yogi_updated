@@ -1,202 +1,337 @@
 <script setup lang="ts">
+import {
+  CalendarDaysIcon,
+  CheckCircle2Icon,
+  Clock3Icon,
+  Globe2Icon,
+  MapPinIcon,
+  UsersIcon
+} from '@lucide/vue'
 import { format } from 'date-fns'
-import type { BookingOptions, OfferingSlot } from '~/entities/booking/schema'
 import { toast } from 'vue-sonner'
 import BookWithPricingOptions from './_components/BookWithPricingOptions.vue'
+import { placeholderImageUrl } from '~/config/constants'
 
 const route = useRoute()
-const offeringSlug = route.params.slug
+const offeringSlug = String(route.params.slug)
 
-const offeringReq = useFetch(`/api/offerings/${offeringSlug}`)
-const slotsReq = useFetch(`/api/offerings/${offeringSlug}/slots`)
+const [{ data: offeringData, error: offeringError }, { data: slotsData }] =
+  await Promise.all([
+    useFetch(`/api/offerings/${offeringSlug}`),
+    useFetch(`/api/offerings/${offeringSlug}/slots`)
+  ])
 
-const [{ data: offeringsData }, { data: offeringsSlots }] = await Promise.all([
-  offeringReq,
-  slotsReq
-])
+if (offeringError.value) {
+  await navigateTo('/404')
+}
 
-const offering = computed(() => offeringsData.value?.offering || null)
-const rawSlots = computed(() => offeringsSlots.value?.slots || [])
+const offering = computed(() => offeringData.value?.offering || null)
+const rawSlots = computed(() => slotsData.value?.slots || [])
+
+const groupedSlots = computed(() =>
+  rawSlots.value.reduce<Record<string, typeof rawSlots.value>>(
+    (groups, slot) => {
+      const dateKey = format(new Date(slot.startTime), 'EEEE, MMMM d')
+      groups[dateKey] ||= []
+      groups[dateKey].push(slot)
+      return groups
+    },
+    {}
+  )
+)
+
+const formatPrice = (price: number) => {
+  const configuredCurrency = offering.value?.studio?.currency
+  const currency =
+    configuredCurrency === 'PHP' || configuredCurrency === 'USD'
+      ? configuredCurrency
+      : 'USD'
+  return new Intl.NumberFormat('en-US', {
+    style: 'currency',
+    currency,
+    maximumFractionDigits: 0
+  }).format(price / 100)
+}
+
+const isOnline = computed(() => !offering.value?.location)
+const gallery = computed(() => offering.value?.gallery || [])
 
 usePageSeo({
   title: () => offering.value?.name || 'Offering',
   description: () =>
-    offering.value?.description || 'Offering details and available slots',
+    offering.value?.description || 'Offering details and available sessions',
   type: 'article'
 })
-
-// Group slots by date for UI presentation
-const groupedSlots = computed(() => {
-  if (!rawSlots.value) return {}
-
-  return rawSlots.value.reduce<Record<string, typeof rawSlots.value>>(
-    (acc, slot) => {
-      // Format UTC to Local string representation for grouping (e.g., 'June 15, 2026')
-      const dateKey = format(new Date(slot.startTime), 'MMMM d, yyyy')
-
-      if (!acc[dateKey]) acc[dateKey] = []
-      acc[dateKey].push(slot)
-      return acc
-    },
-    {}
-  )
-})
-
-const isPricingOptionsPending = ref(false)
-const selectedSlot = ref<OfferingSlot | null>(null)
-const dropInTickets = ref<BookingOptions['dropInTickets']>([])
-const userPasses = ref<BookingOptions['userPasses']>([])
-
-/** Fetch available pricing options for a given slot */
-const checkAvailablePricingOptions = async (slot: OfferingSlot) => {
-  selectedSlot.value = slot
-  dropInTickets.value = []
-  userPasses.value = []
-  try {
-    isPricingOptionsPending.value = true
-
-    const pricingOptions = await $fetch(`/api/bookings/${slot.id}/options`)
-    if (selectedSlot.value?.id !== slot.id) return // stale response guard
-    dropInTickets.value = pricingOptions.options.dropInTickets
-    userPasses.value = pricingOptions.options.userPasses
-  } catch (err) {
-    if (selectedSlot.value?.id !== slot.id) return // stale response guard
-    const message =
-      (err as { data?: { message?: string } })?.data?.message ?? 'Unknown error'
-    toast.error(`Error fetching pricing options: ${message}`)
-  } finally {
-    isPricingOptionsPending.value = false
-  }
-}
-
-/** Book a selected slot */
-// const bookSlot = async (
-//   slot: OfferingSlot,
-//   pricingOptionId: string | null,
-//   userPassId: string | null
-// ) => {
-//   try {
-//     // await $fetch(`/api/slots/${slot.id}/book`, {
-//     //   method: 'POST',
-//     //   body: {
-//     //     ...slot
-//     //   }
-//     // })
-//     await $fetch(`/api/bookings/${slot.id}`, {
-//       method: 'POST',
-//       body: {
-//         pricingOptionId,
-//         userPassId
-//       }
-//     })
-
-//     toast.success('Slot booked successfully!', {
-//       description:
-//         'Your session has been booked. Check your dashboard for details.',
-//       duration: 5000,
-//       action: {
-//         label: 'View Bookings',
-//         onClick: () => navigateTo('/profile/bookings')
-//       }
-//     })
-//   } catch (err) {
-//     toast.error(`Error booking slot: ${(err as Error).message}`)
-//   }
-// }
 </script>
 
 <template>
-  <div
-    class="max-w-5xl mx-auto px-4 py-12 grid grid-cols-1 md:grid-cols-3 gap-8"
-  >
-    <div class="md:col-span-2 space-y-6">
-      <h1 class="text-4xl font-bold">{{ offering?.name }}</h1>
-      <p class="text-muted-foreground">{{ offering?.description }}</p>
-    </div>
+  <div v-if="offering" class="mx-auto max-w-6xl px-4 py-8 sm:px-6 lg:px-8">
+    <div class="grid gap-10 lg:grid-cols-[minmax(0,1fr)_22rem]">
+      <main class="min-w-0 space-y-10">
+        <section
+          class="overflow-hidden rounded-3xl border border-border bg-card shadow-sm"
+        >
+          <div class="bg-muted/40">
+            <NuxtImg
+              :src="gallery[0] || placeholderImageUrl"
+              :alt="offering.name"
+              class="aspect-16/10 h-100 w-full object-cover sm:aspect-auto object-[0_20%]"
+            />
+          </div>
 
-    <div class="bg-white/10 p-6 rounded-2xl border sticky top-8">
-      <h3 class="text-xl font-bold mb-6">Available Dates</h3>
-
-      <div v-if="!rawSlots?.length" class="text-gray-500 text-sm">
-        No upcoming slots available right now.
-      </div>
-
-      <div v-else class="space-y-6">
-        <div v-for="(slots, date) in groupedSlots" :key="date">
-          <h4 class="font-medium text-gray-200 mb-3 border-b pb-2">
-            {{ date }}
-          </h4>
-
-          <div class="space-y-2">
+          <div class="space-y-5 p-6 sm:p-8">
             <div
-              v-for="slot in slots"
-              :key="slot.id"
-              class="w-full flex justify-between items-center p-3 bg-white/10 border border-gray-600 rounded-lg hover:border-gray-400 transition text-left"
+              class="flex flex-wrap gap-2 text-xs font-semibold uppercase tracking-wider"
             >
-              <div>
-                <div class="font-semibold">
-                  {{ format(new Date(slot.startTime), 'HH:mm') }}
-                </div>
-                <div class="text-xs text-muted-foreground">
-                  Coach: {{ slot.practitioner.name }}
-                </div>
+              <span class="rounded-full bg-primary/10 px-3 py-1 text-primary">{{
+                offering.activityType
+              }}</span>
+              <template v-if="offering.types && offering.types.length">
+                <span
+                  v-for="type in offering.types"
+                  :key="type"
+                  class="rounded-full bg-muted px-3 py-1 text-muted-foreground"
+                >
+                  {{ type }}
+                </span>
+              </template>
+              <span
+                v-if="isOnline"
+                class="inline-flex items-center gap-1 rounded-full bg-blue-500/10 px-3 py-1 text-blue-600"
+              >
+                <Globe2Icon class="size-3.5" /> Online
+              </span>
+            </div>
+
+            <div>
+              <h1 class="text-3xl font-bold tracking-tight sm:text-4xl">
+                {{ offering.name }}
+              </h1>
+              <p
+                class="mt-4 max-w-3xl text-base leading-7 text-muted-foreground"
+              >
+                {{
+                  offering.description ||
+                  'A guided practice designed to support your wellbeing.'
+                }}
+              </p>
+            </div>
+
+            <div
+              class="grid gap-3 border-y border-border py-5 text-sm sm:grid-cols-3"
+            >
+              <div class="flex items-center gap-2 text-muted-foreground">
+                <Clock3Icon class="size-4 text-primary" />
+                <span
+                  ><strong class="text-foreground">{{
+                    offering.duration
+                  }}</strong>
+                  min</span
+                >
               </div>
+              <div class="flex items-center gap-2 text-muted-foreground">
+                <UsersIcon class="size-4 text-primary" />
+                <span
+                  ><strong class="text-foreground">{{
+                    offering.capacity || 'Unlimited'
+                  }}</strong>
+                  spots</span
+                >
+              </div>
+              <div class="flex items-center gap-2 text-muted-foreground">
+                <MapPinIcon class="size-4 text-primary" />
+                <span>{{ isOnline ? 'Online' : offering.location?.city }}</span>
+              </div>
+            </div>
 
-              <Dialog>
-                <DialogTrigger as-child>
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    @click="checkAvailablePricingOptions(slot)"
-                  >
-                    Book Now
-                  </Button>
-                </DialogTrigger>
-                <DialogContent>
-                  <DialogHeader>
-                    <DialogTitle>
-                      <p class="leading-6">
-                        Book
-                        <span class="font-normal">{{ offering?.name }}</span>
-                        <br />
-                        on
-                        <span class="font-normal">
-                          {{
-                            format(
-                              new Date(slot.startTime),
-                              'MMMM d, yyyy HH:mm'
-                            )
-                          }}
-                        </span>
-                      </p>
-                    </DialogTitle>
-                    <DialogDescription>
-                      Choose your payment method to complete the booking.
-                    </DialogDescription>
-                  </DialogHeader>
-
-                  <book-with-pricing-options
-                    :slug="String(offeringSlug)"
-                    :slot-id="slot.id"
-                    @success="
-                      payload => {
-                        toast.success('Booking successful!', {
-                          description: payload.message,
-                          duration: 5000,
-                          action: {
-                            label: 'View Bookings',
-                            onClick: () => navigateTo('/profile/bookings')
-                          }
-                        })
-                      }
-                    "
-                  />
-                </DialogContent>
-              </Dialog>
+            <div
+              v-if="offering.categories?.length || offering.types?.length"
+              class="flex flex-wrap gap-2"
+            >
+              <span
+                v-for="label in [
+                  ...(offering.categories || []),
+                  ...(offering.types || [])
+                ]"
+                :key="label"
+                class="rounded-md border border-border px-2.5 py-1 text-xs text-muted-foreground"
+                >{{ label }}</span
+              >
             </div>
           </div>
-        </div>
-      </div>
+        </section>
+
+        <section class="grid gap-6 sm:grid-cols-2">
+          <div class="rounded-2xl border border-border bg-card p-6">
+            <h2 class="text-xl font-bold">Your hosts</h2>
+            <div class="mt-5 space-y-4">
+              <NuxtLink
+                v-for="practitioner in offering.practitioners"
+                :key="practitioner.id"
+                :to="`/practitioners/${practitioner.id}`"
+                class="-mx-2 flex items-center gap-3 rounded-xl p-2 transition-colors hover:bg-muted"
+              >
+                <NuxtImg
+                  :src="practitioner.avatar || placeholderImageUrl"
+                  :alt="practitioner.name"
+                  class="size-12 rounded-full object-cover"
+                />
+                <span class="font-semibold">{{ practitioner.name }}</span>
+              </NuxtLink>
+            </div>
+          </div>
+
+          <div class="rounded-2xl border border-border bg-card p-6">
+            <h2 class="text-xl font-bold">Where it happens</h2>
+            <NuxtLink
+              :to="`/studios/${offering.studio.slug}`"
+              class="mt-5 block rounded-xl bg-muted/50 p-4 transition-colors hover:bg-muted"
+            >
+              <p class="font-semibold">{{ offering.studio.name }}</p>
+              <p
+                v-if="isOnline"
+                class="mt-2 flex items-center gap-2 text-sm text-muted-foreground"
+              >
+                <Globe2Icon class="size-4 text-primary" /> Join online
+              </p>
+              <p
+                v-else
+                class="mt-2 flex items-start gap-2 text-sm text-muted-foreground"
+              >
+                <MapPinIcon class="mt-0.5 size-4 shrink-0 text-primary" />
+                <span
+                  >{{ offering.location?.name }},
+                  {{ offering.location?.address }}</span
+                >
+              </p>
+            </NuxtLink>
+          </div>
+        </section>
+
+        <section v-if="offering.pricingOptions?.length" class="space-y-5">
+          <div>
+            <p
+              class="text-sm font-medium uppercase tracking-wider text-primary"
+            >
+              Choose what works for you
+            </p>
+            <h2 class="mt-1 text-2xl font-bold">Ways to book</h2>
+          </div>
+          <div class="grid gap-4 sm:grid-cols-2">
+            <div
+              v-for="price in offering.pricingOptions"
+              :key="price.id"
+              class="rounded-2xl border border-border bg-card p-5"
+            >
+              <div class="flex items-start justify-between gap-3">
+                <div>
+                  <h3 class="font-semibold">{{ price.name }}</h3>
+                  <p
+                    v-if="price.description"
+                    class="mt-1 text-sm text-muted-foreground"
+                  >
+                    {{ price.description }}
+                  </p>
+                </div>
+                <strong class="shrink-0 text-lg">{{
+                  formatPrice(price.price)
+                }}</strong>
+              </div>
+              <div class="mt-4 flex gap-3 text-xs text-muted-foreground">
+                <span class="rounded-full bg-muted px-2.5 py-1">{{
+                  price.type.replace('_', ' ')
+                }}</span>
+                <span v-if="price.credits">{{ price.credits }} credits</span>
+                <span v-if="price.durationDays"
+                  >{{ price.durationDays }} days</span
+                >
+              </div>
+            </div>
+          </div>
+        </section>
+      </main>
+
+      <aside class="lg:sticky lg:top-24 lg:self-start">
+        <section class="rounded-2xl border border-border bg-card p-5 shadow-sm">
+          <div class="flex items-center justify-between gap-3">
+            <div>
+              <p class="text-sm text-muted-foreground">Reserve your place</p>
+              <h2 class="text-xl font-bold">Upcoming sessions</h2>
+            </div>
+            <CalendarDaysIcon class="size-6 text-primary" />
+          </div>
+
+          <div
+            v-if="!Object.keys(groupedSlots).length"
+            class="mt-6 rounded-xl bg-muted/50 p-4 text-sm text-muted-foreground"
+          >
+            No upcoming sessions are available right now.
+          </div>
+
+          <div v-else class="mt-6 space-y-6">
+            <div v-for="(slots, date) in groupedSlots" :key="date">
+              <h3 class="mb-2 text-sm font-semibold">{{ date }}</h3>
+              <div class="space-y-2">
+                <div
+                  v-for="slot in slots"
+                  :key="slot.id"
+                  class="flex items-center justify-between gap-3 rounded-xl border border-border p-3"
+                >
+                  <div class="min-w-0">
+                    <p class="font-semibold">
+                      {{ format(new Date(slot.startTime), 'h:mm a') }}
+                    </p>
+                    <NuxtLink
+                      :to="`/practitioners/${slot.practitioner.id}`"
+                      class="truncate text-xs text-muted-foreground hover:text-primary"
+                      >{{ slot.practitioner.name }}</NuxtLink
+                    >
+                  </div>
+                  <Dialog>
+                    <DialogTrigger as-child>
+                      <Button size="sm">Book</Button>
+                    </DialogTrigger>
+                    <DialogContent>
+                      <DialogHeader>
+                        <DialogTitle>Book {{ offering.name }}</DialogTitle>
+                        <DialogDescription
+                          >{{
+                            format(
+                              new Date(slot.startTime),
+                              'EEEE, MMMM d, h:mm a'
+                            )
+                          }}
+                          with {{ slot.practitioner.name }}.</DialogDescription
+                        >
+                      </DialogHeader>
+                      <BookWithPricingOptions
+                        :slug="offeringSlug"
+                        :slot-id="slot.id"
+                        @success="
+                          payload =>
+                            toast.success('Booking successful!', {
+                              description: payload.message
+                            })
+                        "
+                      />
+                    </DialogContent>
+                  </Dialog>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div
+            class="mt-6 border-t border-border pt-4 text-xs text-muted-foreground"
+          >
+            <p class="flex items-start gap-2">
+              <CheckCircle2Icon class="mt-0.5 size-4 shrink-0 text-primary" />
+              Secure booking and instant confirmation.
+            </p>
+            <p class="mt-2">Times shown in {{ offering.timezone }}.</p>
+          </div>
+        </section>
+      </aside>
     </div>
   </div>
 </template>

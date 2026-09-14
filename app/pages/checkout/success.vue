@@ -507,7 +507,14 @@ const googleMapsUrl = computed(() => {
                   >
                     Instructor
                   </p>
-                  <p class="font-semibold text-sm mt-0.5">
+                  <NuxtLink
+                    v-if="booking.practitioner?.id"
+                    :to="`/practitioners/${booking.practitioner.id}`"
+                    class="font-semibold text-sm mt-0.5 hover:text-primary transition-colors"
+                  >
+                    {{ booking.practitioner.name }}
+                  </NuxtLink>
+                  <p v-else class="font-semibold text-sm mt-0.5">
                     {{ booking.practitioner?.name || 'Studio Guide' }}
                   </p>
                   <p class="text-xs text-muted-foreground mt-0.5">

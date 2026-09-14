@@ -1,4 +1,8 @@
-import { offerings, offeringPractitioners } from '~~/server/db/schema/offering'
+import {
+  offerings,
+  offeringPractitioners,
+  pricingOptions
+} from '~~/server/db/schema/offering'
 import {
   studioLocations,
   studioPractitioners,
@@ -9,8 +13,9 @@ import {
   MediaEntityTypeEnum,
   MediaTypeEnum
 } from '~~/server/db/schema/_other'
-import { aliasedTable, and, eq, sql } from 'drizzle-orm'
+import { aliasedTable, and, eq, inArray, sql } from 'drizzle-orm'
 import { user } from '~~/server/db/schema/auth-schema'
+import { globalCategories, globalTypes } from '~~/server/db/schema/global'
 
 export default defineEventHandler(async event => {
   const offeringSlug = requireRouteParam(event, 'offeringSlug')
@@ -41,8 +46,11 @@ export default defineEventHandler(async event => {
           logo: studioLogo.url,
           name: studios.name,
           slug: studios.slug,
-          id: studios.id
-        }
+          id: studios.id,
+          currency: studios.currency
+        },
+        categories: offerings.categories,
+        types: offerings.types
       })
       .from(offerings)
       .where(
@@ -65,26 +73,64 @@ export default defineEventHandler(async event => {
     }
 
     // Fetch associated practitioners and gallery media files in parallel
-    const [practitionerRows, galleryRows] = await Promise.all([
-      db
-        .select({ practitionerId: offeringPractitioners.practitionerId })
-        .from(offeringPractitioners)
-        .where(eq(offeringPractitioners.offeringId, offering.id)),
-      db
-        .select({
-          url: mediaFiles.url,
-          providerPublicId: mediaFiles.providerPublicId
-        })
-        .from(mediaFiles)
-        .where(
-          and(
-            eq(mediaFiles.entityId, offering.id),
-            eq(mediaFiles.entityType, MediaEntityTypeEnum.OFFERING),
-            eq(mediaFiles.type, MediaTypeEnum.GALLERY)
+    const [practitionerRows, galleryRows, categoryRows, typeRows, prices] =
+      await Promise.all([
+        db
+          .select({ practitionerId: offeringPractitioners.practitionerId })
+          .from(offeringPractitioners)
+          .where(eq(offeringPractitioners.offeringId, offering.id)),
+        db
+          .select({
+            url: mediaFiles.url,
+            providerPublicId: mediaFiles.providerPublicId
+          })
+          .from(mediaFiles)
+          .where(
+            and(
+              eq(mediaFiles.entityId, offering.id),
+              eq(mediaFiles.entityType, MediaEntityTypeEnum.OFFERING),
+              eq(mediaFiles.type, MediaTypeEnum.GALLERY)
+            )
           )
-        )
-        .orderBy(mediaFiles.order)
-    ])
+          .orderBy(mediaFiles.order),
+        db
+          .select({ name: globalCategories.name })
+          .from(globalCategories)
+          .where(
+            offering.categories?.length
+              ? inArray(globalCategories.id, offering.categories)
+              : sql`false`
+          )
+          .orderBy(globalCategories.name),
+        db
+          .select({ name: globalTypes.name })
+          .from(globalTypes)
+          .where(
+            offering.types?.length
+              ? inArray(globalTypes.id, offering.types)
+              : sql`false`
+          )
+          .orderBy(globalTypes.name),
+        db
+          .select({
+            id: pricingOptions.id,
+            name: pricingOptions.name,
+            description: pricingOptions.description,
+            type: pricingOptions.type,
+            price: pricingOptions.price,
+            credits: pricingOptions.credits,
+            durationDays: pricingOptions.durationDays
+          })
+          .from(pricingOptions)
+          .where(
+            and(
+              eq(pricingOptions.studioId, offering.studio.id),
+              eq(pricingOptions.isActive, true),
+              sql`(${pricingOptions.offeringId} = ${offering.id} OR ${pricingOptions.offeringId} IS NULL)`
+            )
+          )
+          .orderBy(pricingOptions.price)
+      ])
 
     const practitionerDetails = await db
       .select({
@@ -105,12 +151,16 @@ export default defineEventHandler(async event => {
       success: true,
       offering: {
         ...offering,
+        categories: categoryRows.map(row => row.name),
+        types: typeRows.map(row => row.name),
+        pricingOptions: prices,
         practitioners: practitionerDetails
           .filter(detail =>
             practitionerRows.some(row => row.practitionerId === detail.id)
           )
           .map(detail => {
             return {
+              id: detail.id,
               name: detail.name,
               avatar: detail.avatar
             }

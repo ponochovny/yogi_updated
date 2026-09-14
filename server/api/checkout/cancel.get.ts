@@ -207,6 +207,7 @@ export default defineEventHandler(async event => {
         city: studioLocations.city
       },
       practitioner: {
+        id: studioPractitioners.id,
         name: usersTable.name,
         avatar: practitionerAvatar.url
       }

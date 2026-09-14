@@ -28,7 +28,13 @@ const { data: mySlots } = await useFetch('/api/manager/slots', {
               <div>
                 <p class="text-sm font-medium">
                   {{ slot.offering.name }} - {{ slot.studio.name }} by
-                  {{ slot.practitioner.name }}
+                  <NuxtLink
+                    :to="`/practitioners/${slot.practitioner.id}`"
+                    class="hover:text-primary transition-colors"
+                    @click.stop
+                  >
+                    {{ slot.practitioner.name }}
+                  </NuxtLink>
                 </p>
                 <ClientOnly>
                   <p class="text-xs text-gray-500">

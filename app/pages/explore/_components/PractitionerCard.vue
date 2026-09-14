@@ -72,11 +72,12 @@ defineProps<{
     <!-- Body -->
     <div class="flex flex-1 flex-col p-5 gap-2.5">
       <div>
-        <h3
+        <NuxtLink
+          :to="`/practitioners/${practitioner.id}`"
           class="text-base font-bold text-foreground group-hover:text-primary transition-colors line-clamp-1"
         >
           {{ practitioner.name }}
-        </h3>
+        </NuxtLink>
         <!-- Studio connection -->
         <NuxtLink
           :to="`/studios/${practitioner.studio.slug}`"
@@ -112,8 +113,8 @@ defineProps<{
       >
         <MapPinIcon class="size-3.5 shrink-0 text-primary" />
         <span class="truncate">
-          {{ practitioner.studioLocations[0].city }},
-          {{ practitioner.studioLocations[0].country }}
+          {{ practitioner.studioLocations[0]?.city }},
+          {{ practitioner.studioLocations[0]?.country }}
         </span>
       </div>
     </div>

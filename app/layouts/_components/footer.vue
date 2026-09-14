@@ -53,7 +53,7 @@ import { HeartIcon } from '@lucide/vue'
             </li>
             <li>
               <NuxtLinkLocale
-                to="/studios"
+                to="/explore?type=studios"
                 class="text-sm text-muted-foreground hover:text-primary transition-colors duration-200"
               >
                 {{ $t('footer.studios') }}
@@ -61,16 +61,9 @@ import { HeartIcon } from '@lucide/vue'
             </li>
             <li>
               <NuxtLinkLocale
-                to="/offerings"
-                class="text-sm text-muted-foreground hover:text-primary transition-colors duration-200"
-              >
-                {{ $t('footer.offerings') }}
-              </NuxtLinkLocale>
-            </li>
-            <li>
-              <NuxtLinkLocale
                 to="/causes"
                 class="text-sm text-muted-foreground hover:text-primary transition-colors duration-200"
+                disabled
               >
                 {{ $t('footer.causes') }}
               </NuxtLinkLocale>

@@ -1,7 +1,8 @@
 import { offeringSlots, offerings } from '~~/server/db/schema/offering'
 import { user } from '~~/server/db/schema/auth-schema'
 import { studioPractitioners } from '~~/server/db/schema/studio'
-import { and, eq } from 'drizzle-orm'
+import { and, eq, gte } from 'drizzle-orm'
+import { offeringSlotStatus } from '~/entities/offering/schema'
 
 export default defineEventHandler(async event => {
   const offeringSlug = requireRouteParam(event, 'offeringSlug')
@@ -37,7 +38,13 @@ export default defineEventHandler(async event => {
         eq(offeringSlots.practitionerId, studioPractitioners.id)
       )
       .innerJoin(user, eq(studioPractitioners.userId, user.id))
-      .where(eq(offeringSlots.offeringId, offering.id))
+      .where(
+        and(
+          eq(offeringSlots.offeringId, offering.id),
+          eq(offeringSlots.status, offeringSlotStatus.ACTIVE),
+          gte(offeringSlots.startTime, new Date())
+        )
+      )
       .orderBy(offeringSlots.startTime)
 
     return { success: true, slots }

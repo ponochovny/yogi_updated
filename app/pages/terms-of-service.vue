@@ -1645,7 +1645,7 @@ onUnmounted(() => {
               <ArrowUpIcon class="size-4" />
               <span>Back to Top</span>
             </Button>
-            <NuxtLinkLocale to="/" as-child>
+            <NuxtLinkLocale to="/explore?type=studios" as-child>
               <Button size="sm" class="gap-1.5">
                 <CompassIcon class="size-4" />
                 <span>Explore Studios</span>

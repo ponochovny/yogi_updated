@@ -72,8 +72,8 @@ export default defineEventHandler(async event => {
           address: studioLocations.address // Include address for more context in the account page
         },
         practitioner: {
+          id: studioPractitioners.id,
           name: usersTable.name,
-          // slug: studioPractitioners.slug,
           avatar: practitionerAvatar.url
         }
       })

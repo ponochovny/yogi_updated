@@ -6,7 +6,7 @@ import { placeholderImageUrl } from '~/config/constants'
 const route = useRoute()
 
 const { data: membershipsData } = await useFetch(
-  `/api/business/studios/${route.params.slug}/memberships`
+  `/api/studios/${route.params.slug}/memberships`
 )
 const memberships = computed(() => membershipsData.value?.memberships || [])
 
@@ -45,11 +45,20 @@ if (studioError.value) {
   await navigateTo('/404')
 }
 const studio = computed(() => studioData.value?.studio || null)
+
+usePageSeo({
+  title: () => studio.value?.name || 'Studio',
+  description: () =>
+    studio.value?.bio || 'Studio profile, memberships, and practitioners',
+  type: 'profile'
+})
 </script>
 
 <template>
   <div class="max-w-6xl mx-auto mb-20">
-    <div class="rounded-4xl bg-neutral-900">
+    <div
+      class="overflow-hidden rounded-4xl border border-border bg-card shadow-xl"
+    >
       <div class="rounded-tr-4xl rounded-tl-4xl h-112.5">
         <NuxtImg
           v-if="studio?.gallery && studio.gallery.length > 0"
@@ -70,7 +79,7 @@ const studio = computed(() => studioData.value?.studio || null)
           alt="Studio Logo"
           class="size-40 object-cover rounded-full -mt-16 ml-16"
         />
-        <div class="flex gap-6 py-8 px-16">
+        <div class="flex gap-6 px-6 py-8 lg:px-16">
           <div class="flex flex-col shrink gap-6">
             <div class="flex gap-2 items-center h-5 text-xs">
               <div>
@@ -92,16 +101,18 @@ const studio = computed(() => studioData.value?.studio || null)
                 </span>
               </div>
             </div>
-            <h1 class="text-2xl font-semibold">{{ studio?.name }}</h1>
+            <h1 class="text-2xl font-semibold text-foreground">
+              {{ studio?.name }}
+            </h1>
             <div class="flex items-center gap-2">
               <MapPinIcon class="size-5" />
               {{
                 studio?.locations.map(location => location.address)?.join(', ')
               }}
             </div>
-            <h2 class="text-lg font-bold">About</h2>
-            <p class="text-gray-400">{{ studio?.bio }}</p>
-            <h2 class="text-lg font-bold">Practitioners</h2>
+            <h2 class="text-lg font-bold text-foreground">About</h2>
+            <p class="text-muted-foreground">{{ studio?.bio }}</p>
+            <h2 class="text-lg font-bold text-foreground">Practitioners</h2>
             <div class="flex gap-2">
               <div
                 v-for="practitioner in studio?.practitioners || []"
@@ -120,23 +131,34 @@ const studio = computed(() => studioData.value?.studio || null)
                   class="w-12 h-12 object-cover rounded-full"
                 />
                 <div>
-                  <p class="font-semibold">{{ practitioner.name }}</p>
+                  <NuxtLink
+                    :to="`/practitioners/${practitioner.id}`"
+                    class="font-semibold hover:text-primary transition-colors"
+                  >
+                    {{ practitioner.name }}
+                  </NuxtLink>
                 </div>
               </div>
             </div>
-            <h2 class="text-lg font-bold">Mission</h2>
-            <p class="text-gray-400">{{ studio?.mission }}</p>
+            <h2 class="text-lg font-bold text-foreground">Mission</h2>
+            <p class="text-muted-foreground">{{ studio?.mission }}</p>
           </div>
 
           <div
-            class="min-w-sm grow border border-border px-6 py-4 rounded-3xl flex flex-col gap-4 bg-neutral-900"
+            class="min-w-sm grow rounded-3xl border border-border bg-muted/40 px-6 py-4"
           >
-            <h2 class="text-2xl font-medium">Memberships</h2>
-            <ul class="flex flex-col gap-4">
+            <h2 class="text-2xl font-medium text-foreground">Memberships</h2>
+            <p
+              v-if="memberships.length === 0"
+              class="py-6 text-sm text-muted-foreground"
+            >
+              This studio has no active memberships yet.
+            </p>
+            <ul v-else class="flex flex-col gap-4">
               <li
                 v-for="membership in memberships"
                 :key="membership.id"
-                class="border border-border p-4 rounded-2xl flex flex-col gap-2 items-start bg-neutral-800"
+                class="flex flex-col items-start gap-2 rounded-2xl border border-border bg-card p-4 shadow-sm"
               >
                 <div>
                   <h3 class="font-semibold">{{ membership.name }}</h3>
@@ -145,7 +167,7 @@ const studio = computed(() => studioData.value?.studio || null)
                   </p>
                 </div>
                 <div class="text-sm text-muted-foreground">
-                  ${{ Math.round(membership.price / 100) }} - Duration:
+                  {{ membership.price / 100 }} - Duration:
                   {{
                     membership.durationDays
                       ? membership.durationDays + ' days'

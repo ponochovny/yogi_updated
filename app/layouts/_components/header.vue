@@ -5,10 +5,18 @@ import {
   GlobeIcon,
   CoinsIcon,
   ChevronDownIcon,
-  CompassIcon
+  CompassIcon,
+  LogOutIcon,
+  CalendarIcon,
+  UserCircle2Icon
 } from '@lucide/vue'
 import { signOut, useSession } from '@/utils/auth-client'
 import Darkmodetoggle from '~/features/darkmodetoggle.vue'
+import {
+  getUserAvatarUrl,
+  getUserDisplayName,
+  getUserInitials
+} from '~/utils/profile-menu'
 
 const session = useSession()
 const { locale, locales, setLocale } = useI18n()
@@ -16,10 +24,34 @@ const { currency, currencySymbol, currencies, setCurrency } = useCurrency()
 const mobileMenuOpen = ref(false)
 const scrolled = ref(false)
 
+const currentUser = computed(() => session.value?.data?.user || null)
+const currentUserName = computed(() =>
+  getUserDisplayName({
+    name: currentUser.value?.name,
+    email: currentUser.value?.email
+  })
+)
+const currentUserInitials = computed(() =>
+  getUserInitials(currentUser.value?.name, currentUser.value?.email)
+)
+const currentUserAvatar = computed(() =>
+  getUserAvatarUrl(currentUser.value?.image)
+)
+
 const signOutHandler = async () => {
   mobileMenuOpen.value = false
   await signOut()
   await navigateTo('/')
+}
+
+const goToProfile = () => {
+  mobileMenuOpen.value = false
+  navigateTo('/profile/settings')
+}
+
+const goToBookings = () => {
+  mobileMenuOpen.value = false
+  navigateTo('/profile/bookings')
 }
 
 const currentLocaleName = computed(() => {
@@ -87,7 +119,7 @@ if (import.meta.client) {
         <!-- Desktop Controls -->
         <div class="hidden md:flex items-center gap-1.5">
           <!-- Language Switcher -->
-          <DropdownMenu>
+          <DropdownMenu :modal="false">
             <DropdownMenuTrigger as-child>
               <Button
                 variant="ghost"
@@ -123,7 +155,7 @@ if (import.meta.client) {
           </DropdownMenu>
 
           <!-- Currency Switcher -->
-          <DropdownMenu>
+          <DropdownMenu :modal="false">
             <DropdownMenuTrigger as-child>
               <Button
                 variant="ghost"
@@ -184,16 +216,81 @@ if (import.meta.client) {
             </NuxtLink>
           </template>
           <template v-else>
-            <Button
-              variant="ghost"
-              size="sm"
-              @click="$router.push('/profile/settings')"
-            >
-              {{ $t('header.profile') }}
-            </Button>
-            <Button variant="outline" size="sm" @click="signOutHandler">
-              {{ $t('header.signout') }}
-            </Button>
+            <DropdownMenu :modal="false">
+              <DropdownMenuTrigger as-child>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  class="gap-2.5 rounded-full px-2.5 py-1.5 hover:bg-muted/70"
+                >
+                  <Avatar class="h-8 w-8 rounded-full border border-border/80">
+                    <AvatarImage
+                      :src="currentUserAvatar"
+                      :alt="currentUserName"
+                    />
+                    <AvatarFallback
+                      class="rounded-full bg-primary/10 text-primary text-[10px] font-semibold"
+                    >
+                      {{ currentUserInitials }}
+                    </AvatarFallback>
+                  </Avatar>
+                  <span
+                    class="flex flex-col items-start text-left leading-none"
+                  >
+                    <span class="text-sm font-medium">{{
+                      currentUserName
+                    }}</span>
+                    <span
+                      class="text-[10px] uppercase tracking-[0.12em] text-muted-foreground"
+                    >
+                      {{ $t('header.profile') }}
+                    </span>
+                  </span>
+                  <ChevronDownIcon class="h-3.5 w-3.5 text-muted-foreground" />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end" class="w-64 p-2">
+                <div class="flex items-center gap-3 rounded-lg bg-muted/50 p-2">
+                  <Avatar class="h-9 w-9 rounded-full">
+                    <AvatarImage
+                      :src="currentUserAvatar"
+                      :alt="currentUserName"
+                    />
+                    <AvatarFallback
+                      class="rounded-full bg-primary/10 text-primary text-xs font-semibold"
+                    >
+                      {{ currentUserInitials }}
+                    </AvatarFallback>
+                  </Avatar>
+                  <div class="min-w-0">
+                    <p class="truncate text-sm font-medium">
+                      {{ currentUserName }}
+                    </p>
+                    <p class="truncate text-xs text-muted-foreground">
+                      {{ currentUser?.email || 'Profile' }}
+                    </p>
+                  </div>
+                </div>
+                <DropdownMenuSeparator class="my-2" />
+                <DropdownMenuItem class="gap-2" @click="goToProfile">
+                  <UserCircle2Icon class="size-4" />
+                  <span>{{ $t('header.profile') }}</span>
+                </DropdownMenuItem>
+                <DropdownMenuItem class="gap-2" @click="goToBookings">
+                  <CalendarIcon class="size-4" />
+                  <span>My bookings</span>
+                </DropdownMenuItem>
+                <DropdownMenuSeparator class="my-2" />
+                <DropdownMenuItem
+                  variant="destructive"
+                  class="gap-2 text-destructive focus:text-destructive"
+                  @click="signOutHandler"
+                >
+                  <LogOutIcon class="size-4" />
+                  <span>{{ $t('header.signout') }}</span>
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
           </template>
         </div>
 
@@ -325,23 +422,57 @@ if (import.meta.client) {
                       </NuxtLink>
                     </template>
                     <template v-else>
-                      <Button
-                        variant="outline"
-                        class="w-full"
-                        @click="
-                          $router.push('/profile/settings');
-                          mobileMenuOpen = false
-                        "
+                      <div
+                        class="rounded-xl border border-border bg-muted/30 p-2"
                       >
-                        {{ $t('header.profile') }}
-                      </Button>
-                      <Button
-                        variant="secondary"
-                        class="w-full"
-                        @click="signOutHandler"
-                      >
-                        {{ $t('header.signout') }}
-                      </Button>
+                        <div class="flex items-center gap-3">
+                          <Avatar class="h-10 w-10 rounded-full">
+                            <AvatarImage
+                              :src="currentUserAvatar"
+                              :alt="currentUserName"
+                            />
+                            <AvatarFallback
+                              class="rounded-full bg-primary/10 text-primary text-xs font-semibold"
+                            >
+                              {{ currentUserInitials }}
+                            </AvatarFallback>
+                          </Avatar>
+                          <div class="min-w-0 flex-1">
+                            <p class="truncate text-sm font-medium">
+                              {{ currentUserName }}
+                            </p>
+                            <p class="truncate text-xs text-muted-foreground">
+                              {{ currentUser?.email || 'Profile' }}
+                            </p>
+                          </div>
+                        </div>
+                        <div class="mt-3 space-y-2">
+                          <Button
+                            variant="outline"
+                            class="w-full justify-start gap-2"
+                            @click="goToProfile"
+                          >
+                            <UserCircle2Icon class="size-4" />
+                            {{ $t('header.profile') }}
+                          </Button>
+                          <Button
+                            variant="outline"
+                            class="w-full justify-start gap-2"
+                            @click="goToBookings"
+                          >
+                            <CalendarIcon class="size-4" />
+                            My bookings
+                          </Button>
+                          <Button
+                            variant="destructive"
+                            class="w-full justify-start gap-2"
+                            @click="signOutHandler"
+                          >
+                            <LogOutIcon class="size-4" />
+                            {{ $t('header.signout') }}
+                          </Button>
+                        </div>
+                      </div>
                     </template>
                   </div>
                 </div>

@@ -52,11 +52,11 @@ const formattedPrice = computed(() => {
     class="group relative flex flex-col rounded-2xl border border-border bg-card overflow-hidden transition-all duration-300 hover:shadow-xl hover:shadow-primary/10 hover:border-primary/30"
   >
     <!-- Image -->
-    <div class="relative overflow-hidden">
+    <div class="relative">
       <NuxtImg
         :src="offering.gallery?.[0] || placeholderImageUrl"
         alt="Image"
-        class="aspect-[16/10] h-full w-full object-cover transition-transform duration-500"
+        class="aspect-16/10 h-full w-full object-cover transition-transform duration-500"
       />
       <!-- Overlay badges -->
       <div class="absolute top-3 left-3 flex gap-1.5">
