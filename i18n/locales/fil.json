@@ -1,0 +1,26 @@
+{
+  "welcome": "Maligayang pagdating",
+  "header": {
+    "language": "Wika",
+    "currency": "Pera",
+    "login": "Mag-login",
+    "signup": "Mag-sign up",
+    "profile": "Profile",
+    "signout": "Mag-sign out"
+  },
+  "footer": {
+    "tagline": "Tuklasin ang mga wellness studio, mag-book ng klase, at sumuporta sa makabuluhang layunin — lahat sa isang lugar.",
+    "explore": "I-explore",
+    "home": "Home",
+    "studios": "Mga Studio",
+    "offerings": "Mga Alok",
+    "causes": "Mga Layunin",
+    "legal": "Legal",
+    "terms": "Mga Tuntunin ng Serbisyo",
+    "membership": "Membership",
+    "weAccept": "Tinatanggap Namin",
+    "cash": "Cash",
+    "rights": "Lahat ng karapatan ay nakalaan.",
+    "madeWith": "Ginawa nang may"
+  }
+}

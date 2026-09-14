@@ -1,15 +1,6 @@
 <template>
   <div class="flex flex-col items-start gap-8">
     <div class="flex flex-col gap-1">
-      <div class="flex gap-1 flex-wrap">
-        <Button
-          v-for="locale in locales"
-          :key="locale.code"
-          @click="setLocale(locale.code)"
-        >
-          {{ locale.name }}
-        </Button>
-      </div>
       <h1 class="text-3xl font-bold">{{ $t('welcome') }}</h1>
     </div>
     <div class="flex gap-1 flex-wrap">
@@ -69,16 +60,11 @@
 </template>
 
 <script setup lang="ts">
-import { useI18n } from 'vue-i18n'
 import OfferingCard from '~/entities/offering/ui/Card.vue'
 import StudioCard from '~/entities/studio/ui/Card.vue'
 import { PagesConfig } from '~/config/pages.config'
 
-definePageMeta({
-  title: 'Home'
-})
-
-const { locales, setLocale } = useI18n()
+usePageSeo('home')
 
 const { data: studiosData, pending: studiosPending } = useFetch(`/api/studios`)
 const studios = computed(() => studiosData.value?.studios || [])

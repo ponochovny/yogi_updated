@@ -25,13 +25,10 @@ import { toast } from 'vue-sonner'
 import { placeholderImageUrl } from '~/config/constants'
 
 definePageMeta({
-  middleware: 'auth',
-  title: 'Payment Successful'
+  middleware: 'auth'
 })
 
-useHead({
-  title: 'Payment Successful · Yogi'
-})
+usePageSeo('checkoutSuccess')
 
 const route = useRoute()
 const router = useRouter()

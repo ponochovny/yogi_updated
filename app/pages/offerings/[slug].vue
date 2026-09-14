@@ -18,15 +18,11 @@ const [{ data: offeringsData }, { data: offeringsSlots }] = await Promise.all([
 const offering = computed(() => offeringsData.value?.offering || null)
 const rawSlots = computed(() => offeringsSlots.value?.slots || [])
 
-useHead({
-  title: offering.value?.name || 'Offering',
-  meta: [
-    {
-      name: 'description',
-      content:
-        offering.value?.description || 'Offering details and available slots'
-    }
-  ]
+usePageSeo({
+  title: () => offering.value?.name || 'Offering',
+  description: () =>
+    offering.value?.description || 'Offering details and available slots',
+  type: 'article'
 })
 
 // Group slots by date for UI presentation
