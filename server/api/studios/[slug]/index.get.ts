@@ -67,6 +67,7 @@ export default defineEventHandler(async event => {
           .select({
             id: studioPractitioners.id,
             name: user.name,
+            bio: user.bio,
             avatar: sql<string>`practitioner_img.url`
           })
           .from(studioPractitioners)
@@ -104,6 +105,7 @@ export default defineEventHandler(async event => {
         practitioners: practitioners.map(practitioner => ({
           id: practitioner.id,
           name: practitioner.name,
+          bio: practitioner.bio,
           avatar: practitioner.avatar
         }))
       }

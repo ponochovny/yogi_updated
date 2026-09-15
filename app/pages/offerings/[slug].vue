@@ -1,10 +1,13 @@
 <script setup lang="ts">
 import {
+  AlertTriangleIcon,
   CalendarDaysIcon,
   CheckCircle2Icon,
   Clock3Icon,
   Globe2Icon,
   MapPinIcon,
+  ShieldCheckIcon,
+  SparklesIcon,
   UsersIcon
 } from '@lucide/vue'
 import { format } from 'date-fns'
@@ -27,6 +30,16 @@ if (offeringError.value) {
 
 const offering = computed(() => offeringData.value?.offering || null)
 const rawSlots = computed(() => slotsData.value?.slots || [])
+const isScheduleOpen = ref(false)
+
+const nearestSlots = computed(() =>
+  [...rawSlots.value]
+    .sort(
+      (a, b) =>
+        new Date(a.startTime).getTime() - new Date(b.startTime).getTime()
+    )
+    .slice(0, 5)
+)
 
 const groupedSlots = computed(() =>
   rawSlots.value.reduce<Record<string, typeof rawSlots.value>>(
@@ -39,6 +52,33 @@ const groupedSlots = computed(() =>
     {}
   )
 )
+
+const practiceLevel = computed(() => {
+  const labels = offering.value?.types || []
+  const normalized = labels.map(label => label.toLowerCase())
+
+  if (normalized.some(label => label.includes('beginner'))) return 'Beginner'
+  if (normalized.some(label => label.includes('intermediate')))
+    return 'Intermediate'
+  if (normalized.some(label => label.includes('advanced'))) return 'Advanced'
+
+  return 'All levels'
+})
+
+const practiceMeta = computed(() => ({
+  description:
+    offering.value?.description ||
+    'A guided practice designed to support your mobility, breath, and wellbeing.',
+  contraindications: [
+    'Avoid this class if you are in acute pain or have a recent injury without medical advice.',
+    'Speak with your teacher before class if you are pregnant, recovering from surgery, or managing a medical condition.'
+  ],
+  includes: [
+    'Breathwork and movement cues',
+    'Teacher guidance',
+    'A calm, supportive atmosphere'
+  ]
+}))
 
 const formatPrice = (price: number) => {
   const configuredCurrency = offering.value?.studio?.currency
@@ -161,9 +201,72 @@ usePageSeo({
           </div>
         </section>
 
-        <section class="grid gap-6 sm:grid-cols-2">
-          <div class="rounded-2xl border border-border bg-card p-6">
-            <h2 class="text-xl font-bold">Your hosts</h2>
+        <section
+          class="grid gap-6 sm:grid-cols-2 border border-border bg-card rounded-2xl p-6"
+        >
+          <div>
+            <div class="mb-4 flex items-center gap-2 text-primary">
+              <SparklesIcon class="size-5" />
+              <h2 class="text-xl font-bold text-foreground">
+                About this practice
+              </h2>
+            </div>
+
+            <p class="text-base leading-7 text-muted-foreground">
+              {{ practiceMeta.description }}
+            </p>
+
+            <div class="mt-5 grid gap-4 sm:grid-cols-2">
+              <div class="rounded-xl bg-muted/40 p-4">
+                <p
+                  class="text-xs font-semibold uppercase tracking-wider text-muted-foreground"
+                >
+                  Level
+                </p>
+                <p
+                  class="mt-2 flex items-center gap-2 font-medium text-foreground"
+                >
+                  <ShieldCheckIcon class="size-4 text-primary" />
+                  {{ practiceLevel }}
+                </p>
+              </div>
+
+              <div class="rounded-xl bg-muted/40 p-4">
+                <p
+                  class="text-xs font-semibold uppercase tracking-wider text-muted-foreground"
+                >
+                  Duration
+                </p>
+                <p class="mt-2 font-medium text-foreground">
+                  {{ offering.duration }} minutes
+                </p>
+              </div>
+            </div>
+
+            <div class="mt-5 rounded-xl border border-border bg-muted/30 p-4">
+              <p class="text-sm font-semibold text-foreground">
+                Contraindications
+              </p>
+              <ul class="mt-3 space-y-2 text-sm text-muted-foreground">
+                <li
+                  v-for="item in practiceMeta.contraindications"
+                  :key="item"
+                  class="flex items-start gap-2"
+                >
+                  <AlertTriangleIcon
+                    class="mt-0.5 size-4 shrink-0 text-amber-500"
+                  />
+                  <span>{{ item }}</span>
+                </li>
+              </ul>
+            </div>
+          </div>
+
+          <div>
+            <div class="mb-4 flex items-center gap-2 text-primary">
+              <UsersIcon class="size-5" />
+              <h2 class="text-xl font-bold text-foreground">Your hosts</h2>
+            </div>
             <div class="mt-5 space-y-4">
               <NuxtLink
                 v-for="practitioner in offering.practitioners"
@@ -179,32 +282,22 @@ usePageSeo({
                 <span class="font-semibold">{{ practitioner.name }}</span>
               </NuxtLink>
             </div>
-          </div>
 
-          <div class="rounded-2xl border border-border bg-card p-6">
-            <h2 class="text-xl font-bold">Where it happens</h2>
-            <NuxtLink
-              :to="`/studios/${offering.studio.slug}`"
-              class="mt-5 block rounded-xl bg-muted/50 p-4 transition-colors hover:bg-muted"
-            >
-              <p class="font-semibold">{{ offering.studio.name }}</p>
-              <p
-                v-if="isOnline"
-                class="mt-2 flex items-center gap-2 text-sm text-muted-foreground"
-              >
-                <Globe2Icon class="size-4 text-primary" /> Join online
+            <div class="mt-6 rounded-2xl border border-border bg-muted/30 p-4">
+              <p class="text-sm font-semibold text-foreground">
+                What you'll get
               </p>
-              <p
-                v-else
-                class="mt-2 flex items-start gap-2 text-sm text-muted-foreground"
-              >
-                <MapPinIcon class="mt-0.5 size-4 shrink-0 text-primary" />
-                <span
-                  >{{ offering.location?.name }},
-                  {{ offering.location?.address }}</span
+              <ul class="mt-3 space-y-2 text-sm text-muted-foreground">
+                <li
+                  v-for="item in practiceMeta.includes"
+                  :key="item"
+                  class="flex items-center gap-2"
                 >
-              </p>
-            </NuxtLink>
+                  <CheckCircle2Icon class="size-4 text-primary" />
+                  <span>{{ item }}</span>
+                </li>
+              </ul>
+            </div>
           </div>
         </section>
 
@@ -237,7 +330,9 @@ usePageSeo({
                   formatPrice(price.price)
                 }}</strong>
               </div>
-              <div class="mt-4 flex gap-3 text-xs text-muted-foreground">
+              <div
+                class="mt-4 flex gap-3 text-xs text-muted-foreground items-center"
+              >
                 <span class="rounded-full bg-muted px-2.5 py-1">{{
                   price.type.replace('_', ' ')
                 }}</span>
@@ -251,71 +346,161 @@ usePageSeo({
         </section>
       </main>
 
-      <aside class="lg:sticky lg:top-24 lg:self-start">
+      <aside>
         <section class="rounded-2xl border border-border bg-card p-5 shadow-sm">
           <div class="flex items-center justify-between gap-3">
             <div>
               <p class="text-sm text-muted-foreground">Reserve your place</p>
-              <h2 class="text-xl font-bold">Upcoming sessions</h2>
+              <h2 class="text-xl font-bold">Next available sessions</h2>
             </div>
             <CalendarDaysIcon class="size-6 text-primary" />
           </div>
 
           <div
-            v-if="!Object.keys(groupedSlots).length"
+            v-if="!nearestSlots.length"
             class="mt-6 rounded-xl bg-muted/50 p-4 text-sm text-muted-foreground"
           >
             No upcoming sessions are available right now.
           </div>
 
-          <div v-else class="mt-6 space-y-6">
-            <div v-for="(slots, date) in groupedSlots" :key="date">
-              <h3 class="mb-2 text-sm font-semibold">{{ date }}</h3>
-              <div class="space-y-2">
-                <div
-                  v-for="slot in slots"
-                  :key="slot.id"
-                  class="flex items-center justify-between gap-3 rounded-xl border border-border p-3"
+          <div v-else class="mt-6 space-y-3">
+            <div
+              v-for="slot in nearestSlots"
+              :key="slot.id"
+              class="rounded-2xl border border-border bg-muted/35 p-3"
+            >
+              <div class="flex items-center justify-between gap-3">
+                <div>
+                  <p class="text-sm font-semibold text-foreground">
+                    {{ format(new Date(slot.startTime), 'EEE, d MMM') }}
+                  </p>
+                  <p class="text-sm text-muted-foreground">
+                    {{ format(new Date(slot.startTime), 'h:mm a') }} -
+                    {{ format(new Date(slot.endTime), 'h:mm a') }}
+                  </p>
+                </div>
+                <span
+                  class="rounded-full px-2 py-1 text-[10px] font-semibold uppercase tracking-wider"
+                  :class="
+                    slot.status === 'ACTIVE'
+                      ? 'bg-emerald-500/10 text-emerald-600'
+                      : 'bg-amber-500/10 text-amber-600'
+                  "
                 >
-                  <div class="min-w-0">
-                    <p class="font-semibold">
-                      {{ format(new Date(slot.startTime), 'h:mm a') }}
-                    </p>
-                    <NuxtLink
-                      :to="`/practitioners/${slot.practitioner.id}`"
-                      class="truncate text-xs text-muted-foreground hover:text-primary"
-                      >{{ slot.practitioner.name }}</NuxtLink
+                  {{ slot.status }}
+                </span>
+              </div>
+
+              <div class="mt-3 flex items-center justify-between gap-3 text-sm">
+                <NuxtLink
+                  :to="`/practitioners/${slot.practitioner.id}`"
+                  class="text-muted-foreground hover:text-primary"
+                >
+                  {{ slot.practitioner.name }}
+                </NuxtLink>
+                <span class="text-xs text-muted-foreground"
+                  >Free spots available</span
+                >
+              </div>
+
+              <Dialog class="mt-3 block">
+                <DialogTrigger as-child>
+                  <Button class="mt-3 w-full" size="sm">Book</Button>
+                </DialogTrigger>
+                <DialogContent>
+                  <DialogHeader>
+                    <DialogTitle>Book {{ offering.name }}</DialogTitle>
+                    <DialogDescription
+                      >{{
+                        format(new Date(slot.startTime), 'EEEE, MMMM d, h:mm a')
+                      }}
+                      with {{ slot.practitioner.name }}.</DialogDescription
                     >
+                  </DialogHeader>
+                  <BookWithPricingOptions
+                    :slug="offeringSlug"
+                    :slot-id="slot.id"
+                    @success="
+                      payload =>
+                        toast.success('Booking successful!', {
+                          description: payload.message
+                        })
+                    "
+                  />
+                </DialogContent>
+              </Dialog>
+            </div>
+          </div>
+
+          <div
+            v-if="Object.keys(groupedSlots).length"
+            class="mt-6 border-t border-border pt-4"
+          >
+            <button
+              type="button"
+              class="mb-3 flex w-full items-center justify-between gap-3 text-left"
+              @click="isScheduleOpen = !isScheduleOpen"
+            >
+              <p
+                class="text-xs font-semibold uppercase tracking-[0.12em] text-muted-foreground"
+              >
+                Full schedule
+              </p>
+              <span class="text-sm text-primary">
+                {{ isScheduleOpen ? 'Hide' : 'Show all' }}
+              </span>
+            </button>
+
+            <div v-if="isScheduleOpen" class="space-y-4">
+              <div v-for="(slots, date) in groupedSlots" :key="date">
+                <h3 class="mb-2 text-sm font-semibold">{{ date }}</h3>
+                <div class="space-y-2">
+                  <div
+                    v-for="slot in slots"
+                    :key="slot.id"
+                    class="flex items-center justify-between gap-3 rounded-xl border border-border p-3"
+                  >
+                    <div class="min-w-0">
+                      <p class="font-semibold">
+                        {{ format(new Date(slot.startTime), 'h:mm a') }}
+                      </p>
+                      <NuxtLink
+                        :to="`/practitioners/${slot.practitioner.id}`"
+                        class="truncate text-xs text-muted-foreground hover:text-primary"
+                        >{{ slot.practitioner.name }}</NuxtLink
+                      >
+                    </div>
+                    <Dialog>
+                      <DialogTrigger as-child>
+                        <Button size="sm">Book</Button>
+                      </DialogTrigger>
+                      <DialogContent>
+                        <DialogHeader>
+                          <DialogTitle>Book {{ offering.name }}</DialogTitle>
+                          <DialogDescription
+                            >{{
+                              format(
+                                new Date(slot.startTime),
+                                'EEEE, MMMM d, h:mm a'
+                              )
+                            }}
+                            with
+                            {{ slot.practitioner.name }}.</DialogDescription
+                          >
+                        </DialogHeader>
+                        <BookWithPricingOptions
+                          :slug="offeringSlug"
+                          :slot-id="slot.id"
+                          @success="
+                            payload =>
+                              toast.success('Booking successful!', {
+                                description: payload.message
+                              })
+                          "
+                        />
+                      </DialogContent>
+                    </Dialog>
                   </div>
-                  <Dialog>
-                    <DialogTrigger as-child>
-                      <Button size="sm">Book</Button>
-                    </DialogTrigger>
-                    <DialogContent>
-                      <DialogHeader>
-                        <DialogTitle>Book {{ offering.name }}</DialogTitle>
-                        <DialogDescription
-                          >{{
-                            format(
-                              new Date(slot.startTime),
-                              'EEEE, MMMM d, h:mm a'
-                            )
-                          }}
-                          with {{ slot.practitioner.name }}.</DialogDescription
-                        >
-                      </DialogHeader>
-                      <BookWithPricingOptions
-                        :slug="offeringSlug"
-                        :slot-id="slot.id"
-                        @success="
-                          payload =>
-                            toast.success('Booking successful!', {
-                              description: payload.message
-                            })
-                        "
-                      />
-                    </DialogContent>
-                  </Dialog>
                 </div>
               </div>
             </div>

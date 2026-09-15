@@ -221,7 +221,7 @@ if (import.meta.client) {
                 <Button
                   variant="ghost"
                   size="sm"
-                  class="gap-2.5 rounded-full px-2.5 py-1.5 hover:bg-muted/70"
+                  class="gap-2.5 rounded-xl px-2.5 py-1.5 hover:bg-muted/70"
                 >
                   <Avatar class="h-8 w-8 rounded-full border border-border/80">
                     <AvatarImage
