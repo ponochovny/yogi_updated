@@ -15,13 +15,17 @@ export default defineEventHandler(async event => {
       .set({
         name: body.name,
         bio: body.bio,
+        email: body.email,
+        phone: body.phone || null,
         updatedAt: new Date()
       })
       .where(eq(user.id, currentUserId))
       .returning({
         id: user.id,
         name: user.name,
-        bio: user.bio
+        bio: user.bio,
+        email: user.email,
+        phone: user.phone
       })
 
     return {

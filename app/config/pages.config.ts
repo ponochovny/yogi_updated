@@ -9,6 +9,11 @@ export const PagesConfig = {
 
   PROFILE_SETTINGS: '/profile/settings',
   PROFILE_BOOKINGS: '/profile/bookings',
+  PROFILE: '/profile',
+  PROFILE_AGREEMENTS: '/profile/agreements',
+  MY_BOOKINGS: '/my-bookings',
+  MY_PASSES: '/my-passes',
+  MY_TRANSACTIONS: '/my-transactions',
 
   BUSINESS: '/business',
   BUSINESS_CALENDAR: '/business/calendar',

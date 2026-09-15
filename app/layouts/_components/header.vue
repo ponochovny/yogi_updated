@@ -47,12 +47,12 @@ const signOutHandler = async () => {
 
 const goToProfile = () => {
   mobileMenuOpen.value = false
-  navigateTo('/profile/settings')
+  navigateTo('/profile')
 }
 
 const goToBookings = () => {
   mobileMenuOpen.value = false
-  navigateTo('/profile/bookings')
+  navigateTo('/my-bookings')
 }
 
 const currentLocaleName = computed(() => {

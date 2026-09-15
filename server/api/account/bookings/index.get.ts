@@ -7,6 +7,7 @@ import {
 } from '~~/server/db/schema/studio'
 import { user as usersTable } from '~~/server/db/schema/auth-schema'
 import { eq, desc, and, sql, asc } from 'drizzle-orm'
+import { transactions } from '~~/server/db/schema/payment'
 import {
   MediaEntityTypeEnum,
   mediaFiles,
@@ -55,6 +56,10 @@ export default defineEventHandler(async event => {
         status: bookings.status,
         createdAt: bookings.createdAt,
         updatedAt: bookings.updatedAt,
+        payment: {
+          provider: transactions.provider,
+          status: transactions.status
+        },
         slot: {
           id: offeringSlots.id,
           startTime: offeringSlots.startTime,
@@ -98,6 +103,7 @@ export default defineEventHandler(async event => {
           practitionerAvatar.entityId
         )
       )
+      .leftJoin(transactions, eq(bookings.transactionId, transactions.id))
       .where(eq(bookings.userId, userId))
       .orderBy(desc(offeringSlots.startTime))
 

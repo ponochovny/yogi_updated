@@ -1,7 +1,14 @@
 <script lang="ts" setup>
 import 'vue-sonner/style.css'
 import SidebarDashboardLayout from '~/widgets/sidebar-dashboard/index.vue'
-import { PlusIcon, ShoppingCartIcon, UserIcon } from '@lucide/vue'
+import {
+  CreditCardIcon,
+  FileTextIcon,
+  PlusIcon,
+  ShoppingCartIcon,
+  UserIcon,
+  WalletCardsIcon
+} from '@lucide/vue'
 import { PagesConfig } from '~/config/pages.config'
 
 const sidebarProps = [
@@ -9,14 +16,29 @@ const sidebarProps = [
     group: 'Platform',
     menuLinks: [
       {
-        name: 'Profile settings',
-        url: PagesConfig.PROFILE_SETTINGS,
+        name: 'Profile',
+        url: PagesConfig.PROFILE,
         icon: UserIcon
       },
       {
         name: 'My Bookings',
-        url: PagesConfig.PROFILE_BOOKINGS,
+        url: PagesConfig.MY_BOOKINGS,
         icon: ShoppingCartIcon
+      },
+      {
+        name: 'My Passes',
+        url: PagesConfig.MY_PASSES,
+        icon: WalletCardsIcon
+      },
+      {
+        name: 'Transactions',
+        url: PagesConfig.MY_TRANSACTIONS,
+        icon: CreditCardIcon
+      },
+      {
+        name: 'Agreements',
+        url: PagesConfig.PROFILE_AGREEMENTS,
+        icon: FileTextIcon
       }
     ]
   },

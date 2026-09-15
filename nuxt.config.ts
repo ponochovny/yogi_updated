@@ -82,6 +82,12 @@ export default defineNuxtConfig({
   },
 
   routeRules: {
+    '/profile': {
+      appLayout: 'dashboard-user',
+      appMiddleware: 'auth',
+      ssr: false,
+      isr: false
+    },
     '/business/**': {
       appLayout: 'business',
       appMiddleware: 'auth',
@@ -89,6 +95,24 @@ export default defineNuxtConfig({
       isr: false
     },
     '/profile/**': {
+      appLayout: 'dashboard-user',
+      appMiddleware: 'auth',
+      ssr: false,
+      isr: false
+    },
+    '/my-bookings': {
+      appLayout: 'dashboard-user',
+      appMiddleware: 'auth',
+      ssr: false,
+      isr: false
+    },
+    '/my-passes': {
+      appLayout: 'dashboard-user',
+      appMiddleware: 'auth',
+      ssr: false,
+      isr: false
+    },
+    '/my-transactions': {
       appLayout: 'dashboard-user',
       appMiddleware: 'auth',
       ssr: false,
