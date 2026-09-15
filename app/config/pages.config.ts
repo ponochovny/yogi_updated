@@ -12,6 +12,7 @@ export const PagesConfig = {
 
   BUSINESS: '/business',
   BUSINESS_CALENDAR: '/business/calendar',
+  FOR_BUSINESS: '/for-business',
 
   CAUSES: '/causes',
 

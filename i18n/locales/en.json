@@ -7,7 +7,8 @@
     "signup": "Sign up",
     "profile": "Profile",
     "signout": "Sign out",
-    "explore": "Explore"
+    "explore": "Explore",
+    "forBusiness": "For Business"
   },
   "footer": {
     "tagline": "Discover wellness studios, book classes, and support meaningful causes — all in one place.",
@@ -85,6 +86,99 @@
     "b2bFeature4": "Real-time analytics & insights",
     "b2bCta": "Register Your Studio",
     "from": "from"
+  },
+  "businessLanding": {
+    "metaTitle": "Yogi for Business",
+    "metaDescription": "Automate cancellations, online payments, package protection and studio analytics.",
+    "badge": "Yogi for Business",
+    "title": "Smart operating system for yoga and wellness studios",
+    "subtitle": "Automate bookings, payment management and analytics — so your studio grows without chaos and lost revenue.",
+    "primaryCta": "Create studio",
+    "secondaryCta": "View platform",
+    "highlights": {
+      "cancel": "Cancel in one click",
+      "pos": "Online point of sale",
+      "analytics": "Real-time analytics"
+    },
+    "card": {
+      "revenueLabel": "Monthly revenue",
+      "averageTicket": "Average ticket",
+      "classesPerWeek": "Classes per week",
+      "occupancy": "Occupancy",
+      "bookings": "Bookings",
+      "profitability": "Profitability"
+    },
+    "benefits": {
+      "titleLabel": "Benefits",
+      "heading": "Everything you need as a studio owner",
+      "cancellation": {
+        "title": "Cancellation automation",
+        "description": "Automatically hold bookings, refund according to policy, and simplify communication with clients."
+      },
+      "pos": {
+        "title": "Online point of sale",
+        "description": "Accept payments, sell memberships and manage transactions in one place without extra tools."
+      },
+      "packageProtection": {
+        "title": "Package protection",
+        "description": "Prevent revenue loss with rules for class activation, extensions and transfers."
+      },
+      "analytics": {
+        "title": "Analytics and reports",
+        "description": "Track revenue, utilization, top classes and customer retention in real time."
+      }
+    },
+    "calculator": {
+      "label": "Calculator",
+      "heading": "Estimate your studio revenue",
+      "averageTicketLabel": "Average ticket per class",
+      "weeklyClassesLabel": "Number of classes per week",
+      "occupancyLabel": "Occupancy",
+      "forecastLabel": "Forecast",
+      "forecastHeading": "Monthly income",
+      "expectedRevenue": "Expected revenue",
+      "growthNote": "Growth up to +28% thanks to automation",
+      "bookingsPerMonth": "Bookings per month",
+      "avgRevenuePerClass": "Average revenue per class"
+    },
+    "pricing": {
+      "label": "Pricing",
+      "heading": "Choose the right plan",
+      "popular": "Popular",
+      "monthly": "/ month",
+      "cta": "Create studio"
+    },
+    "plans": {
+      "starter": {
+        "name": "Starter",
+        "description": "For early studios and small teams",
+        "feature1": "Up to 1 studio",
+        "feature2": "Online booking",
+        "feature3": "Basic analytics",
+        "feature4": "Auto-cancel and reminders"
+      },
+      "growth": {
+        "name": "Growth",
+        "description": "For growing studios and regular groups",
+        "feature1": "Multiple studios and teams",
+        "feature2": "Online point of sale",
+        "feature3": "Advanced reports",
+        "feature4": "Custom package rules"
+      },
+      "scale": {
+        "name": "Scale",
+        "description": "For multiple locations and larger operations",
+        "feature1": "Multiple locations",
+        "feature2": "Priority support",
+        "feature3": "Premium analytics",
+        "feature4": "API and integrations"
+      }
+    },
+    "ctaBanner": {
+      "label": "Start now",
+      "title": "Turn your studio into a stable, scalable business",
+      "cta": "Create studio"
+    }
   },
   "explore": {
     "title": "Explore",

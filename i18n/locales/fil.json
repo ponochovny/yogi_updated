@@ -7,7 +7,8 @@
     "signup": "Mag-sign up",
     "profile": "Profile",
     "signout": "Mag-sign out",
-    "explore": "I-explore"
+    "explore": "I-explore",
+    "forBusiness": "Para sa Negosyo"
   },
   "footer": {
     "tagline": "Tuklasin ang mga wellness studio, mag-book ng klase, at sumuporta sa makabuluhang layunin — lahat sa isang lugar.",
@@ -85,6 +86,99 @@
     "b2bFeature4": "Real-time analytics at insights",
     "b2bCta": "I-register ang Iyong Studio",
     "from": "mula sa"
+  },
+  "businessLanding": {
+    "metaTitle": "Yogi para sa Negosyo",
+    "metaDescription": "Awtomatiko ang mga cancellation, online payments, protection sa mga package at analytics ng studio.",
+    "badge": "Yogi para sa Negosyo",
+    "title": "Matalinong operating system para sa yoga at wellness studios",
+    "subtitle": "Awtomatiko ang mga booking, pamamahala ng bayad, at analytics — upang ang iyong studio ay lumago nang walang kaguluhan at pagkawala ng kita.",
+    "primaryCta": "Gumawa ng studio",
+    "secondaryCta": "Tingnan ang platform",
+    "highlights": {
+      "cancel": "Kanselasyon sa iisang click",
+      "pos": "Online point of sale",
+      "analytics": "Real-time analytics"
+    },
+    "card": {
+      "revenueLabel": "Buwanang kita",
+      "averageTicket": "Average ticket",
+      "classesPerWeek": "Mga klase bawat linggo",
+      "occupancy": "Occupancy",
+      "bookings": "Mga booking",
+      "profitability": "Profitability"
+    },
+    "benefits": {
+      "titleLabel": "Mga benepisyo",
+      "heading": "Lahat ng kailangan mo bilang may-ari ng studio",
+      "cancellation": {
+        "title": "Awtomatikong kanselasyon",
+        "description": "Awtomatikong hawakan ang booking, ibalik ang bayad ayon sa patakaran, at gawing mas madali ang komunikasyon sa mga client."
+      },
+      "pos": {
+        "title": "Online point of sale",
+        "description": "Tanggapin ang mga payment, magbenta ng memberships at pamahalaan ang mga transaksyon sa iisang lugar nang walang dagdag na tool."
+      },
+      "packageProtection": {
+        "title": "Proteksyon sa package",
+        "description": "Pigilan ang pagkawala ng kita gamit ang mga patakaran para sa activation, extension at transfer ng klase."
+      },
+      "analytics": {
+        "title": "Analytics at reports",
+        "description": "Subaybayan ang kita, utilization, pinakasikat na klase at customer retention sa real time."
+      }
+    },
+    "calculator": {
+      "label": "Calculator",
+      "heading": "Tukuyin ang kita ng iyong studio",
+      "averageTicketLabel": "Average ticket sa bawat klase",
+      "weeklyClassesLabel": "Bilang ng klase bawat linggo",
+      "occupancyLabel": "Occupancy",
+      "forecastLabel": "Forecast",
+      "forecastHeading": "Buwanang kita",
+      "expectedRevenue": "Inaasahang kita",
+      "growthNote": "Paglago hanggang +28% salamat sa automation",
+      "bookingsPerMonth": "Mga booking bawat buwan",
+      "avgRevenuePerClass": "Average kita bawat klase"
+    },
+    "pricing": {
+      "label": "Mga plano",
+      "heading": "Piliin ang tamang plano",
+      "popular": "Popular",
+      "monthly": "/ buwan",
+      "cta": "Gumawa ng studio"
+    },
+    "plans": {
+      "starter": {
+        "name": "Starter",
+        "description": "Para sa mga unang studio at maliliit na team",
+        "feature1": "Hanggang 1 studio",
+        "feature2": "Online booking",
+        "feature3": "Basic analytics",
+        "feature4": "Auto-cancel at reminders"
+      },
+      "growth": {
+        "name": "Growth",
+        "description": "Para sa lumalaking studio at regular na grupo",
+        "feature1": "Maraming studio at team",
+        "feature2": "Online point of sale",
+        "feature3": "Advanced reports",
+        "feature4": "Custom package rules"
+      },
+      "scale": {
+        "name": "Scale",
+        "description": "Para sa maraming lokasyon at mas malaking operasyon",
+        "feature1": "Maraming lokasyon",
+        "feature2": "Priority support",
+        "feature3": "Premium analytics",
+        "feature4": "API at integrations"
+      }
+    },
+    "ctaBanner": {
+      "label": "Simulan na",
+      "title": "Gawing stable at scalable ang iyong studio",
+      "cta": "Gumawa ng studio"
+    }
   },
   "explore": {
     "title": "I-explore",

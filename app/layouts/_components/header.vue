@@ -8,7 +8,8 @@ import {
   CompassIcon,
   LogOutIcon,
   CalendarIcon,
-  UserCircle2Icon
+  UserCircle2Icon,
+  Building2Icon
 } from '@lucide/vue'
 import { signOut, useSession } from '@/utils/auth-client'
 import Darkmodetoggle from '~/features/darkmodetoggle.vue'
@@ -112,6 +113,14 @@ if (import.meta.client) {
             >
               <CompassIcon class="size-4" />
               {{ $t('header.explore') }}
+            </NuxtLinkLocale>
+            <NuxtLinkLocale
+              to="/for-business"
+              class="inline-flex items-center gap-2 text-sm font-medium text-muted-foreground hover:text-foreground transition-colors py-2 px-3 rounded-xl hover:bg-muted/50"
+              active-class="text-primary font-semibold bg-primary/10 hover:bg-primary/10 hover:text-primary"
+            >
+              <Building2Icon class="size-4" />
+              For Business
             </NuxtLinkLocale>
           </nav>
         </div>
@@ -341,6 +350,15 @@ if (import.meta.client) {
                     >
                       <CompassIcon class="size-4 text-primary" />
                       {{ $t('header.explore') }}
+                    </NuxtLinkLocale>
+                    <NuxtLinkLocale
+                      to="/for-business"
+                      class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium hover:bg-muted transition-colors"
+                      active-class="bg-primary/10 text-primary font-semibold"
+                      @click="mobileMenuOpen = false"
+                    >
+                      <Building2Icon class="size-4 text-primary" />
+                      {{ $t('header.forBusiness') }}
                     </NuxtLinkLocale>
                   </div>
 
