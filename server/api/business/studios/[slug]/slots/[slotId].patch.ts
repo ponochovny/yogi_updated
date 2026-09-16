@@ -1,17 +1,21 @@
 import { and, eq } from 'drizzle-orm'
 import { z } from 'zod'
-import { offeringSlots } from '~~/server/db/schema/offering'
-import { offerings } from '~~/server/db/schema/offering'
+import { offerings, offeringSlots } from '~~/server/db/schema/offering'
 import { studioPractitioners } from '~~/server/db/schema/studio'
 import { userRoles } from '~~/server/auth/config'
 
-const slotSchema = z.object({
-  offeringId: z.uuid(),
-  practitionerId: z.uuid(),
-  startTime: z.coerce.date(),
-  endTime: z.coerce.date(),
-  capacityOverride: z.number().int().positive().nullable().optional()
-})
+const slotSchema = z
+  .object({
+    offeringId: z.uuid(),
+    practitionerId: z.uuid(),
+    startTime: z.coerce.date(),
+    endTime: z.coerce.date(),
+    capacityOverride: z.number().int().positive().nullable().optional()
+  })
+  .refine(data => data.endTime > data.startTime, {
+    message: 'endTime must be after startTime',
+    path: ['endTime']
+  })
 
 export default defineEventHandler(async event => {
   const userData = await requireAuthenticatedUser(event)
@@ -45,15 +49,19 @@ export default defineEventHandler(async event => {
     .limit(1)
   if (!ownedOffering || !ownedPractitioner)
     throwApiError(400, 'Slot references are outside this studio')
+  const [ownedSlot] = await db
+    .select({ id: offeringSlots.id })
+    .from(offeringSlots)
+    .innerJoin(offerings, eq(offerings.id, offeringSlots.offeringId))
+    .where(
+      and(eq(offeringSlots.id, slotId), eq(offerings.studioId, access.studioId))
+    )
+  if (!ownedSlot)
+    throw createError({ statusCode: 404, message: 'Slot not found' })
   const [updated] = await db
     .update(offeringSlots)
     .set(body)
-    .where(
-      and(
-        eq(offeringSlots.id, slotId),
-        eq(offeringSlots.offeringId, body.offeringId)
-      )
-    )
+    .where(eq(offeringSlots.id, slotId))
     .returning()
   if (!updated) throwApiError(404, 'Slot not found')
   return { success: true, slot: updated }

@@ -120,7 +120,7 @@ if (import.meta.client) {
               active-class="text-primary font-semibold bg-primary/10 hover:bg-primary/10 hover:text-primary"
             >
               <Building2Icon class="size-4" />
-              For Business
+              {{ $t('header.forBusiness') }}
             </NuxtLinkLocale>
           </nav>
         </div>

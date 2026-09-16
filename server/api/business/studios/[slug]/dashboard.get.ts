@@ -1,4 +1,4 @@
-import { and, eq, gte, inArray } from 'drizzle-orm'
+import { and, between, eq, gte, inArray } from 'drizzle-orm'
 import { bookings } from '~~/server/db/schema/booking'
 import { offeringSlots, offerings } from '~~/server/db/schema/offering'
 import { studios } from '~~/server/db/schema/studio'
@@ -44,7 +44,12 @@ export default defineEventHandler(async event => {
       .select({ slot: offeringSlots, offering: offerings })
       .from(offeringSlots)
       .innerJoin(offerings, eq(offerings.id, offeringSlots.offeringId))
-      .where(eq(offerings.studioId, studio.id))
+      .where(
+        and(
+          eq(offerings.studioId, studio.id),
+          between(offeringSlots.startTime, since, new Date())
+        )
+      )
   ])
 
   const slotIds = slotRows.map(row => row.slot.id)

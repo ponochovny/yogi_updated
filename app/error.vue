@@ -7,8 +7,13 @@ import {
   SearchIcon
 } from '@lucide/vue'
 
+const props = defineProps<{
+  error: { statusCode: number; statusMessage?: string }
+}>()
+const isNotFound = computed(() => props.error?.statusCode === 404)
+
 useHead({
-  title: 'Page not found'
+  title: isNotFound.value ? 'Page not found' : 'Something went wrong'
 })
 
 const quickLinks = [
@@ -73,13 +78,14 @@ const quickLinks = [
           </div>
 
           <div class="flex flex-col gap-3 sm:flex-row">
-            <NuxtLink
-              to="/"
+            <button
+              type="button"
               class="inline-flex items-center justify-center gap-2 rounded-xl bg-primary px-6 py-3 font-semibold text-primary-foreground shadow-lg shadow-primary/20 transition hover:bg-primary/90"
+              @click="clearError({ redirect: '/' })"
             >
               <HomeIcon class="h-4 w-4" />
               Go home
-            </NuxtLink>
+            </button>
             <NuxtLink
               to="/explore"
               class="inline-flex items-center justify-center gap-2 rounded-xl border border-border bg-background px-6 py-3 font-semibold text-foreground transition hover:border-primary/30 hover:text-primary"

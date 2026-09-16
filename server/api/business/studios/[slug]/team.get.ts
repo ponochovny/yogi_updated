@@ -6,13 +6,15 @@ import { transactions } from '~~/server/db/schema/payment'
 import { user } from '~~/server/db/schema/auth-schema'
 import { userRoles } from '~~/server/auth/config'
 import { BookingStatus } from '~/entities/booking/schema'
+import z from 'zod'
 
 export default defineEventHandler(async event => {
   const userData = await requireAuthenticatedUser(event)
   const slug = requireRouteParam(event, 'slug')
-  const month = String(
-    getQuery(event).month || new Date().toISOString().slice(0, 7)
-  )
+  const month = z
+    .string()
+    .regex(/^\d{4}-(0[1-9]|1[0-2])$/)
+    .parse(getQuery(event).month || new Date().toISOString().slice(0, 7))
   const start = new Date(`${month}-01T00:00:00.000Z`)
   const end = new Date(start)
   end.setUTCMonth(end.getUTCMonth() + 1)

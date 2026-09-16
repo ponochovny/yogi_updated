@@ -23,7 +23,7 @@ import {
   UserPassStatus
 } from '~~/server/db/schema/payment'
 import { pricingOptions } from '~~/server/db/schema/offering'
-import { eq } from 'drizzle-orm'
+import { eq, and, inArray } from 'drizzle-orm'
 import Stripe from 'stripe'
 import { BookingStatus } from '~/entities/booking/schema'
 import { PaymentMetadataSchema } from '~/entities/payment/schema'
@@ -88,7 +88,15 @@ export default defineEventHandler(async event => {
           providerTransactionId: payment.id,
           updatedAt: new Date()
         })
-        .where(eq(transactions.id, transactionId))
+        .where(
+          and(
+            eq(transactions.id, transactionId),
+            inArray(transactions.status, [
+              TransactionStatus.PENDING,
+              TransactionStatus.FAILED
+            ])
+          )
+        )
     }
     return { received: true }
   }

@@ -14,7 +14,9 @@ import type { InternalApi } from 'nitropack'
 
 export type OfferingItem = InternalApi['/api/offerings']['get']['offerings'][number]
 
----
+```
+
+```TS
 import type { InternalApi } from 'nitropack'
 export type StudioTransactionItem =
   InternalApi['/api/business/studios/:slug/transactions']['get'][number]

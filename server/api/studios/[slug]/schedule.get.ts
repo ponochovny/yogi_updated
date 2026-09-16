@@ -60,6 +60,7 @@ export default defineEventHandler(async event => {
     .where(
       and(
         eq(offerings.studioId, studio.id),
+        eq(offerings.isPublished, true),
         eq(offeringSlots.status, offeringSlotStatus.ACTIVE),
         gte(offeringSlots.startTime, new Date())
       )

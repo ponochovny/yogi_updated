@@ -2,6 +2,7 @@ import { and, eq, ilike, or } from 'drizzle-orm'
 import { user } from '~~/server/db/schema/auth-schema'
 import { studios } from '~~/server/db/schema/studio'
 import { userRoles } from '~~/server/auth/config'
+import { transactions } from '~~/server/db/schema/payment'
 
 export default defineEventHandler(async event => {
   const userData = await requireAuthenticatedUser(event)
@@ -20,9 +21,10 @@ export default defineEventHandler(async event => {
       phone: user.phone
     })
     .from(user)
+    .innerJoin(transactions, eq(transactions.userId, user.id))
     .where(
       and(
-        eq(user.emailVerified, true),
+        eq(transactions.studioId, access.studioId),
         or(
           ilike(user.email, `%${search}%`),
           ilike(user.name, `%${search}%`),
@@ -30,6 +32,7 @@ export default defineEventHandler(async event => {
         )
       )
     )
+    .groupBy(user.id, user.name, user.email, user.phone)
     .limit(10)
   void access
   return rows

@@ -1,22 +1,46 @@
 import { and, desc, eq, ilike, or } from 'drizzle-orm'
-import { transactions } from '~~/server/db/schema/payment'
-import { studios } from '~~/server/db/schema/studio'
+import {
+  transactions,
+  TransactionProvider,
+  TransactionStatus
+} from '~~/server/db/schema/payment'
 import { user } from '~~/server/db/schema/auth-schema'
 import { userRoles } from '~~/server/auth/config'
+import { z } from 'zod'
+
+const transactionsQuerySchema = z.object({
+  provider: z
+    .enum([
+      TransactionProvider.STRIPE,
+      TransactionProvider.LIQPAY,
+      TransactionProvider.HUTKO,
+      TransactionProvider.MONOPAY,
+      TransactionProvider.CASH,
+      TransactionProvider.FREE
+    ])
+    .optional(),
+  status: z
+    .enum([
+      TransactionStatus.PENDING,
+      TransactionStatus.SUCCESS,
+      TransactionStatus.FAILED,
+      TransactionStatus.REFUNDED
+    ])
+    .optional(),
+  customer: z.string().trim().optional()
+})
 
 export default defineEventHandler(async event => {
   const userData = await requireAuthenticatedUser(event)
   const slug = requireRouteParam(event, 'slug')
-  const query = getQuery(event)
+  const query = await getValidatedQuery(event, transactionsQuerySchema.parse)
   const access = await checkStudioAccess(userData.id, slug, [
     userRoles.BUSINESS
   ])
   const conditions = [eq(transactions.studioId, access.studioId)]
-  if (query.provider)
-    conditions.push(eq(transactions.provider, String(query.provider) as never))
-  if (query.status)
-    conditions.push(eq(transactions.status, String(query.status) as never))
-  const customer = String(query.customer || '').trim()
+  if (query.provider) conditions.push(eq(transactions.provider, query.provider))
+  if (query.status) conditions.push(eq(transactions.status, query.status))
+  const customer = query.customer || ''
   const rows = await useDb()
     .select({
       id: transactions.id,

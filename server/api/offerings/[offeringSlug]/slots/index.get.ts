@@ -1,7 +1,9 @@
 import { offeringSlots, offerings } from '~~/server/db/schema/offering'
+import { bookings } from '~~/server/db/schema/booking'
 import { user } from '~~/server/db/schema/auth-schema'
 import { studioPractitioners } from '~~/server/db/schema/studio'
-import { and, eq, gte } from 'drizzle-orm'
+import { and, eq, gte, sql } from 'drizzle-orm'
+import { BookingStatus } from '~/entities/booking/schema'
 import { offeringSlotStatus } from '~/entities/offering/schema'
 
 export default defineEventHandler(async event => {
@@ -27,6 +29,23 @@ export default defineEventHandler(async event => {
         startTime: offeringSlots.startTime,
         endTime: offeringSlots.endTime,
         status: offeringSlots.status,
+        availableSpots: sql<number | null>`CASE
+          WHEN COALESCE(${offeringSlots.capacityOverride}, ${offerings.capacity}) IS NULL THEN NULL
+          ELSE GREATEST(
+            COALESCE(${offeringSlots.capacityOverride}, ${offerings.capacity}) - (
+              SELECT count(*)::int
+              FROM ${bookings}
+              WHERE ${bookings.slotId} = ${offeringSlots.id}
+                AND ${bookings.status} IN (
+                  ${BookingStatus.CONFIRMED},
+                  ${BookingStatus.ATTENDED},
+                  ${BookingStatus.NO_SHOW},
+                  ${BookingStatus.PENDING}
+                )
+            ),
+            0
+          )
+        END`,
         practitioner: {
           id: studioPractitioners.id,
           name: user.name

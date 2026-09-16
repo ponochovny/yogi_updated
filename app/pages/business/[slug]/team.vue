@@ -30,7 +30,7 @@ const editing = ref<Record<string, { type: string; rate: number }>>({})
 const edit = (member: Member) => {
   editing.value[member.linkId] = {
     type: member.compensationType,
-    rate: member.compensationRate
+    rate: member.compensationRate / 100
   }
 }
 const save = async (member: Member) => {
@@ -103,19 +103,16 @@ const formatRate = (member: Member) =>
                     ></NativeSelect
                   ></template
                 ><span v-else>{{ member.compensationType }}</span></TableCell
-              ><TableCell
-                ><template v-if="editing[member.linkId]"
-                  ><Input
+              ><TableCell>
+                <template v-if="editing[member.linkId]">
+                  <Input
                     v-model.number="editing[member.linkId].rate"
                     type="number"
                     min="0"
-                    class="w-28" /></template
-                ><span v-else
-                  >{{ formatRate(member)
-                  }}<span v-if="member.compensationType === 'REVENUE_SHARE'"
-                    >%</span
-                  ></span
-                ></TableCell
+                    class="w-28"
+                  />
+                </template>
+                <span v-else>{{ formatRate(member) }}</span></TableCell
               ><TableCell class="space-x-2"
                 ><template v-if="editing[member.linkId]"
                   ><Button size="sm" @click="save(member)">Save</Button

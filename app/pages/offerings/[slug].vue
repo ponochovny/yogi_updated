@@ -398,14 +398,30 @@ usePageSeo({
                 >
                   {{ slot.practitioner.name }}
                 </NuxtLink>
-                <span class="text-xs text-muted-foreground"
-                  >Free spots available</span
+                <span
+                  v-if="slot.availableSpots !== null && slot.availableSpots > 0"
+                  class="text-xs text-muted-foreground"
                 >
+                  {{ slot.availableSpots }} free
+                  {{ slot.availableSpots === 1 ? 'spot' : 'spots' }}
+                </span>
+                <span
+                  v-else-if="slot.availableSpots === 0"
+                  class="text-xs font-medium text-destructive"
+                >
+                  Fully booked
+                </span>
               </div>
 
               <Dialog class="mt-3 block">
                 <DialogTrigger as-child>
-                  <Button class="mt-3 w-full" size="sm">Book</Button>
+                  <Button
+                    class="mt-3 w-full"
+                    size="sm"
+                    :disabled="slot.availableSpots === 0"
+                  >
+                    {{ slot.availableSpots === 0 ? 'Fully booked' : 'Book' }}
+                  </Button>
                 </DialogTrigger>
                 <DialogContent>
                   <DialogHeader>

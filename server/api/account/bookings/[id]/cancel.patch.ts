@@ -1,7 +1,7 @@
 import { bookings } from '~~/server/db/schema/booking'
 import { offeringSlots } from '~~/server/db/schema/offering'
 import { userPasses } from '~~/server/db/schema/payment'
-import { eq, and, sql } from 'drizzle-orm'
+import { eq, and, ne, sql } from 'drizzle-orm'
 import { BookingStatus } from '~/entities/booking/schema'
 
 export default defineEventHandler(async event => {
@@ -42,10 +42,20 @@ export default defineEventHandler(async event => {
 
   try {
     await db.transaction(async tx => {
-      await tx
+      const [cancelledBooking] = await tx
         .update(bookings)
         .set({ status: BookingStatus.CANCELLED, updatedAt: new Date() })
-        .where(eq(bookings.id, bookingId))
+        .where(
+          and(
+            eq(bookings.id, bookingId),
+            ne(bookings.status, BookingStatus.CANCELLED)
+          )
+        )
+        .returning({ id: bookings.id })
+
+      if (!cancelledBooking) {
+        throwApiError(400, 'Already cancelled')
+      }
 
       if (booking.userPassId) {
         await tx

@@ -1,11 +1,11 @@
-import { offeringSlots } from '~~/server/db/schema/offering'
+import { offeringSlots, offerings } from '~~/server/db/schema/offering'
 import { bookings } from '~~/server/db/schema/booking'
 import {
   transactions,
   TransactionProvider,
   TransactionStatus
 } from '~~/server/db/schema/payment'
-import { eq } from 'drizzle-orm'
+import { and, eq } from 'drizzle-orm'
 import { userRoles } from '~~/server/auth/config'
 import { updateBookingStatusSchema } from '~/entities/booking/schema'
 
@@ -41,8 +41,11 @@ export default defineEventHandler(async event => {
     })
     .from(bookings)
     .innerJoin(offeringSlots, eq(bookings.slotId, offeringSlots.id))
+    .innerJoin(offerings, eq(offeringSlots.offeringId, offerings.id))
     .leftJoin(transactions, eq(bookings.transactionId, transactions.id))
-    .where(eq(bookings.id, bookingId))
+    .where(
+      and(eq(bookings.id, bookingId), eq(offerings.studioId, access.studioId))
+    )
     .limit(1)
 
   if (!currentBooking)
@@ -68,25 +71,32 @@ export default defineEventHandler(async event => {
     })
   }
 
-  // Updating the booking status
-  await db
-    .update(bookings)
-    .set({
-      status,
-      updatedAt: new Date()
-    })
-    .where(eq(bookings.id, bookingId))
+  await db.transaction(async tx => {
+    // Updating the booking status
+    await tx
+      .update(bookings)
+      .set({
+        status,
+        updatedAt: new Date()
+      })
+      .where(eq(bookings.id, bookingId))
 
-  if (
-    status === 'CONFIRMED' &&
-    currentBooking.transactionId &&
-    currentBooking.transactionProvider === TransactionProvider.CASH
-  ) {
-    await db
-      .update(transactions)
-      .set({ status: TransactionStatus.SUCCESS, updatedAt: new Date() })
-      .where(eq(transactions.id, currentBooking.transactionId))
-  }
+    if (
+      status === 'CONFIRMED' &&
+      currentBooking.transactionId &&
+      currentBooking.transactionProvider === TransactionProvider.CASH
+    ) {
+      await tx
+        .update(transactions)
+        .set({ status: TransactionStatus.SUCCESS, updatedAt: new Date() })
+        .where(
+          and(
+            eq(transactions.id, currentBooking.transactionId),
+            eq(transactions.studioId, access.studioId)
+          )
+        )
+    }
+  })
 
   return { success: true, message: `Booking status updated to ${status}` }
 })

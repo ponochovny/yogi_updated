@@ -6,12 +6,13 @@ import {
   createMembershipSchema,
   expiryRuleType,
   priceOptionsType,
-  type CreateMembershipInput
+  type CreateMembershipInput,
+  type MembershipItemBusiness
 } from '~/entities/membership/schema'
 
 const props = defineProps<{
   studioSlug: string
-  membership?: (CreateMembershipInput & { id: string; price: number }) | null
+  membership?: MembershipItemBusiness | null
 }>()
 
 const emit = defineEmits<{
@@ -82,7 +83,7 @@ const saveMembership = async (values: CreateMembershipInput) => {
       }
     )
 
-    if (response.membership) {
+    if (response.memberships?.length) {
       toast.success(
         props.membership
           ? 'Membership updated successfully!'

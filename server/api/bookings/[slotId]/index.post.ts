@@ -131,6 +131,7 @@ export default defineEventHandler(async event => {
             .where(
               and(
                 eq(bookings.userId, userData.id),
+                eq(bookings.userPassId, pass.id),
                 inArray(bookings.status, [
                   BookingStatus.CONFIRMED,
                   BookingStatus.ATTENDED,

@@ -95,7 +95,7 @@ const copyId = async (id: string) => {
             <TableCell>
               <Badge
                 :class="{
-                  'bg-gray-500': item.status !== TransactionStatus.REFUNDED,
+                  'bg-gray-500': item.status === TransactionStatus.REFUNDED,
                   'bg-green-400/20 text-green-700':
                     item.status === TransactionStatus.SUCCESS,
                   'bg-rose-500/20 text-rose-700':

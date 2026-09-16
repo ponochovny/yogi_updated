@@ -1,4 +1,4 @@
-import { and, eq } from 'drizzle-orm'
+import { and, eq, ne } from 'drizzle-orm'
 import { z } from 'zod'
 import { bookings } from '~~/server/db/schema/booking'
 import {
@@ -45,7 +45,7 @@ export default defineEventHandler(async event => {
       and(
         eq(bookings.slotId, body.slotId),
         eq(bookings.userId, body.userId),
-        eq(bookings.status, BookingStatus.PENDING)
+        ne(bookings.status, BookingStatus.CANCELLED)
       )
     )
     .limit(1)
@@ -54,7 +54,13 @@ export default defineEventHandler(async event => {
     .select({ amount: pricingOptions.price, currency: studios.currency })
     .from(studios)
     .innerJoin(pricingOptions, eq(pricingOptions.studioId, studios.id))
-    .where(eq(studios.id, access.studioId))
+    .where(
+      and(
+        eq(studios.id, access.studioId),
+        eq(pricingOptions.type, 'DROP_IN'),
+        eq(pricingOptions.isActive, true)
+      )
+    )
     .limit(1)
   const [transaction] = await db
     .insert(transactions)
@@ -67,12 +73,15 @@ export default defineEventHandler(async event => {
       status: TransactionStatus.PENDING
     })
     .returning({ id: transactions.id })
+
+  if (!transaction) throwApiError(500, 'Failed to create transaction')
+
   const [created] = await db
     .insert(bookings)
     .values({
       slotId: body.slotId,
       userId: body.userId,
-      transactionId: transaction.id,
+      transactionId: transaction?.id,
       status: BookingStatus.PENDING
     })
     .returning()

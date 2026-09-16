@@ -60,7 +60,7 @@ const visibleSlots = computed(() =>
       const weekStart = startOfWeek(selectedDate.value, { weekStartsOn: 1 })
       return isWithinInterval(date, {
         start: weekStart,
-        end: addDays(weekStart, 6)
+        end: endOfWeek(selectedDate.value, { weekStartsOn: 1 })
       })
     })
     .sort(
@@ -137,13 +137,13 @@ const bookClient = async (clientId: string) => {
   }
 }
 const moveDate = (amount: number) => {
+  if (view.value === 'month') {
+    selectedDate.value = addMonths(selectedDate.value, amount)
+    return
+  }
   selectedDate.value = addDays(
     selectedDate.value,
-    view.value === 'month'
-      ? amount * 30
-      : view.value === 'week'
-        ? amount * 7
-        : amount
+    view.value === 'week' ? amount * 7 : amount
   )
 }
 </script>

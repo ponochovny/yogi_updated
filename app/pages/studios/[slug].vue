@@ -147,7 +147,7 @@ usePageSeo({
             <div class="space-y-4">
               <div class="flex items-center gap-4">
                 <NuxtImg
-                  v-if="studio.logo"
+                  v-if="studio.logo?.url"
                   :src="
                     studio.logo.url.replace(
                       '/upload/',

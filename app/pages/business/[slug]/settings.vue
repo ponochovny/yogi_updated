@@ -16,8 +16,8 @@ watch(
   value => {
     if (value)
       Object.assign(form, {
-        bio: value.bio,
-        mission: value.mission,
+        bio: value.bio || '',
+        mission: value.mission || '',
         cancellationPolicy: value.cancellationPolicy || '',
         liabilityWaiver: value.liabilityWaiver || ''
       })

@@ -102,11 +102,9 @@ const cancelBooking = async (id: string) => {
             </p>
           </div>
           <div class="flex items-center gap-3">
-            <span class="rounded-full border px-3 py-1 text-xs font-medium">{{
-              booking.payment?.status === 'SUCCESS'
-                ? 'CONFIRMED'
-                : booking.payment?.status || 'CONFIRMED'
-            }}</span>
+            <span class="rounded-full border px-3 py-1 text-xs font-medium">
+              {{ booking.status }}
+            </span>
             <Button
               v-if="
                 booking.status === BookingStatus.CONFIRMED &&

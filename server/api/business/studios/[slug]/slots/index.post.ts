@@ -4,13 +4,18 @@ import { offeringSlots, offerings } from '~~/server/db/schema/offering'
 import { studioPractitioners } from '~~/server/db/schema/studio'
 import { userRoles } from '~~/server/auth/config'
 
-const slotSchema = z.object({
-  offeringId: z.uuid(),
-  practitionerId: z.uuid(),
-  startTime: z.coerce.date(),
-  endTime: z.coerce.date(),
-  capacityOverride: z.number().int().positive().nullable().optional()
-})
+const slotSchema = z
+  .object({
+    offeringId: z.uuid(),
+    practitionerId: z.uuid(),
+    startTime: z.coerce.date(),
+    endTime: z.coerce.date(),
+    capacityOverride: z.number().int().positive().nullable().optional()
+  })
+  .refine(slot => slot.endTime > slot.startTime, {
+    message: 'endTime must be later than startTime',
+    path: ['endTime']
+  })
 
 export default defineEventHandler(async event => {
   const userData = await requireAuthenticatedUser(event)

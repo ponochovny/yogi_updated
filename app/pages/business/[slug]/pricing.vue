@@ -2,6 +2,7 @@
 import { PlusIcon } from '@lucide/vue'
 import MembershipCreationForm from './memberships/_components/MembershipCreationForm.vue'
 import MembershipsDataTable from './memberships/_components/MembershipsDataTable.vue'
+import type { MembershipItemBusiness } from '~/entities/membership/schema.ts'
 
 definePageMeta({ title: 'Studio pricing' })
 useHead({ title: 'Studio pricing' })
@@ -12,8 +13,14 @@ const { data: membershipsData, refresh } = await useFetch(
   `/api/business/studios/${studioSlug.value}/memberships`
 )
 const isSheetOpen = ref(false)
-const membershipCreated = async () => {
+const editingMembership = ref<MembershipItemBusiness | null>(null)
+const openEdit = (membership: MembershipItemBusiness) => {
+  editingMembership.value = membership
+  isSheetOpen.value = true
+}
+const membershipSaved = async () => {
   await refresh()
+  editingMembership.value = null
   isSheetOpen.value = false
 }
 </script>
@@ -45,7 +52,8 @@ const membershipCreated = async () => {
           <div class="grid flex-1 auto-rows-min gap-6 p-4 overflow-y-auto">
             <MembershipCreationForm
               :studio-slug="studioSlug"
-              @membership-saved="membershipCreated"
+              :membership="editingMembership"
+              @membership-saved="membershipSaved"
             />
           </div>
         </SheetContent>
@@ -53,6 +61,7 @@ const membershipCreated = async () => {
       <MembershipsDataTable
         :memberships-data="membershipsData?.memberships"
         :studio-slug="studioSlug"
+        @edit="openEdit"
       />
     </CardContent>
   </Card>

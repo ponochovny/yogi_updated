@@ -26,8 +26,9 @@ const weeklyClasses = ref(24)
 const occupancy = ref(72)
 
 const estimatedRevenue = computed(() => {
-  const monthlyClasses = weeklyClasses.value * 4.33
-  const revenue = averageTicket.value * monthlyClasses * (occupancy.value / 100)
+  const ticket = Math.max(0, Number(averageTicket.value) || 0)
+  const classes = Math.max(0, Number(weeklyClasses.value) || 0)
+  const revenue = ticket * classes * 4.33 * (occupancy.value / 100)
   return Math.round(revenue)
 })
 
