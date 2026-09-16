@@ -56,8 +56,6 @@ export default defineEventHandler(async event => {
 
   const { pricingOptionId, slotId } = body
 
-  let checkoutUrl: string | null = null
-
   const { pricing, transactionId, bookingId, lineItemName, checkoutCurrency } =
     await db.transaction(async tx => {
       /** Fetch pricing option details
@@ -87,17 +85,17 @@ export default defineEventHandler(async event => {
       }
 
       /** Currency */
-      const [currencyData] = await db
+      const [currencyData] = await tx
         .select()
         .from(globalCurrencies)
-        .where(eq(globalCurrencies.id, pricing.currency))
+        .where(eq(globalCurrencies.name, pricing.currency))
       if (!currencyData) {
         throwApiError(404, 'Currency not found for the selected pricing option')
       }
 
       let bookingId: string | null = null
       /** Inside our DB, table "transactions" */
-      let transactionId: string | null = null
+      let transactionId: string | null
       let lineItemName = pricing.name
       const checkoutCurrency = (currencyData.name || 'USD').toUpperCase()
 
@@ -294,7 +292,10 @@ export default defineEventHandler(async event => {
       .set({ providerTransactionId: stripeSession.id })
       .where(eq(transactions.id, transactionId))
 
-    checkoutUrl = stripeSession.url
+    return {
+      success: true,
+      url: stripeSession.url
+    }
   } catch (error) {
     try {
       await revertPendingCheckoutState(db, transactionId, bookingId)
@@ -302,10 +303,5 @@ export default defineEventHandler(async event => {
       console.error('Failed to revert pending checkout state', revertError)
     }
     throw error
-  }
-
-  return {
-    success: true,
-    url: checkoutUrl
   }
 })

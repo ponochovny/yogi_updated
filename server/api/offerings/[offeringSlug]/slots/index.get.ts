@@ -57,6 +57,7 @@ export default defineEventHandler(async event => {
         eq(offeringSlots.practitionerId, studioPractitioners.id)
       )
       .innerJoin(user, eq(studioPractitioners.userId, user.id))
+      .innerJoin(offerings, eq(offeringSlots.offeringId, offerings.id))
       .where(
         and(
           eq(offeringSlots.offeringId, offering.id),

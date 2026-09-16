@@ -53,7 +53,8 @@ onMounted(async () => {
       // Auto-select first active membership pass if available
       if (data.options.userPasses.length > 0) {
         selectedPassId.value = data?.options?.userPasses[0]?.id || null
-      } else if (data.options.dropInTickets.length > 0) {
+      }
+      if (data.options.dropInTickets.length > 0) {
         selectedTicketId.value = data?.options?.dropInTickets[0]?.id || null
       }
     }
@@ -86,7 +87,7 @@ async function handleConfirmBooking() {
         {
           method: 'POST',
           body: {
-            slotId: props.slotId,
+            pricingOptionId: null,
             userPassId: selectedPassId.value
           }
         }
