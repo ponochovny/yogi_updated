@@ -107,8 +107,8 @@ const submit = handleSubmit(handleLogin)
     </Card>
     <FieldDescription class="px-6 text-center">
       By clicking continue, you agree to our
-      <NuxtLink to="/terms">Terms of Service</NuxtLink> and
-      <NuxtLink to="/privacy">Privacy Policy</NuxtLink>.
+      <NuxtLink to="/terms-of-service">Terms of Service</NuxtLink> and
+      <NuxtLink to="/privacy-policy">Privacy Policy</NuxtLink>.
     </FieldDescription>
   </div>
 </template>

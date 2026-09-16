@@ -1,8 +1,12 @@
 <template>
   <div class="space-y-6">
     <!-- Header with Reset -->
-    <div class="flex items-center justify-between pb-2 border-b border-border/60">
-      <span class="text-sm font-semibold uppercase tracking-wider text-muted-foreground">
+    <div
+      class="flex items-center justify-between pb-2 border-b border-border/60"
+    >
+      <span
+        class="text-sm font-semibold uppercase tracking-wider text-muted-foreground"
+      >
         {{ $t('explore.filters') }}
       </span>
       <button
@@ -17,21 +21,19 @@
 
     <!-- Category (Offerings & Studios) -->
     <div v-if="activeType !== 'practitioners'" class="space-y-2">
-      <label class="text-xs font-semibold text-foreground flex items-center gap-1.5">
+      <label
+        class="text-xs font-semibold text-foreground flex items-center gap-1.5"
+      >
         <TagIcon class="size-3.5 text-primary" />
         {{ $t('explore.category') }}
       </label>
       <NativeSelect
         :model-value="filters.category"
         class="w-full h-10 rounded-xl bg-card border-input text-sm"
-        @update:model-value="onFieldChange('category', $event)"
+        @update:model-value="onCategoryChange"
       >
         <option value="">{{ $t('explore.allCategories') }}</option>
-        <option
-          v-for="cat in categories"
-          :key="cat.id"
-          :value="cat.id"
-        >
+        <option v-for="cat in categories" :key="cat.id" :value="cat.id">
           {{ cat.name }}
         </option>
       </NativeSelect>
@@ -39,7 +41,9 @@
 
     <!-- Date (Offerings only) -->
     <div v-if="activeType === 'offerings'" class="space-y-2">
-      <label class="text-xs font-semibold text-foreground flex items-center gap-1.5">
+      <label
+        class="text-xs font-semibold text-foreground flex items-center gap-1.5"
+      >
         <CalendarIcon class="size-3.5 text-primary" />
         {{ $t('explore.date') }}
       </label>
@@ -47,37 +51,43 @@
         type="date"
         :value="filters.date"
         class="w-full h-10 px-3 rounded-xl border border-input bg-card text-sm focus:ring-2 focus:ring-primary focus:outline-none transition"
-        @input="onFieldChange('date', ($event.target as HTMLInputElement).value)"
+        @input="
+          onFieldChange('date', ($event.target as HTMLInputElement).value)
+        "
       />
     </div>
 
     <!-- Time of Day (Offerings only) -->
     <div v-if="activeType === 'offerings'" class="space-y-2">
-      <label class="text-xs font-semibold text-foreground flex items-center gap-1.5">
+      <label
+        class="text-xs font-semibold text-foreground flex items-center gap-1.5"
+      >
         <ClockIcon class="size-3.5 text-primary" />
         {{ $t('explore.timeOfDay') }}
       </label>
       <div class="grid grid-cols-3 gap-1.5 p-1 bg-muted/40 rounded-xl">
         <button
-          v-for="t in timeOptions"
-          :key="t.value"
+          v-for="time in timeOptions"
+          :key="time.value"
           type="button"
           class="py-1.5 text-xs font-medium rounded-lg transition-all text-center"
           :class="
-            filters.time === t.value
+            filters.time === time.value
               ? 'bg-card text-foreground shadow-xs font-semibold'
               : 'text-muted-foreground hover:text-foreground'
           "
-          @click="onTimeSelect(t.value)"
+          @click="onTimeSelect(time.value)"
         >
-          {{ t.label }}
+          {{ time.label }}
         </button>
       </div>
     </div>
 
     <!-- Pricing Type (Offerings only) -->
     <div v-if="activeType === 'offerings'" class="space-y-2">
-      <label class="text-xs font-semibold text-foreground flex items-center gap-1.5">
+      <label
+        class="text-xs font-semibold text-foreground flex items-center gap-1.5"
+      >
         <CreditCardIcon class="size-3.5 text-primary" />
         {{ $t('explore.pricingType') }}
       </label>
@@ -105,7 +115,9 @@
 
     <!-- City / Location (All types) -->
     <div class="space-y-2">
-      <label class="text-xs font-semibold text-foreground flex items-center gap-1.5">
+      <label
+        class="text-xs font-semibold text-foreground flex items-center gap-1.5"
+      >
         <MapPinIcon class="size-3.5 text-primary" />
         {{ $t('explore.city') }}
       </label>
@@ -150,6 +162,7 @@
 </template>
 
 <script setup lang="ts">
+import type { AcceptableValue } from 'reka-ui'
 import {
   RotateCcwIcon,
   TagIcon,
@@ -196,11 +209,18 @@ const pricingOptions = computed(() => [
   { value: 'MEMBERSHIP', label: t('home.membership', 'Monthly Membership') }
 ])
 
-function onFieldChange(field: string, value: any) {
+function onFieldChange<K extends keyof typeof props.filters>(
+  field: K,
+  value: (typeof props.filters)[K]
+) {
   emit('update:filters', {
     ...props.filters,
     [field]: value
   })
+}
+
+function onCategoryChange(value: AcceptableValue | AcceptableValue[]) {
+  onFieldChange('category', typeof value === 'string' ? value : '')
 }
 
 function onTimeSelect(val: string) {
