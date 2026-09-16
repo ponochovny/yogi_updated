@@ -1,6 +1,7 @@
 <script lang="ts" setup>
 import { userRoles } from '~~/server/auth/config'
 import PractitionerSlots from '../_components/PractitionerSlots.vue'
+import ManagerSlots from '../_components/ManagerSlots.vue'
 import BusinessSlots from '../_components/BusinessSlots.vue'
 
 useHead({

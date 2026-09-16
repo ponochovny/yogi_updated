@@ -71,7 +71,7 @@ const breadcrumbs = computed(
         </div>
       </header>
       <div class="p-4 pt-0 flex-1">
-        <div class="h-full p-6 bg-white/5 rounded-lg shadow-sm">
+        <div class="h-full p-6">
           <slot />
         </div>
       </div>

@@ -7,6 +7,11 @@ export const priceOptionsType = {
   MEMBERSHIP: 'MEMBERSHIP'
 } as const
 
+export const expiryRuleType = {
+  DURATION: 'DURATION',
+  END_OF_YEAR: 'END_OF_YEAR'
+} as const
+
 const basePricingSchema = z.object({
   name: z
     .string()
@@ -18,6 +23,11 @@ const basePricingSchema = z.object({
     .max(500, 'Description must be at most 500 characters long'),
   price: z.number().min(0, 'Price must be a positive number'),
   durationDays: z.number().int().min(1, 'Duration must be at least 1 day'),
+  expiryRule: z
+    .enum([expiryRuleType.DURATION, expiryRuleType.END_OF_YEAR])
+    .default(expiryRuleType.DURATION),
+  expiryBufferDays: z.number().int().min(0).max(31).default(0),
+  maxBookingsPerDay: z.number().int().min(1).nullable().default(null),
   isActive: z.boolean(),
   applicableCategoryIds: z.array(z.string()).optional()
 })

@@ -35,6 +35,9 @@ export default defineEventHandler(async event => {
           price: body.price * 100,
           credits: !body.credits ? null : body.credits,
           durationDays: body.durationDays,
+          expiryRule: body.expiryRule,
+          expiryBufferDays: body.expiryBufferDays,
+          maxBookingsPerDay: body.maxBookingsPerDay,
           isActive: body.isActive
         })
         .returning()

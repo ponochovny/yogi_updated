@@ -40,6 +40,8 @@ export const revertPendingCheckoutState = async (
       .set({
         status: TransactionStatus.FAILED,
         providerTransactionId: null,
+        failureReason:
+          'Checkout expired or was abandoned before payment completed.',
         updatedAt: new Date()
       })
       .where(eq(transactions.id, transactionId))

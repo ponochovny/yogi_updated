@@ -1,4 +1,5 @@
 import * as z from 'zod'
+import type { InternalApi } from 'nitropack'
 
 export const createSessionSchema = z.object({
   pricingOptionId: z.uuid(),
@@ -15,3 +16,6 @@ export const PaymentMetadataSchema = z.object({
   pricingOptionId: z.uuid(),
   userId: z.string()
 })
+
+export type StudioTransactionItem =
+  InternalApi['/api/business/studios/:slug/transactions']['get'][number]

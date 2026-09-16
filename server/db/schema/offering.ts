@@ -102,6 +102,9 @@ export const pricingOptions = pgTable('pricing_options', {
   // Limits logic
   credits: integer('credits'), // Visits amount. For DROP_IN = 1, PACK = 10, MEMBERSHIP = null (unlimited)
   durationDays: integer('duration_days').notNull(), // Duration of the pass after purchase (e.g., 1 day, 30 days, 365 days)
+  expiryRule: varchar('expiry_rule').default('DURATION').notNull(),
+  expiryBufferDays: integer('expiry_buffer_days').default(0).notNull(),
+  maxBookingsPerDay: integer('max_bookings_per_day'),
 
   isActive: boolean('is_active').default(true).notNull(),
   createdAt: timestamp('created_at').defaultNow().notNull()

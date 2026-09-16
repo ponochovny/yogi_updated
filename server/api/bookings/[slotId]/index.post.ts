@@ -116,6 +116,40 @@ export default defineEventHandler(async event => {
         })
       }
 
+      if (pass.pricingOptionId) {
+        const [pricing] = await tx
+          .select({ maxBookingsPerDay: pricingOptions.maxBookingsPerDay })
+          .from(pricingOptions)
+          .where(eq(pricingOptions.id, pass.pricingOptionId))
+          .limit(1)
+
+        if (pricing?.maxBookingsPerDay) {
+          const [dailyBookings] = await tx
+            .select({ count: sql<number>`count(*)` })
+            .from(bookings)
+            .innerJoin(offeringSlots, eq(bookings.slotId, offeringSlots.id))
+            .where(
+              and(
+                eq(bookings.userId, userData.id),
+                inArray(bookings.status, [
+                  BookingStatus.CONFIRMED,
+                  BookingStatus.ATTENDED,
+                  BookingStatus.NO_SHOW,
+                  BookingStatus.PENDING
+                ]),
+                sql`DATE(${offeringSlots.startTime}) = DATE(${slot.startTime})`
+              )
+            )
+
+          if (Number(dailyBookings?.count || 0) >= pricing.maxBookingsPerDay) {
+            throw createError({
+              statusCode: 400,
+              message: 'This pass has reached its daily booking limit'
+            })
+          }
+        }
+      }
+
       // If pass has limited credits, decrement them
       if (pass.remainingCredits !== null) {
         if (pass.remainingCredits <= 0) {

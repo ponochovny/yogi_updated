@@ -3,7 +3,8 @@ import {
   ArrowUpDown,
   ChevronDownIcon,
   CrownIcon,
-  LayersIcon
+  LayersIcon,
+  PencilIcon
 } from '@lucide/vue'
 import {
   FlexRender,
@@ -23,12 +24,14 @@ import type { MembershipItemBusiness } from '~/entities/membership/schema'
 import { Button } from '~/shared/ui/button'
 import { valueUpdater } from '~/shared/ui/table/utils'
 
-const route = useRoute()
-const studioSlug = computed(() => route.params.slug as string)
-
-const { data: membershipsData } = await useFetch(
-  `/api/business/studios/${studioSlug.value}/memberships`
-)
+const props = defineProps<{
+  membershipsData?: MembershipItemBusiness[]
+  studioSlug: string
+}>()
+const emit = defineEmits<{
+  (e: 'edit', membership: MembershipItemBusiness): void
+}>()
+const selectedType = ref('ALL')
 
 const columns: ColumnDef<MembershipItemBusiness>[] = [
   {
@@ -67,20 +70,41 @@ const columns: ColumnDef<MembershipItemBusiness>[] = [
     cell: ({ row }) => h('div', row.getValue('name'))
   },
   {
-    accessorKey: 'durationDays',
-    header: 'Duration',
-    cell: ({ row }) => {
-      const duration = row.original.durationDays
-      return h('div', duration ? `${duration} days` : 'Unlimited')
-    }
-  },
-  {
     accessorKey: 'credits',
     header: 'Credits',
     cell: ({ row }) => {
       const credits = row.original.credits
       return h('div', credits ? `${credits} credits` : 'Unlimited')
     }
+  },
+  {
+    accessorKey: 'expiryRule',
+    header: 'Validity',
+    cell: ({ row }) => {
+      const pricing = row.original
+      return h(
+        'div',
+        pricing.expiryRule === 'END_OF_YEAR'
+          ? `Year end${pricing.expiryBufferDays ? ` + ${pricing.expiryBufferDays}d` : ''}`
+          : `${pricing.durationDays} days`
+      )
+    }
+  },
+  {
+    accessorKey: 'maxBookingsPerDay',
+    header: () =>
+      h(
+        'span',
+        { title: 'Maximum number of bookings allowed per day for this pass' },
+        'Daily bookings limit'
+      ),
+    cell: ({ row }) =>
+      h(
+        'div',
+        row.original.maxBookingsPerDay
+          ? `${row.original.maxBookingsPerDay}/day`
+          : 'Unlimited'
+      )
   },
   {
     accessorKey: 'price',
@@ -90,6 +114,22 @@ const columns: ColumnDef<MembershipItemBusiness>[] = [
       const text = price === 0 ? 'Free' : `$${(price / 100).toFixed(2)}`
       return h('div', { class: 'text-right font-medium' }, text)
     }
+  },
+  {
+    id: 'actions',
+    header: '',
+    enableHiding: false,
+    cell: ({ row }) =>
+      h(
+        Button,
+        {
+          variant: 'ghost',
+          size: 'icon',
+          title: 'Edit pricing option',
+          onClick: () => emit('edit', row.original)
+        },
+        () => h(PencilIcon, { class: 'h-4 w-4' })
+      )
   }
 ]
 const sorting = ref<SortingState>([])
@@ -97,7 +137,7 @@ const columnFilters = ref<ColumnFiltersState>([])
 const columnVisibility = ref<VisibilityState>({})
 const expanded = ref<ExpandedState>({})
 const table = useVueTable({
-  data: membershipsData.value?.memberships || [],
+  data: props.membershipsData || [],
   columns,
   getCoreRowModel: getCoreRowModel(),
   getPaginationRowModel: getPaginationRowModel(),
@@ -125,6 +165,19 @@ const table = useVueTable({
     }
   }
 })
+
+watch(
+  () => props.membershipsData,
+  memberships => {
+    table.setOptions(previous => ({ ...previous, data: memberships || [] }))
+  },
+  { deep: true }
+)
+
+const setTypeFilter = (type: string) => {
+  selectedType.value = type
+  table.getColumn('type')?.setFilterValue(type === 'ALL' ? undefined : type)
+}
 </script>
 
 <template>
@@ -137,6 +190,25 @@ const table = useVueTable({
           :model-value="table.getColumn('name')?.getFilterValue() as string"
           @update:model-value="table.getColumn('name')?.setFilterValue($event)"
         />
+        <div
+          class="ml-4 flex flex-wrap gap-1"
+          aria-label="Filter by pricing type"
+        >
+          <Button
+            v-for="type in [
+              { value: 'ALL', label: 'All' },
+              { value: 'MEMBERSHIP', label: 'Membership' },
+              { value: 'PACK', label: 'Pack' },
+              { value: 'DROP_IN', label: 'Drop-in' }
+            ]"
+            :key="type.value"
+            size="sm"
+            :variant="selectedType === type.value ? 'default' : 'outline'"
+            @click="setTypeFilter(type.value)"
+          >
+            {{ type.label }}
+          </Button>
+        </div>
         <DropdownMenu>
           <DropdownMenuTrigger as-child>
             <Button variant="outline" class="ml-auto">

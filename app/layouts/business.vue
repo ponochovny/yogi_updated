@@ -9,6 +9,7 @@ provide('sidebarProps', visibleMenu)
 
 <template>
   <SidebarDashboardLayout>
+    <NuxtLoadingIndicator color="var(--color-primary)" />
     <DevOnly>
       <div
         class="fixed right-1 bottom-1 border border-gray-500 px-4 py-2 rounded-md bg-white/10 text-sm text-muted-foreground z-50 opacity-50 pointer-events-none"

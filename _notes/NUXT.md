@@ -13,4 +13,12 @@ export type Offering = Omit<typeof offerings.$inferSelect,
 import type { InternalApi } from 'nitropack'
 
 export type OfferingItem = InternalApi['/api/offerings']['get']['offerings'][number]
+
+---
+import type { InternalApi } from 'nitropack'
+export type StudioTransactionItem =
+  InternalApi['/api/business/studios/:slug/transactions']['get'][number]
+
+import type { StudioTransactionItem } from '../../../entities/payment/schema'
+// StudioTransactionItem[]
 ```

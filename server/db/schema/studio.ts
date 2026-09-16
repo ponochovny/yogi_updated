@@ -5,7 +5,8 @@ import {
   boolean,
   timestamp,
   pgEnum,
-  unique
+  unique,
+  integer
 } from 'drizzle-orm/pg-core'
 import { user } from './auth-schema'
 import { userRoles } from '../../auth/config'
@@ -27,6 +28,11 @@ export const studios = pgTable('studios', {
   currency: text('currency').notNull(),
   bio: text('bio').notNull(),
   mission: text('mission').notNull(),
+  cancellationPolicy: text('cancellation_policy'),
+  liabilityWaiver: text('liability_waiver'),
+  liabilityWaiverVersion: integer('liability_waiver_version')
+    .default(1)
+    .notNull(),
   isArchived: boolean('is_archived').default(false).notNull(),
   ownerId: text('owner_id')
     .notNull()
@@ -51,6 +57,8 @@ export const studioPractitioners = pgTable(
     role: studioRoleEnum('role').default(userRoles.PRACTITIONER).notNull(),
 
     salaryActive: boolean('salary_active').default(true).notNull(),
+    compensationType: text('compensation_type').default('FLAT_RATE').notNull(),
+    compensationRate: integer('compensation_rate').default(0).notNull(),
     isActive: boolean('is_active').default(true).notNull(),
     createdAt: timestamp('created_at').defaultNow().notNull()
   },

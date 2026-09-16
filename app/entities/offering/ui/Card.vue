@@ -3,18 +3,22 @@ import { MapPinIcon, ClockIcon, UsersIcon, GlobeIcon } from '@lucide/vue'
 import { placeholderImageUrl } from '~/config/constants'
 import { Avatar, AvatarFallback, AvatarImage } from '~/shared/ui/avatar'
 import type { OfferingItem } from '../schema'
+import type { ExploreOfferingItem } from '../../explore/schema'
 
 const props = defineProps<{
-  offering: OfferingItem & {
-    minPrice?: number
-    currency?: string
-    spotsTotal?: number | null
-    spotsBooked?: number
-    spotsRemaining?: number | null
-    nearestSlotTime?: string | null
-  }
+  offering:
+    | (OfferingItem & {
+        minPrice?: number
+        currency?: string
+        spotsTotal?: number | null
+        spotsBooked?: number
+        spotsRemaining?: number | null
+        nearestSlotTime?: string | null
+      })
+    | ExploreOfferingItem
 }>()
 
+// check if locations field exists in object
 const isOnline = computed(() => !props.offering.location?.name)
 
 const spotsPercent = computed(() => {

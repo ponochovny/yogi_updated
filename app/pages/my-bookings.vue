@@ -108,7 +108,10 @@ const cancelBooking = async (id: string) => {
                 : booking.payment?.status || 'CONFIRMED'
             }}</span>
             <Button
-              v-if="booking.status === BookingStatus.CONFIRMED"
+              v-if="
+                booking.status === BookingStatus.CONFIRMED &&
+                new Date(booking.slot.startTime) >= new Date()
+              "
               variant="destructive"
               size="sm"
               @click="cancelBooking(booking.id)"

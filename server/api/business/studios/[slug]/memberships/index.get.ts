@@ -32,6 +32,7 @@ export default defineEventHandler(async event => {
         and(
           eq(pricingOptions.studioId, studio.id),
           inArray(pricingOptions.type, [
+            priceOptionsType.DROP_IN,
             priceOptionsType.MEMBERSHIP,
             priceOptionsType.PACK
           ])

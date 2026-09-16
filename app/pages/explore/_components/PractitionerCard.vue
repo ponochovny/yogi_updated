@@ -2,26 +2,10 @@
 import { MapPinIcon, BuildingIcon, UserCheckIcon } from '@lucide/vue'
 import { placeholderImageUrl } from '~/config/constants'
 import { Avatar, AvatarFallback, AvatarImage } from '~/shared/ui/avatar'
+import type { ExplorePractitionerItem } from '../../../entities/explore/schema'
 
 defineProps<{
-  practitioner: {
-    id: string
-    userId: string
-    name: string
-    image?: string | null
-    bio?: string | null
-    role: string
-    avatar?: string | null
-    studio: {
-      id: string
-      name: string
-      slug: string
-    }
-    studioLocations?: {
-      city: string
-      country: string
-    }[]
-  }
+  practitioner: ExplorePractitionerItem
 }>()
 </script>
 

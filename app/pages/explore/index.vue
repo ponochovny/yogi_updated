@@ -191,7 +191,7 @@
             <!-- Offerings -->
             <template v-if="activeType === 'offerings'">
               <OfferingCard
-                v-for="item in exploreData.items"
+                v-for="item in exploreData.items as ExploreOfferingItem[]"
                 :key="item.id"
                 :offering="item"
               />
@@ -199,7 +199,7 @@
             <!-- Studios -->
             <template v-else-if="activeType === 'studios'">
               <StudioCard
-                v-for="item in exploreData.items"
+                v-for="item in exploreData.items as ExploreStudioItem[]"
                 :key="item.id"
                 :studio="item"
               />
@@ -207,7 +207,7 @@
             <!-- Practitioners -->
             <template v-else-if="activeType === 'practitioners'">
               <PractitionerCard
-                v-for="item in exploreData.items"
+                v-for="item in exploreData.items as ExplorePractitionerItem[]"
                 :key="item.id"
                 :practitioner="item"
               />
@@ -260,6 +260,12 @@ import StudioCard from '~/entities/studio/ui/Card.vue'
 import PractitionerCard from '~/pages/explore/_components/PractitionerCard.vue'
 import ExploreFilters from '~/pages/explore/_components/ExploreFilters.vue'
 import Spinner from '~/shared/ui/spinner/Spinner.vue'
+import type {
+  ExploreOfferingItem,
+  ExplorePractitionerItem,
+  ExploreResultItem,
+  ExploreStudioItem
+} from '~/entities/explore/schema'
 
 usePageSeo('explore')
 
@@ -331,7 +337,7 @@ function buildQueryParams() {
 // Fetch data
 const pending = ref(false)
 const exploreData = ref<{
-  items: any[]
+  items: ExploreResultItem[]
   total: number
   page: number
   totalPages: number
@@ -343,7 +349,7 @@ async function fetchData() {
   try {
     const params = buildQueryParams()
     const data = await $fetch('/api/explore', { params })
-    exploreData.value = data as any
+    exploreData.value = data
 
     // Update URL without navigation
     const urlParams = new URLSearchParams()
@@ -375,7 +381,7 @@ async function loadMore() {
   try {
     filters.page = exploreData.value.page + 1
     const params = buildQueryParams()
-    const data = (await $fetch('/api/explore', { params })) as any
+    const data = await $fetch('/api/explore', { params })
     exploreData.value = {
       ...data,
       items: [...exploreData.value!.items, ...data.items]

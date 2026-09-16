@@ -15,6 +15,27 @@
       "when": 1789483406356,
       "tag": "0001_smooth_hex",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1789486356834,
+      "tag": "0002_loving_dorian_gray",
+      "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "7",
+      "when": 1789493124640,
+      "tag": "0003_wise_albert_cleary",
+      "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "7",
+      "when": 1789503756340,
+      "tag": "0004_mysterious_goliath",
+      "breakpoints": true
     }
   ]
 }

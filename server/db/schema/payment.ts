@@ -70,6 +70,7 @@ export const transactions = pgTable('transactions', {
 
   provider: paymentProviderEnum('provider').notNull(),
   providerTransactionId: text('provider_transaction_id'), // For external IDs from Stripe/LiqPay
+  failureReason: text('failure_reason'),
 
   status: transactionStatusEnum('status').default('PENDING').notNull(),
 

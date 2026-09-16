@@ -38,6 +38,8 @@ export default defineEventHandler(async event => {
         linkId: studioPractitioners.id,
         role: studioPractitioners.role,
         isActive: studioPractitioners.isActive,
+        compensationType: studioPractitioners.compensationType,
+        compensationRate: studioPractitioners.compensationRate,
         user: {
           id: user.id,
           name: user.name,

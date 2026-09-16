@@ -1,15 +1,29 @@
 import { offerings } from '~~/server/db/schema/offering'
-import { studios, studioLocations, studioPractitioners } from '~~/server/db/schema/studio'
+import {
+  studios,
+  studioLocations,
+  studioPractitioners
+} from '~~/server/db/schema/studio'
 import { user } from '~~/server/db/schema/auth-schema'
 import {
   MediaEntityTypeEnum,
   mediaFiles,
   MediaTypeEnum
 } from '~~/server/db/schema/_other'
-import { and, eq, sql, ilike, or, isNull, inArray, desc, asc, aliasedTable } from 'drizzle-orm'
+import {
+  and,
+  eq,
+  sql,
+  ilike,
+  or,
+  isNull,
+  inArray,
+  desc,
+  aliasedTable
+} from 'drizzle-orm'
 import { getEntityGallery } from '~~/server/utils/db-helpers'
 
-export default defineEventHandler(async (event) => {
+export default defineEventHandler(async event => {
   const db = useDb()
   const query = getQuery(event)
 
@@ -28,19 +42,37 @@ export default defineEventHandler(async (event) => {
   try {
     if (type === 'offerings') {
       return await fetchOfferings(db, {
-        category, date, timeOfDay, pricingType, city, searchQuery, onlineOnly, limit, offset
+        category,
+        date,
+        timeOfDay,
+        pricingType,
+        city,
+        searchQuery,
+        onlineOnly,
+        limit,
+        offset
       })
     } else if (type === 'studios') {
       return await fetchStudios(db, {
-        category, city, searchQuery, limit, offset
+        category,
+        city,
+        searchQuery,
+        limit,
+        offset
       })
     } else if (type === 'practitioners') {
       return await fetchPractitioners(db, {
-        city, searchQuery, limit, offset
+        city,
+        searchQuery,
+        limit,
+        offset
       })
     }
 
-    throwApiError(400, 'Invalid type parameter. Use: offerings, studios, practitioners')
+    throwApiError(
+      400,
+      'Invalid type parameter. Use: offerings, studios, practitioners'
+    )
   } catch (error) {
     if (isApiError(error)) throw error
     console.error('Failed to fetch explore data', error)
@@ -63,7 +95,10 @@ interface OfferingFilters {
   offset: number
 }
 
-async function fetchOfferings(db: ReturnType<typeof useDb>, filters: OfferingFilters) {
+async function fetchOfferings(
+  db: ReturnType<typeof useDb>,
+  filters: OfferingFilters
+) {
   const now = new Date()
   const studioLogo = aliasedTable(mediaFiles, 'studio_logo')
 
@@ -71,16 +106,12 @@ async function fetchOfferings(db: ReturnType<typeof useDb>, filters: OfferingFil
 
   // Category filter
   if (filters.category) {
-    conditions.push(
-      sql`${filters.category} = ANY(${studios.categories})`
-    )
+    conditions.push(sql`${filters.category} = ANY(${studios.categories})`)
   }
 
   // City filter
   if (filters.city) {
-    conditions.push(
-      ilike(studioLocations.city, `%${filters.city}%`)
-    )
+    conditions.push(ilike(studioLocations.city, `%${filters.city}%`))
   }
 
   // Search by name
@@ -126,9 +157,16 @@ async function fetchOfferings(db: ReturnType<typeof useDb>, filters: OfferingFil
   if (filters.timeOfDay) {
     let startHour = 0
     let endHour = 24
-    if (filters.timeOfDay === 'morning') { startHour = 5; endHour = 12 }
-    else if (filters.timeOfDay === 'afternoon') { startHour = 12; endHour = 17 }
-    else if (filters.timeOfDay === 'evening') { startHour = 17; endHour = 23 }
+    if (filters.timeOfDay === 'morning') {
+      startHour = 5
+      endHour = 12
+    } else if (filters.timeOfDay === 'afternoon') {
+      startHour = 12
+      endHour = 17
+    } else if (filters.timeOfDay === 'evening') {
+      startHour = 17
+      endHour = 23
+    }
 
     conditions.push(
       sql`EXISTS (
@@ -238,7 +276,7 @@ async function fetchOfferings(db: ReturnType<typeof useDb>, filters: OfferingFil
 
   return {
     success: true,
-    type: 'offerings',
+    type: 'offerings' as const,
     items,
     total,
     page: Math.floor(filters.offset / filters.limit) + 1,
@@ -257,13 +295,14 @@ interface StudioFilters {
   offset: number
 }
 
-async function fetchStudios(db: ReturnType<typeof useDb>, filters: StudioFilters) {
+async function fetchStudios(
+  db: ReturnType<typeof useDb>,
+  filters: StudioFilters
+) {
   const conditions = [eq(studios.isArchived, false)]
 
   if (filters.category) {
-    conditions.push(
-      sql`${filters.category} = ANY(${studios.categories})`
-    )
+    conditions.push(sql`${filters.category} = ANY(${studios.categories})`)
   }
 
   if (filters.searchQuery) {
@@ -314,20 +353,33 @@ async function fetchStudios(db: ReturnType<typeof useDb>, filters: StudioFilters
     .offset(filters.offset)
 
   if (!allStudios.length) {
-    return { success: true, type: 'studios', items: [], total, page: 1, totalPages: 0 }
+    return {
+      success: true,
+      type: 'studios' as const,
+      items: [],
+      total,
+      page: 1,
+      totalPages: 0
+    }
   }
 
   const studioIds = allStudios.map(s => s.id)
 
   // Get locations & media
   const [locations, media] = await Promise.all([
-    db.select().from(studioLocations).where(inArray(studioLocations.studioId, studioIds)),
-    db.select().from(mediaFiles).where(
-      and(
-        inArray(mediaFiles.entityId, studioIds),
-        eq(mediaFiles.entityType, MediaEntityTypeEnum.STUDIO)
+    db
+      .select()
+      .from(studioLocations)
+      .where(inArray(studioLocations.studioId, studioIds)),
+    db
+      .select()
+      .from(mediaFiles)
+      .where(
+        and(
+          inArray(mediaFiles.entityId, studioIds),
+          eq(mediaFiles.entityType, MediaEntityTypeEnum.STUDIO)
+        )
       )
-    )
   ])
 
   const items = allStudios.map(studio => {
@@ -337,7 +389,9 @@ async function fetchStudios(db: ReturnType<typeof useDb>, filters: StudioFilters
     return {
       ...studio,
       logo: studioMedia.find(m => m.type === MediaTypeEnum.LOGO)?.url ?? null,
-      gallery: studioMedia.filter(m => m.type === MediaTypeEnum.GALLERY).map(m => m.url),
+      gallery: studioMedia
+        .filter(m => m.type === MediaTypeEnum.GALLERY)
+        .map(m => m.url),
       locations: studioLocs.map(l => ({
         address: l.address,
         city: l.city,
@@ -348,7 +402,7 @@ async function fetchStudios(db: ReturnType<typeof useDb>, filters: StudioFilters
 
   return {
     success: true,
-    type: 'studios',
+    type: 'studios' as const,
     items,
     total,
     page: Math.floor(filters.offset / filters.limit) + 1,
@@ -366,13 +420,14 @@ interface PractitionerFilters {
   offset: number
 }
 
-async function fetchPractitioners(db: ReturnType<typeof useDb>, filters: PractitionerFilters) {
+async function fetchPractitioners(
+  db: ReturnType<typeof useDb>,
+  filters: PractitionerFilters
+) {
   const conditions = [eq(studioPractitioners.isActive, true)]
 
   if (filters.searchQuery) {
-    conditions.push(
-      ilike(user.name, `%${filters.searchQuery}%`)
-    )
+    conditions.push(ilike(user.name, `%${filters.searchQuery}%`))
   }
 
   if (filters.city) {
@@ -387,7 +442,9 @@ async function fetchPractitioners(db: ReturnType<typeof useDb>, filters: Practit
 
   // Count total
   const [totalResult] = await db
-    .select({ count: sql<number>`count(DISTINCT ${studioPractitioners.id})::int` })
+    .select({
+      count: sql<number>`count(DISTINCT ${studioPractitioners.id})::int`
+    })
     .from(studioPractitioners)
     .innerJoin(user, eq(studioPractitioners.userId, user.id))
     .innerJoin(studios, eq(studioPractitioners.studioId, studios.id))
@@ -438,7 +495,10 @@ async function fetchPractitioners(db: ReturnType<typeof useDb>, filters: Practit
   // Get locations for studio
   const studioIds = [...new Set(data.map(d => d.studio.id))]
   const locationsData = studioIds.length
-    ? await db.select().from(studioLocations).where(inArray(studioLocations.studioId, studioIds))
+    ? await db
+        .select()
+        .from(studioLocations)
+        .where(inArray(studioLocations.studioId, studioIds))
     : []
 
   const items = data.map(p => ({
@@ -451,7 +511,7 @@ async function fetchPractitioners(db: ReturnType<typeof useDb>, filters: Practit
 
   return {
     success: true,
-    type: 'practitioners',
+    type: 'practitioners' as const,
     items,
     total,
     page: Math.floor(filters.offset / filters.limit) + 1,

@@ -1,5 +1,10 @@
 import { offeringSlots } from '~~/server/db/schema/offering'
 import { bookings } from '~~/server/db/schema/booking'
+import {
+  transactions,
+  TransactionProvider,
+  TransactionStatus
+} from '~~/server/db/schema/payment'
 import { eq } from 'drizzle-orm'
 import { userRoles } from '~~/server/auth/config'
 import { updateBookingStatusSchema } from '~/entities/booking/schema'
@@ -30,10 +35,13 @@ export default defineEventHandler(async event => {
     .select({
       id: bookings.id,
       status: bookings.status,
+      transactionId: bookings.transactionId,
+      transactionProvider: transactions.provider,
       practitionerId: offeringSlots.practitionerId
     })
     .from(bookings)
     .innerJoin(offeringSlots, eq(bookings.slotId, offeringSlots.id))
+    .leftJoin(transactions, eq(bookings.transactionId, transactions.id))
     .where(eq(bookings.id, bookingId))
     .limit(1)
 
@@ -68,6 +76,17 @@ export default defineEventHandler(async event => {
       updatedAt: new Date()
     })
     .where(eq(bookings.id, bookingId))
+
+  if (
+    status === 'CONFIRMED' &&
+    currentBooking.transactionId &&
+    currentBooking.transactionProvider === TransactionProvider.CASH
+  ) {
+    await db
+      .update(transactions)
+      .set({ status: TransactionStatus.SUCCESS, updatedAt: new Date() })
+      .where(eq(transactions.id, currentBooking.transactionId))
+  }
 
   return { success: true, message: `Booking status updated to ${status}` }
 })

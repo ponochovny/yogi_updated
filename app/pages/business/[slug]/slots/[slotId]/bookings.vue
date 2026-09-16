@@ -100,12 +100,13 @@ const updateBookingStatus = async (bookingId: string, status: string) => {
             variant="ghost"
             @click="updateBookingStatus(booking.id, 'CONFIRMED')"
           >
-            Confirm
+            Confirm Cash
           </Button>
-          <div v-else-if="booking.status !== 'CANCELLED'" class="space-x-2">
+          <div v-if="booking.status !== 'CANCELLED'" class="space-x-2">
             <Button
               class="bg-blue-400 hover:bg-blue-500!"
               variant="ghost"
+              :disabled="booking.status === 'ATTENDED'"
               @click="updateBookingStatus(booking.id, 'ATTENDED')"
             >
               Attended
@@ -113,6 +114,7 @@ const updateBookingStatus = async (bookingId: string, status: string) => {
             <Button
               class="bg-red-500"
               variant="destructive"
+              :disabled="booking.status === 'NO_SHOW'"
               @click="updateBookingStatus(booking.id, 'NO_SHOW')"
             >
               No Show

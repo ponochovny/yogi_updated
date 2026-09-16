@@ -4,16 +4,18 @@ import { useForm } from 'vee-validate'
 import { toast } from 'vue-sonner'
 import {
   createMembershipSchema,
+  expiryRuleType,
   priceOptionsType,
   type CreateMembershipInput
 } from '~/entities/membership/schema'
 
 const props = defineProps<{
   studioSlug: string
+  membership?: (CreateMembershipInput & { id: string; price: number }) | null
 }>()
 
 const emit = defineEmits<{
-  (e: 'membershipCreated'): void
+  (e: 'membershipSaved'): void
 }>()
 
 const { data: paramsData } = await useFetch('/api/params', {
@@ -32,10 +34,32 @@ const { isSubmitting, handleSubmit, resetForm, values, setFieldValue } =
       price: 0,
       credits: 0,
       durationDays: 1,
+      expiryRule: expiryRuleType.DURATION,
+      expiryBufferDays: 0,
+      maxBookingsPerDay: null,
       isActive: true,
       applicableCategoryIds: []
     }
   })
+
+watch(
+  () => props.membership,
+  membership => {
+    if (membership) {
+      resetForm({
+        values: {
+          ...membership,
+          price: membership.price / 100,
+          description: membership.description || '',
+          applicableCategoryIds: membership.applicableCategoryIds || []
+        }
+      })
+    } else {
+      resetForm()
+    }
+  },
+  { immediate: true }
+)
 
 watch(
   () => values.type,
@@ -48,28 +72,32 @@ watch(
   }
 )
 
-const createMembership = async (values: CreateMembershipInput) => {
+const saveMembership = async (values: CreateMembershipInput) => {
   try {
     const response = await $fetch(
-      `/api/business/studios/${props.studioSlug}/memberships`,
+      `/api/business/studios/${props.studioSlug}/memberships${props.membership ? `/${props.membership.id}` : ''}`,
       {
-        method: 'POST',
+        method: props.membership ? 'PATCH' : 'POST',
         body: values
       }
     )
 
     if (response.membership) {
-      toast.success('Membership created successfully!')
+      toast.success(
+        props.membership
+          ? 'Membership updated successfully!'
+          : 'Membership created successfully!'
+      )
       resetForm()
-      emit('membershipCreated')
+      emit('membershipSaved')
     }
   } catch (error) {
-    toast.error('Failed to create membership. Please try again', {
+    toast.error('Failed to save membership. Please try again', {
       description: (error as Error).message || 'Unknown error.'
     })
   }
 }
-const submit = handleSubmit(createMembership)
+const submit = handleSubmit(saveMembership)
 </script>
 
 <template>
@@ -111,6 +139,9 @@ const submit = handleSubmit(createMembership)
                   <SelectValue placeholder="Select membership type" />
                 </SelectTrigger>
                 <SelectContent>
+                  <SelectItem :value="priceOptionsType.DROP_IN">
+                    Drop-in
+                  </SelectItem>
                   <SelectItem :value="priceOptionsType.PACK">
                     Class Pack
                   </SelectItem>
@@ -175,6 +206,63 @@ const submit = handleSubmit(createMembership)
             <FormMessage />
           </FormItem>
         </FormField>
+        <FormField v-slot="{ componentField }" name="expiryRule">
+          <FormItem>
+            <FormLabel>Expiry rule</FormLabel>
+            <FormControl>
+              <Select v-bind="componentField">
+                <SelectTrigger
+                  ><SelectValue placeholder="Select expiry rule"
+                /></SelectTrigger>
+                <SelectContent>
+                  <SelectItem :value="expiryRuleType.DURATION"
+                    >After duration</SelectItem
+                  >
+                  <SelectItem :value="expiryRuleType.END_OF_YEAR"
+                    >Until end of year</SelectItem
+                  >
+                </SelectContent>
+              </Select>
+            </FormControl>
+            <FormMessage />
+          </FormItem>
+        </FormField>
+        <FormField v-slot="{ componentField }" name="expiryBufferDays">
+          <FormItem>
+            <FormLabel>Year-end buffer (days)</FormLabel>
+            <FormControl>
+              <Input
+                v-bind="componentField"
+                type="number"
+                min="0"
+                max="31"
+                :disabled="values.expiryRule !== expiryRuleType.END_OF_YEAR"
+              />
+            </FormControl>
+            <FormDescription
+              >Extra days for passes purchased in November or
+              December.</FormDescription
+            >
+            <FormMessage />
+          </FormItem>
+        </FormField>
+        <FormField v-slot="{ componentField }" name="maxBookingsPerDay">
+          <FormItem>
+            <FormLabel>Max bookings per day</FormLabel>
+            <FormControl>
+              <Input
+                v-bind="componentField"
+                type="number"
+                min="1"
+                placeholder="Unlimited"
+              />
+            </FormControl>
+            <FormDescription
+              >Leave empty for unlimited bookings.</FormDescription
+            >
+            <FormMessage />
+          </FormItem>
+        </FormField>
         <FormField v-slot="{ componentField }" name="applicableCategoryIds">
           <FormItem>
             <FormLabel>Categories</FormLabel>
@@ -215,7 +303,7 @@ const submit = handleSubmit(createMembership)
       </div>
       <Button type="submit" class="w-full" :disabled="isSubmitting">
         <Spinner v-if="isSubmitting" class="animate-spin" />
-        Create Membership
+        {{ props.membership ? 'Save Changes' : 'Create Membership' }}
       </Button>
     </form>
   </div>

@@ -2,11 +2,14 @@
 import { MapPinIcon, LayersIcon } from '@lucide/vue'
 import { placeholderImageUrl } from '~/config/constants'
 import type { StudioItem } from '../schema'
+import type { ExploreStudioItem } from '../../explore/schema'
 
 defineProps<{
-  studio: StudioItem & {
-    offeringCount?: number
-  }
+  studio:
+    | (StudioItem & {
+        offeringCount?: number
+      })
+    | ExploreStudioItem
 }>()
 </script>
 

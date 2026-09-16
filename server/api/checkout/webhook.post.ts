@@ -31,6 +31,7 @@ import {
   revertPendingCheckoutState,
   cleanupExpiredPendingCheckoutState
 } from '~~/server/utils/checkout'
+import { calculatePricingValidUntil } from '~~/server/utils/pricing-expiry'
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY || '', {
   apiVersion: '2026-06-24.dahlia'
@@ -65,6 +66,32 @@ export default defineEventHandler(async event => {
   }
 
   const db = useDb()
+
+  if (
+    stripeEvent.type === 'checkout.session.async_payment_failed' ||
+    stripeEvent.type === 'payment_intent.payment_failed'
+  ) {
+    const payment = stripeEvent.data.object as
+      | Stripe.Checkout.Session
+      | Stripe.PaymentIntent
+    const transactionId = payment.metadata?.transactionId
+    if (transactionId) {
+      const reason =
+        'last_payment_error' in payment && payment.last_payment_error?.message
+          ? payment.last_payment_error.message
+          : 'The payment provider reported that the payment failed.'
+      await db
+        .update(transactions)
+        .set({
+          status: TransactionStatus.FAILED,
+          failureReason: reason,
+          providerTransactionId: payment.id,
+          updatedAt: new Date()
+        })
+        .where(eq(transactions.id, transactionId))
+    }
+    return { received: true }
+  }
 
   if (stripeEvent.type === 'checkout.session.expired') {
     const session = stripeEvent.data.object as Stripe.Checkout.Session
@@ -176,8 +203,11 @@ export default defineEventHandler(async event => {
         }
 
         const validFrom = new Date()
-        const validUntil = new Date(validFrom)
-        validUntil.setDate(validUntil.getDate() + durationDays)
+        const validUntil = calculatePricingValidUntil(validFrom, {
+          durationDays,
+          expiryRule: pricing.expiryRule,
+          expiryBufferDays: pricing.expiryBufferDays
+        })
 
         // Add the pass to the user wallet
         await tx.insert(userPasses).values({

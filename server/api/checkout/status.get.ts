@@ -25,6 +25,7 @@ import {
   MediaTypeEnum
 } from '~~/server/db/schema/_other'
 import { BookingStatus } from '~/entities/booking/schema'
+import { calculatePricingValidUntil } from '~~/server/utils/pricing-expiry'
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY || '', {
   apiVersion: '2026-06-24.dahlia'
@@ -119,8 +120,11 @@ export default defineEventHandler(async event => {
                   if (pricing) {
                     const durationDays = Number(pricing.durationDays) || 30
                     const validFrom = new Date()
-                    const validUntil = new Date(validFrom)
-                    validUntil.setDate(validUntil.getDate() + durationDays)
+                    const validUntil = calculatePricingValidUntil(validFrom, {
+                      durationDays,
+                      expiryRule: pricing.expiryRule,
+                      expiryBufferDays: pricing.expiryBufferDays
+                    })
 
                     await tx.insert(userPasses).values({
                       userId: user.id,

@@ -92,13 +92,13 @@ export const useBusinessMenu = () => {
     menuLinks: [
       {
         name: 'Dashboard',
-        url: `${PagesConfig.BUSINESS}/${slug.value}`,
+        url: `${PagesConfig.BUSINESS}/${slug.value}/dashboard`,
         icon: ChartNoAxesCombinedIcon,
         roles: [userRoles.BUSINESS]
       },
       {
-        name: 'Calendar',
-        url: `${PagesConfig.BUSINESS}/${slug.value}/calendar`,
+        name: 'Schedule',
+        url: `${PagesConfig.BUSINESS}/${slug.value}/schedule`,
         icon: CalendarClockIcon,
         roles: [userRoles.BUSINESS, userRoles.MANAGER, userRoles.PRACTITIONER]
       },
@@ -109,8 +109,8 @@ export const useBusinessMenu = () => {
         roles: [userRoles.BUSINESS]
       },
       {
-        name: 'Members',
-        url: `${PagesConfig.BUSINESS}/${slug.value}/members`,
+        name: 'Team',
+        url: `${PagesConfig.BUSINESS}/${slug.value}/team`,
         icon: UsersIcon,
         roles: [userRoles.BUSINESS]
       },
@@ -118,6 +118,12 @@ export const useBusinessMenu = () => {
         name: 'Memberships',
         url: `${PagesConfig.BUSINESS}/${slug.value}/memberships`,
         icon: CrownIcon,
+        roles: [userRoles.BUSINESS]
+      },
+      {
+        name: 'Transactions',
+        url: `${PagesConfig.BUSINESS}/${slug.value}/transactions`,
+        icon: ShoppingCartIcon,
         roles: [userRoles.BUSINESS]
       },
       {

@@ -94,7 +94,7 @@ await db.transaction(async (tx) => {
 ## Types
 
 ```TS
-import { bookings } from '~~/server/db/schema/booking' // <-- Drizzle Schema
+import type { bookings } from '~~/server/db/schema/booking' // <-- Drizzle Schema
 typeof bookings.$inferSelect // <-- Type of schema. Schema converted into type
 ```
 
