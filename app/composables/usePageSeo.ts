@@ -1,4 +1,4 @@
-import { computed, toValue } from 'vue'
+import { computed, toValue, type ComputedRef } from 'vue'
 import {
   pageSeoPresets,
   siteSeoDefaults,
@@ -6,6 +6,8 @@ import {
   type PageSeoInput,
   type SeoPresetKey
 } from '../config/seo.config'
+
+export type PageSeoRouteInput = string | { path?: string } | null
 
 export interface ResolvedSeoResult {
   title: string
@@ -132,16 +134,69 @@ export function resolveSeoConfig(
  *   title: () => offering.value?.name,
  *   description: () => offering.value?.description
  * })
+ *
+ * @example With explicit route or path (e.g. in middleware):
+ * usePageSeo(to.meta.seo, undefined, to.path)
  */
 export function usePageSeo(
   input?: SeoPresetKey | PageSeoInput | (() => PageSeoConfig),
-  overrides?: PageSeoInput
-) {
-  const route = useRoute()
-  const runtimeConfig = useRuntimeConfig()
+  overrides?: PageSeoInput,
+  routeOrPath?: PageSeoRouteInput
+): ComputedRef<ResolvedSeoResult>
+export function usePageSeo(
+  input?: SeoPresetKey | PageSeoInput | (() => PageSeoConfig),
+  routeOrPath?: PageSeoRouteInput
+): ComputedRef<ResolvedSeoResult>
+export function usePageSeo(
+  input?: SeoPresetKey | PageSeoInput | (() => PageSeoConfig),
+  overridesOrRoute?: PageSeoInput | PageSeoRouteInput,
+  routeOrPath?: PageSeoRouteInput
+): ComputedRef<ResolvedSeoResult> {
+  let overrides: PageSeoInput | undefined
+  let targetRouteOrPath: PageSeoRouteInput | undefined
+
+  if (
+    typeof overridesOrRoute === 'string' ||
+    (overridesOrRoute &&
+      'path' in overridesOrRoute &&
+      !('title' in overridesOrRoute ||
+        'description' in overridesOrRoute ||
+        'image' in overridesOrRoute ||
+        'canonical' in overridesOrRoute ||
+        'noindex' in overridesOrRoute ||
+        'keywords' in overridesOrRoute ||
+        'twitterCard' in overridesOrRoute ||
+        'jsonLd' in overridesOrRoute))
+  ) {
+    overrides = undefined
+    targetRouteOrPath = overridesOrRoute
+  } else {
+    overrides = overridesOrRoute as PageSeoInput | undefined
+    targetRouteOrPath = routeOrPath
+  }
+
+  let route: ReturnType<typeof useRoute> | undefined
+  if (!targetRouteOrPath) {
+    try {
+      route = typeof useRoute === 'function' ? useRoute() : undefined
+    } catch {
+      route = undefined
+    }
+  }
+
+  let runtimeConfig: ReturnType<typeof useRuntimeConfig> | undefined
+  try {
+    runtimeConfig =
+      typeof useRuntimeConfig === 'function' ? useRuntimeConfig() : undefined
+  } catch {
+    runtimeConfig = undefined
+  }
 
   const resolved = computed(() => {
-    const currentPath = route?.path || ''
+    const rawTarget = toValue(targetRouteOrPath)
+    const explicitPath =
+      typeof rawTarget === 'string' ? rawTarget : rawTarget?.path
+    const currentPath = explicitPath ?? route?.path ?? ''
     const baseUrl =
       (runtimeConfig?.public?.baseUrl as string) ||
       (typeof window !== 'undefined' ? window.location.origin : '')
@@ -150,49 +205,53 @@ export function usePageSeo(
   })
 
   // Register meta tags via Nuxt's useSeoMeta
-  useSeoMeta({
-    title: () => resolved.value.title || undefined,
-    ogTitle: () => resolved.value.fullTitle,
-    description: () => resolved.value.description,
-    ogDescription: () => resolved.value.description,
-    ogImage: () => resolved.value.image,
-    ogType: () => resolved.value.type,
-    ogSiteName: siteSeoDefaults.siteName,
-    ogUrl: () => resolved.value.canonical || undefined,
-    twitterCard: () => resolved.value.twitterCard,
-    twitterTitle: () => resolved.value.fullTitle,
-    twitterDescription: () => resolved.value.description,
-    twitterImage: () => resolved.value.image,
-    robots: () => resolved.value.robots
-  })
+  if (typeof useSeoMeta === 'function') {
+    useSeoMeta({
+      title: () => resolved.value.title || undefined,
+      ogTitle: () => resolved.value.fullTitle,
+      description: () => resolved.value.description,
+      ogDescription: () => resolved.value.description,
+      ogImage: () => resolved.value.image,
+      ogType: () => resolved.value.type,
+      ogSiteName: siteSeoDefaults.siteName,
+      ogUrl: () => resolved.value.canonical || undefined,
+      twitterCard: () => resolved.value.twitterCard,
+      twitterTitle: () => resolved.value.fullTitle,
+      twitterDescription: () => resolved.value.description,
+      twitterImage: () => resolved.value.image,
+      robots: () => resolved.value.robots
+    })
+  }
 
   // Register canonical link and custom tags via Nuxt's useHead
-  useHead(() => {
-    const links: { rel: string; href: string }[] = []
-    if (resolved.value.canonical) {
-      links.push({ rel: 'canonical', href: resolved.value.canonical })
-    }
+  if (typeof useHead === 'function') {
+    useHead(() => {
+      const links: { rel: 'canonical'; href: string }[] = []
+      if (resolved.value.canonical) {
+        links.push({ rel: 'canonical', href: resolved.value.canonical })
+      }
 
-    const meta: { name: string; content: string }[] = []
-    if (resolved.value.keywords) {
-      meta.push({ name: 'keywords', content: resolved.value.keywords })
-    }
+      const meta: { name: string; content: string }[] = []
+      if (resolved.value.keywords) {
+        meta.push({ name: 'keywords', content: resolved.value.keywords })
+      }
 
-    const scripts: { type: string; children: string }[] = []
-    if (resolved.value.jsonLd) {
-      scripts.push({
-        type: 'application/ld+json',
-        children: JSON.stringify(resolved.value.jsonLd)
-      })
-    }
+      const scripts: { type: 'application/ld+json'; innerHTML: string }[] = []
+      if (resolved.value.jsonLd) {
+        scripts.push({
+          type: 'application/ld+json',
+          innerHTML: JSON.stringify(resolved.value.jsonLd)
+        })
+      }
 
-    return {
-      title: resolved.value.title || undefined,
-      link: links,
-      meta,
-      script: scripts
-    }
-  })
+      return {
+        title: resolved.value.title || undefined,
+        link: links,
+        meta,
+        script: scripts
+      }
+    })
+  }
 
   return resolved
 }

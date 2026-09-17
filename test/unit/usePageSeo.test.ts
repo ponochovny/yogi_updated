@@ -1,6 +1,6 @@
-import { describe, expect, it } from 'vitest'
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { ref } from 'vue'
-import { resolveSeoConfig } from '../../app/composables/usePageSeo'
+import { resolveSeoConfig, usePageSeo } from '../../app/composables/usePageSeo'
 import { pageSeoPresets, siteSeoDefaults } from '../../app/config/seo.config'
 
 describe('resolveSeoConfig', () => {
@@ -102,5 +102,75 @@ describe('resolveSeoConfig', () => {
     expect(result.description).toBe(siteSeoDefaults.defaultDescription)
     expect(result.image).toBe(siteSeoDefaults.defaultImage)
     expect(result.robots).toBeUndefined()
+  })
+})
+
+describe('usePageSeo', () => {
+  const mockUseRoute = vi.fn()
+  const mockUseRuntimeConfig = vi.fn(() => ({
+    public: { baseUrl: 'https://yogi.app' }
+  }))
+
+  beforeEach(() => {
+    vi.stubGlobal('useRoute', mockUseRoute)
+    vi.stubGlobal('useRuntimeConfig', mockUseRuntimeConfig)
+    mockUseRoute.mockReset()
+    mockUseRuntimeConfig.mockClear()
+  })
+
+  afterEach(() => {
+    vi.unstubAllGlobals()
+  })
+
+  it('does not call useRoute when explicit path string is provided (middleware caller pattern)', () => {
+    const result = usePageSeo('termsOfService', undefined, '/middleware-path')
+
+    expect(mockUseRoute).not.toHaveBeenCalled()
+    expect(result.value.canonical).toBe('https://yogi.app/middleware-path')
+    expect(result.value.title).toBe(pageSeoPresets.termsOfService.title)
+  })
+
+  it('does not call useRoute when explicit path is passed as second argument', () => {
+    const result = usePageSeo('termsOfService', '/second-arg-path')
+
+    expect(mockUseRoute).not.toHaveBeenCalled()
+    expect(result.value.canonical).toBe('https://yogi.app/second-arg-path')
+  })
+
+  it('does not call useRoute when explicit route object is provided', () => {
+    const mockToRoute = { path: '/explore/studios', fullPath: '/explore/studios?search=yoga' }
+    const result = usePageSeo('home', undefined, mockToRoute)
+
+    expect(mockUseRoute).not.toHaveBeenCalled()
+    expect(result.value.canonical).toBe('https://yogi.app/explore/studios')
+  })
+
+  it('does not call useRoute when explicit route object is passed as second argument', () => {
+    const mockToRoute = { path: '/route-object' }
+    const result = usePageSeo('home', mockToRoute)
+
+    expect(mockUseRoute).not.toHaveBeenCalled()
+    expect(result.value.canonical).toBe('https://yogi.app/route-object')
+  })
+
+  it('calls useRoute when no explicit route or path is provided (preserving existing caller behavior)', () => {
+    mockUseRoute.mockReturnValue({ path: '/page-route' })
+
+    const result = usePageSeo('termsOfService')
+
+    expect(mockUseRoute).toHaveBeenCalled()
+    expect(result.value.canonical).toBe('https://yogi.app/page-route')
+  })
+
+  it('preserves overrides when explicit route or path is provided as third argument', () => {
+    const result = usePageSeo(
+      'termsOfService',
+      { title: 'Custom Terms' },
+      '/custom-path'
+    )
+
+    expect(mockUseRoute).not.toHaveBeenCalled()
+    expect(result.value.title).toBe('Custom Terms')
+    expect(result.value.canonical).toBe('https://yogi.app/custom-path')
   })
 })
