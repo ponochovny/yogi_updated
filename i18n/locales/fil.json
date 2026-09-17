@@ -237,6 +237,7 @@
     "afternoon": "Hapon",
     "evening": "Gabi",
     "pricingType": "Uri ng Pagbabayad",
+    "allPricingTypes": "Lahat ng Uri ng Pagbabayad",
     "city": "Lungsod",
     "cityPlaceholder": "Ilagay ang lungsod...",
     "onlineOnly": "Online Lang",

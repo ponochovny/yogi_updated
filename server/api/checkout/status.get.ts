@@ -77,12 +77,14 @@ export default defineEventHandler(async event => {
     }
 
     if (session?.payment_status === 'paid' || session?.status === 'complete') {
-      await fulfillCheckoutPayment(
+      const fulfilled = await fulfillCheckoutPayment(
         db,
         transactionId,
         session.metadata?.pricingOptionId
       )
-      txRecord.status = TransactionStatus.SUCCESS
+      if (fulfilled) {
+        txRecord.status = TransactionStatus.SUCCESS
+      }
     }
   }
 

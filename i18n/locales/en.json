@@ -237,6 +237,7 @@
     "afternoon": "Afternoon",
     "evening": "Evening",
     "pricingType": "Pricing Type",
+    "allPricingTypes": "All Pricing Types",
     "city": "City",
     "cityPlaceholder": "Enter city...",
     "onlineOnly": "Online Only",
