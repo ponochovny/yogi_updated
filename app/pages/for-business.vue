@@ -102,7 +102,7 @@ const plans = computed(() => [
 <template>
   <div class="mx-auto max-w-7xl px-4 pb-20 pt-8 sm:px-6 lg:px-8">
     <section
-      class="relative overflow-hidden rounded-[32px] border border-border/60 bg-gradient-to-br from-primary/10 via-background to-accent/5 px-6 py-12 shadow-xl shadow-primary/5 sm:px-10 lg:px-16 lg:py-20"
+      class="relative overflow-hidden rounded-[32px] border border-border/60 bg-linear-to-br from-primary/10 via-background to-accent/5 px-6 py-12 shadow-xl shadow-primary/5 sm:px-10 lg:px-16 lg:py-20"
     >
       <div
         class="absolute -right-10 top-8 h-40 w-40 rounded-full bg-primary/10 blur-3xl"
@@ -342,7 +342,7 @@ const plans = computed(() => [
         </div>
 
         <div
-          class="rounded-[28px] border border-primary/20 bg-gradient-to-br from-primary/8 to-accent/5 p-6"
+          class="rounded-[28px] border border-primary/20 bg-linear-to-br from-primary/8 to-accent/5 p-6"
         >
           <div class="flex items-center gap-3">
             <div class="rounded-2xl bg-primary/10 p-3 text-primary">

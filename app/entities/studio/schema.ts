@@ -5,6 +5,10 @@ export type StudioItem = InternalApi['/api/studios']['get']['studios'][number]
 export type OwnerStudioItem =
   InternalApi['/api/business/studios/:slug']['get']['studio']
 
+// api/home-data
+export type HomePopularStudioItem =
+  InternalApi['/api/home-data']['get']['data']['popularStudios'][number]
+
 export const createStudioSchema = z.object({
   name: z.string().trim().min(1, 'Studio name is required'),
   currency: z.string().trim().min(3),

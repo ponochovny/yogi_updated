@@ -7,7 +7,7 @@
     <section class="relative -mt-20 overflow-hidden">
       <!-- Background gradient -->
       <div
-        class="absolute inset-0 bg-gradient-to-br from-primary/10 via-accent/5 to-background z-0"
+        class="absolute inset-0 bg-linear-to-br from-primary/10 via-accent/5 to-background z-0"
       />
       <div
         class="absolute inset-0 bg-[radial-gradient(ellipse_at_top_right,var(--tw-gradient-stops))] from-primary/15 via-transparent to-transparent z-0"
@@ -29,7 +29,7 @@
             class="text-4xl sm:text-5xl lg:text-6xl font-bold tracking-tight leading-[1.1]"
           >
             <span
-              class="bg-gradient-to-r from-foreground via-foreground to-foreground/70 bg-clip-text"
+              class="bg-linear-to-r from-foreground via-foreground to-foreground/70 bg-clip-text"
             >
               {{ $t('home.heroTitle') }}
             </span>
@@ -133,7 +133,7 @@
             v-for="(cat, index) in homeData.popularCategories"
             :key="cat.id"
             :to="`/explore?category=${cat.id}`"
-            class="group relative overflow-hidden rounded-2xl aspect-[4/3] border border-border/50 hover:border-primary/40 transition-all duration-300 hover:shadow-xl hover:shadow-primary/10"
+            class="group relative overflow-hidden rounded-2xl aspect-4/3 border border-border/50 hover:border-primary/40 transition-all duration-300 hover:shadow-xl hover:shadow-primary/10"
           >
             <img
               :src="getCategoryImage(cat.slug, index)"
@@ -141,7 +141,7 @@
               class="absolute inset-0 w-full h-full object-cover transition-transform duration-500"
             />
             <div
-              class="absolute inset-0 bg-gradient-to-t from-black/85 via-black/35 to-transparent"
+              class="absolute inset-0 bg-linear-to-t from-black/85 via-black/35 to-transparent"
             />
             <div
               class="relative z-10 flex flex-col justify-end h-full p-4 text-white"
@@ -177,7 +177,7 @@
         </div>
         <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
           <StudioCard
-            v-for="studio in homeData.popularStudios"
+            v-for="studio in homeData.popularStudios as HomePopularStudioItem[]"
             :key="studio.id"
             :studio="studio"
           />
@@ -385,11 +385,11 @@
             <!-- Connector line (desktop) -->
             <div
               v-if="index < bookingSteps.length - 1"
-              class="hidden lg:block absolute top-8 left-[60%] w-[80%] h-0.5 bg-gradient-to-r from-primary/30 to-primary/10"
+              class="hidden lg:block absolute top-8 left-[60%] w-[80%] h-0.5 bg-linear-to-r from-primary/30 to-primary/10"
             />
 
             <div
-              class="relative z-10 inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-gradient-to-br from-primary/10 to-accent/10 border border-primary/20 mb-4 group-hover:scale-110 transition-transform duration-300"
+              class="relative z-10 inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-linear-to-br from-primary/10 to-accent/10 border border-primary/20 mb-4 group-hover:scale-110 transition-transform duration-300"
             >
               <component :is="step.icon" class="size-7 text-primary" />
             </div>
@@ -459,9 +459,9 @@
             </div>
 
             <!-- Decorative illustration side -->
-            <div class="flex-shrink-0 w-64 h-64 lg:w-80 lg:h-80 relative">
+            <div class="shrink-0 w-64 h-64 lg:w-80 lg:h-80 relative">
               <div
-                class="absolute inset-0 rounded-3xl bg-gradient-to-br from-primary/20 to-accent/20 backdrop-blur-sm border border-background/10 dark:border-border/30 flex items-center justify-center"
+                class="absolute inset-0 rounded-3xl bg-linear-to-br from-primary/20 to-accent/20 backdrop-blur-sm border border-background/10 dark:border-border/30 flex items-center justify-center"
               >
                 <NuxtImg
                   src="/img/logoBg.svg"
@@ -493,6 +493,7 @@ import {
 } from '@lucide/vue'
 import OfferingCard from '~/entities/offering/ui/Card.vue'
 import StudioCard from '~/entities/studio/ui/Card.vue'
+import type { HomePopularStudioItem } from '../entities/studio/schema'
 
 usePageSeo('home')
 

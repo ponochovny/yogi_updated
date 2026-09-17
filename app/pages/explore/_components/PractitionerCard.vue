@@ -15,7 +15,7 @@ defineProps<{
   >
     <!-- Top banner / header with decorative gradient -->
     <div
-      class="h-20 bg-gradient-to-r from-primary/15 via-accent/10 to-primary/5 relative"
+      class="h-20 bg-linear-to-r from-primary/15 via-accent/10 to-primary/5 relative"
     >
       <!-- Role Badge -->
       <div class="absolute top-3 right-3">

@@ -1,7 +1,7 @@
 <script lang="ts" setup>
 import { MapPinIcon, LayersIcon } from '@lucide/vue'
 import { placeholderImageUrl } from '~/config/constants'
-import type { StudioItem } from '../schema'
+import type { HomePopularStudioItem, StudioItem } from '../schema'
 import type { ExploreStudioItem } from '../../explore/schema'
 
 defineProps<{
@@ -10,6 +10,7 @@ defineProps<{
         offeringCount?: number
       })
     | ExploreStudioItem
+    | HomePopularStudioItem
 }>()
 </script>
 

@@ -315,7 +315,7 @@ const googleMapsUrl = computed(() => {
             class="absolute size-24 rounded-full bg-emerald-500/20 blur-xl animate-pulse"
           />
           <div
-            class="relative size-20 rounded-full bg-gradient-to-tr from-emerald-500 to-teal-400 text-white flex items-center justify-center shadow-lg shadow-emerald-500/25"
+            class="relative size-20 rounded-full bg-linear-to-tr from-emerald-500 to-teal-400 text-white flex items-center justify-center shadow-lg shadow-emerald-500/25"
           >
             <CheckCircle2Icon class="size-11 stroke-[2.2]" />
           </div>

@@ -91,7 +91,7 @@ const formatMoney = (amountInCents?: number, currency: string = 'USD') => {
       class="pointer-events-none absolute inset-x-0 -top-10 -z-10 transform-gpu overflow-hidden blur-3xl sm:-top-20"
     >
       <div
-        class="relative left-[calc(50%-15rem)] aspect-1155/678 w-[36rem] -translate-x-1/2 rotate-[25deg] bg-gradient-to-tr from-amber-500/15 via-rose-500/15 to-primary/10 opacity-70 sm:left-[calc(50%-18rem)] sm:w-[50rem]"
+        class="relative left-[calc(50%-15rem)] aspect-1155/678 w-[36rem] -translate-x-1/2 rotate-[25deg] bg-linear-to-tr from-amber-500/15 via-rose-500/15 to-primary/10 opacity-70 sm:left-[calc(50%-18rem)] sm:w-[50rem]"
       />
     </div>
 
