@@ -15,8 +15,10 @@ import {
   mediaFiles,
   MediaTypeEnum
 } from '~~/server/db/schema/_other'
-import { revertPendingCheckoutState } from '~~/server/utils/checkout'
-import { BookingStatus } from '~/entities/booking/schema'
+import {
+  fulfillCheckoutPayment,
+  revertPendingCheckoutState
+} from '~~/server/utils/checkout'
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY || '', {
   apiVersion: '2026-06-24.dahlia'
@@ -76,51 +78,39 @@ export default defineEventHandler(async event => {
     txRecord.providerTransactionId &&
     process.env.STRIPE_SECRET_KEY
   ) {
+    let session: Stripe.Checkout.Session | undefined
     try {
-      const session = await stripe.checkout.sessions.retrieve(
+      session = await stripe.checkout.sessions.retrieve(
         txRecord.providerTransactionId
       )
 
       stripeStatusKnown = true
-
-      if (session.payment_status === 'paid' || session.status === 'complete') {
-        // Payment was completed in Stripe! Mark SUCCESS and confirm booking
-        await db
-          .update(transactions)
-          .set({ status: TransactionStatus.SUCCESS, updatedAt: new Date() })
-          .where(eq(transactions.id, transactionId))
-
-        const [pendingBooking] = await db
-          .select({ id: bookings.id })
-          .from(bookings)
-          .where(eq(bookings.transactionId, transactionId))
-          .limit(1)
-
-        if (pendingBooking) {
-          await db
-            .update(bookings)
-            .set({ status: BookingStatus.CONFIRMED, updatedAt: new Date() })
-            .where(eq(bookings.id, pendingBooking.id))
-        }
-
-        return {
-          success: true,
-          isAlreadyPaid: true,
-          transaction: {
-            id: txRecord.id,
-            amount: txRecord.amount,
-            currency: txRecord.currency,
-            status: TransactionStatus.SUCCESS,
-            createdAt: txRecord.createdAt
-          },
-          successUrl: `/checkout/success?transactionId=${txRecord.id}`
-        }
-      }
     } catch (stripeErr) {
       console.warn(
         'Could not verify Stripe session status on cancel check:',
         stripeErr
       )
+    }
+
+    if (session?.payment_status === 'paid' || session?.status === 'complete') {
+      await fulfillCheckoutPayment(
+        db,
+        transactionId,
+        session.metadata?.pricingOptionId
+      )
+
+      return {
+        success: true,
+        isAlreadyPaid: true,
+        transaction: {
+          id: txRecord.id,
+          amount: txRecord.amount,
+          currency: txRecord.currency,
+          status: TransactionStatus.SUCCESS,
+          createdAt: txRecord.createdAt
+        },
+        successUrl: `/checkout/success?transactionId=${txRecord.id}`
+      }
     }
   }
 

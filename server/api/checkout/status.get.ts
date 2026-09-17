@@ -4,8 +4,7 @@ import Stripe from 'stripe'
 import {
   transactions,
   TransactionStatus,
-  userPasses,
-  UserPassStatus
+  userPasses
 } from '~~/server/db/schema/payment'
 import { bookings } from '~~/server/db/schema/booking'
 import {
@@ -24,8 +23,7 @@ import {
   mediaFiles,
   MediaTypeEnum
 } from '~~/server/db/schema/_other'
-import { BookingStatus } from '~/entities/booking/schema'
-import { calculatePricingValidUntil } from '~~/server/utils/pricing-expiry'
+import { fulfillCheckoutPayment } from '~~/server/utils/checkout'
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY || '', {
   apiVersion: '2026-06-24.dahlia'
@@ -66,90 +64,25 @@ export default defineEventHandler(async event => {
     txRecord.providerTransactionId &&
     process.env.STRIPE_SECRET_KEY
   ) {
+    let session: Stripe.Checkout.Session | undefined
     try {
-      const session = await stripe.checkout.sessions.retrieve(
+      session = await stripe.checkout.sessions.retrieve(
         txRecord.providerTransactionId
       )
-
-      if (session.payment_status === 'paid' || session.status === 'complete') {
-        await db.transaction(async tx => {
-          const [lockedTx] = await tx
-            .select()
-            .from(transactions)
-            .where(eq(transactions.id, transactionId))
-            .for('update')
-
-          if (lockedTx && lockedTx.status === TransactionStatus.PENDING) {
-            await tx
-              .update(transactions)
-              .set({ status: TransactionStatus.SUCCESS, updatedAt: new Date() })
-              .where(eq(transactions.id, transactionId))
-
-            txRecord.status = TransactionStatus.SUCCESS
-
-            // If there is an associated pending booking, confirm it
-            const [pendingBooking] = await tx
-              .select()
-              .from(bookings)
-              .where(eq(bookings.transactionId, transactionId))
-
-            if (
-              pendingBooking &&
-              pendingBooking.status === BookingStatus.PENDING
-            ) {
-              await tx
-                .update(bookings)
-                .set({ status: BookingStatus.CONFIRMED, updatedAt: new Date() })
-                .where(eq(bookings.id, pendingBooking.id))
-            } else if (!pendingBooking) {
-              // Pass purchase: check if pass is already inserted
-              const [existingPass] = await tx
-                .select()
-                .from(userPasses)
-                .where(eq(userPasses.transactionId, transactionId))
-
-              if (!existingPass) {
-                const pricingOptionId = session.metadata?.pricingOptionId
-                if (pricingOptionId) {
-                  const [pricing] = await tx
-                    .select()
-                    .from(pricingOptions)
-                    .where(eq(pricingOptions.id, pricingOptionId))
-                    .limit(1)
-
-                  if (pricing) {
-                    const durationDays = Number(pricing.durationDays) || 30
-                    const validFrom = new Date()
-                    const validUntil = calculatePricingValidUntil(validFrom, {
-                      durationDays,
-                      expiryRule: pricing.expiryRule,
-                      expiryBufferDays: pricing.expiryBufferDays
-                    })
-
-                    await tx.insert(userPasses).values({
-                      userId: user.id,
-                      studioId: pricing.studioId,
-                      pricingOptionId: pricing.id,
-                      transactionId: transactionId,
-                      status: UserPassStatus.ACTIVE,
-                      remainingCredits: pricing.credits,
-                      validFrom,
-                      validUntil,
-                      createdAt: new Date(),
-                      updatedAt: new Date()
-                    })
-                  }
-                }
-              }
-            }
-          }
-        })
-      }
     } catch (stripeErr) {
       console.warn(
         'Could not verify Stripe session in checkout status API:',
         stripeErr
       )
+    }
+
+    if (session?.payment_status === 'paid' || session?.status === 'complete') {
+      await fulfillCheckoutPayment(
+        db,
+        transactionId,
+        session.metadata?.pricingOptionId
+      )
+      txRecord.status = TransactionStatus.SUCCESS
     }
   }
 

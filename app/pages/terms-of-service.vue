@@ -215,7 +215,7 @@ const keyHighlights = [
     icon: RefreshCwIcon,
     title: 'Fair Cancellations',
     description:
-      'Cancel before the studio window (typically 12h) for full credit. Studio-cancelled classes are always 100% refunded.'
+      'Cancel at least 12 hours before class start for full credit or refund. Studio-cancelled classes are always 100% refunded.'
   },
   {
     icon: HeartIcon,
@@ -571,7 +571,7 @@ onUnmounted(() => {
             class="space-y-0.5 max-h-[calc(100vh-14rem)] overflow-y-auto pr-1"
           >
             <button
-              v-for="s in sections"
+              v-for="s in filteredSections"
               :key="s.id"
               type="button"
               :class="[

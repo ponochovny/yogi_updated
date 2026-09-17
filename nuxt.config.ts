@@ -142,9 +142,6 @@ export default defineNuxtConfig({
     head: {
       title: 'Unnamed',
       titleTemplate: '%s · Yogi App',
-      htmlAttrs: {
-        lang: 'en'
-      },
       link: [
         {
           rel: 'apple-touch-icon',

@@ -174,6 +174,11 @@ async function fetchOfferings(
         WHERE os.offering_id = ${offerings.id}
         AND os.status = 'ACTIVE'
         AND os.start_time > ${now.toISOString()}
+        ${
+          filters.date
+            ? sql`AND os.start_time::date = ${filters.date}::date`
+            : sql``
+        }
         AND EXTRACT(HOUR FROM os.start_time) >= ${startHour}
         AND EXTRACT(HOUR FROM os.start_time) < ${endHour}
       )`
