@@ -210,19 +210,20 @@ if (import.meta.client) {
             <div class="h-9 w-20 rounded-md bg-muted animate-pulse" />
           </template>
           <template v-else-if="!session.data?.user">
-            <NuxtLink to="/login" as-child>
-              <Button variant="ghost" size="sm">{{
-                $t('header.login')
-              }}</Button>
-            </NuxtLink>
-            <NuxtLink to="/register" as-child>
-              <Button
-                size="sm"
-                class="bg-primary text-primary-foreground hover:bg-primary/90"
-              >
+            <Button as-child variant="ghost" size="sm">
+              <NuxtLinkLocale to="/login">
+                {{ $t('header.login') }}
+              </NuxtLinkLocale>
+            </Button>
+            <Button
+              as-child
+              size="sm"
+              class="bg-primary text-primary-foreground hover:bg-primary/90"
+            >
+              <NuxtLinkLocale to="/register">
                 {{ $t('header.signup') }}
-              </Button>
-            </NuxtLink>
+              </NuxtLinkLocale>
+            </Button>
           </template>
           <template v-else>
             <DropdownMenu :modal="false">
@@ -424,20 +425,26 @@ if (import.meta.client) {
                       />
                     </template>
                     <template v-else-if="!session.data?.user">
-                      <NuxtLink to="/register" as-child>
-                        <Button class="w-full" @click="mobileMenuOpen = false">
+                      <Button as-child class="w-full">
+                        <NuxtLinkLocale
+                          to="/register"
+                          @click="mobileMenuOpen = false"
+                        >
                           {{ $t('header.signup') }}
-                        </Button>
-                      </NuxtLink>
-                      <NuxtLink to="/login" as-child>
-                        <Button
-                          variant="outline"
-                          class="w-full"
+                        </NuxtLinkLocale>
+                      </Button>
+                      <Button
+                        as-child
+                        variant="outline"
+                        class="w-full"
+                      >
+                        <NuxtLinkLocale
+                          to="/login"
                           @click="mobileMenuOpen = false"
                         >
                           {{ $t('header.login') }}
-                        </Button>
-                      </NuxtLink>
+                        </NuxtLinkLocale>
+                      </Button>
                     </template>
                     <template v-else>
                       <div

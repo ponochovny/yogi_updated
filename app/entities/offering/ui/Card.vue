@@ -74,7 +74,7 @@ const formattedPrice = computed(() => {
           class="bg-blue-500/90 backdrop-blur-sm px-2.5 py-1 rounded-lg text-xs font-semibold text-white flex items-center gap-1"
         >
           <GlobeIcon class="size-3" />
-          Online
+          {{ $t('home.online') }}
         </span>
       </div>
       <!-- Price badge -->
@@ -82,7 +82,7 @@ const formattedPrice = computed(() => {
         v-if="formattedPrice"
         class="absolute top-3 right-3 bg-primary/90 backdrop-blur-sm px-3 py-1.5 rounded-lg text-xs font-bold text-primary-foreground"
       >
-        from {{ formattedPrice }}
+        {{ $t('home.from') }} {{ formattedPrice }}
       </div>
     </div>
 
@@ -135,10 +135,10 @@ const formattedPrice = computed(() => {
                 : 'text-muted-foreground'
             "
           >
-            {{ offering.spotsRemaining }} spots left
+            {{ $t('home.spotsLeft', { n: offering.spotsRemaining }) }}
           </span>
           <span class="text-muted-foreground">
-            of {{ offering.spotsTotal }}
+            {{ $t('home.spotsOf', { total: offering.spotsTotal }) }}
           </span>
         </div>
         <div class="h-1.5 w-full rounded-full bg-muted overflow-hidden">

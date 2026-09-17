@@ -22,7 +22,7 @@ defineProps<{
       <NuxtImg
         :src="studio.gallery?.[0] || placeholderImageUrl"
         alt="Image"
-        class="aspect-16/10 h-full w-full object-cover transition-transform duration-500"
+        class="aspect-16/10 h-full w-full object-cover transition-transform duration-500 rounded-t-2xl"
       />
       <!-- Logo overlay -->
       <div v-if="studio.logo" class="absolute -bottom-5 left-4 z-10">
@@ -72,8 +72,7 @@ defineProps<{
           class="inline-flex items-center gap-1"
         >
           <LayersIcon class="size-3.5" />
-          {{ studio.offeringCount }}
-          {{ studio.offeringCount === 1 ? 'class' : 'classes' }}
+          {{ $t('home.classesCount', studio.offeringCount) }}
         </span>
       </div>
     </div>
