@@ -21,7 +21,7 @@ export const fulfillCheckoutPayment = async (
   transactionId: string,
   pricingOptionId?: string | null
 ) => {
-  return db.transaction(async tx => {
+  return db.transaction(async (tx: CheckoutDbLike) => {
     const [lockedTransaction] = await tx
       .select()
       .from(transactions)
