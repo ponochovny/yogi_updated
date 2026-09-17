@@ -68,6 +68,9 @@
 
               <!-- Date -->
               <div class="flex-1 min-w-0">
+                <label for="hero-date" class="sr-only">
+                  {{ $t('home.searchDate') }}
+                </label>
                 <input
                   id="hero-date"
                   v-model="searchDate"
@@ -149,8 +152,7 @@
                 {{ cat.name }}
               </h3>
               <p class="text-xs text-white/80 font-medium mt-0.5">
-                {{ cat.studioCount }}
-                {{ cat.studioCount === 1 ? 'studio' : 'studios' }}
+                {{ $t('home.studiosCount', cat.studioCount) }}
               </p>
             </div>
           </NuxtLink>
@@ -503,13 +505,15 @@ const searchLocation = ref('')
 const { data: homeDataRaw } = await useFetch('/api/home-data')
 const homeData = computed(() => homeDataRaw.value?.data || null)
 
+const localePath = useLocalePath()
+
 // Handle search
 const handleSearch = () => {
   const params = new URLSearchParams()
   if (searchCategory.value) params.set('category', searchCategory.value)
   if (searchDate.value) params.set('date', searchDate.value)
   if (searchLocation.value) params.set('city', searchLocation.value)
-  navigateTo(`/explore?${params.toString()}`)
+  return navigateTo(localePath(`/explore?${params.toString()}`))
 }
 
 // Booking steps

@@ -144,7 +144,7 @@
             v-if="filters.online"
             class="inline-flex items-center gap-1 px-3 py-1 rounded-full bg-blue-500/10 text-blue-600 text-xs font-medium"
           >
-            Online
+            {{ $t('home.online') }}
             <button @click="((filters.online = false), fetchData())">
               <XIcon class="size-3" />
             </button>
@@ -157,13 +157,16 @@
           </button>
         </div>
 
+        <p v-if="fetchError" role="alert" class="mb-4 text-sm text-destructive">
+          {{ fetchError }}
+        </p>
+
         <!-- Results count -->
         <div
           v-if="!pending && exploreData"
           class="text-sm text-muted-foreground mb-4"
         >
-          {{ exploreData.total }}
-          {{ exploreData.total === 1 ? 'result' : 'results' }}
+          {{ $t('explore.results', exploreData.total) }}
         </div>
 
         <!-- Loading skeleton -->
@@ -336,6 +339,8 @@ function buildQueryParams() {
 
 // Fetch data
 const pending = ref(false)
+const fetchError = ref('')
+const exploreRequestGeneration = ref(0)
 const exploreData = ref<{
   items: ExploreResultItem[]
   total: number
@@ -344,11 +349,15 @@ const exploreData = ref<{
 } | null>(null)
 
 async function fetchData() {
+  const requestGeneration = ++exploreRequestGeneration.value
   filters.page = 1
   pending.value = true
+  loadingMore.value = false
+  fetchError.value = ''
   try {
     const params = buildQueryParams()
     const data = await $fetch('/api/explore', { params })
+    if (exploreRequestGeneration.value !== requestGeneration) return
     exploreData.value = data
 
     // Update URL without navigation
@@ -366,8 +375,14 @@ async function fetchData() {
     if (import.meta.client) {
       history.replaceState(null, '', qs ? `/explore?${qs}` : '/explore')
     }
+  } catch {
+    if (exploreRequestGeneration.value === requestGeneration) {
+      fetchError.value = t('explore.fetchError')
+    }
   } finally {
-    pending.value = false
+    if (exploreRequestGeneration.value === requestGeneration) {
+      pending.value = false
+    }
   }
 }
 
@@ -377,17 +392,26 @@ async function loadMore() {
     exploreData.value.page >= exploreData.value.totalPages
   )
     return
+  const requestGeneration = exploreRequestGeneration.value
+  const previousData = exploreData.value
   loadingMore.value = true
   try {
-    filters.page = exploreData.value.page + 1
+    filters.page = previousData.page + 1
     const params = buildQueryParams()
     const data = await $fetch('/api/explore', { params })
+    if (
+      exploreRequestGeneration.value !== requestGeneration ||
+      exploreData.value !== previousData
+    )
+      return
     exploreData.value = {
       ...data,
-      items: [...exploreData.value!.items, ...data.items]
+      items: [...previousData.items, ...data.items]
     }
   } finally {
-    loadingMore.value = false
+    if (exploreRequestGeneration.value === requestGeneration) {
+      loadingMore.value = false
+    }
   }
 }
 

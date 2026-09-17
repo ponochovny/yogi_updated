@@ -232,7 +232,7 @@ const googleMapsUrl = computed(() => {
       class="pointer-events-none absolute inset-x-0 -top-10 -z-10 transform-gpu overflow-hidden blur-3xl sm:-top-20"
     >
       <div
-        class="relative left-[calc(50%-18rem)] aspect-1155/678 w-[40rem] -translate-x-1/2 rotate-[30deg] bg-gradient-to-tr from-emerald-500/20 to-primary/30 opacity-60 sm:left-[calc(50%-22rem)] sm:w-[60rem]"
+        class="relative left-[calc(50%-18rem)] aspect-1155/678 w-[40rem] -translate-x-1/2 rotate-30 bg-linear-to-tr from-emerald-500/20 to-primary/30 opacity-60 sm:left-[calc(50%-22rem)] sm:w-[60rem]"
       />
     </div>
 
@@ -951,7 +951,7 @@ const googleMapsUrl = computed(() => {
   </div>
 </template>
 
-<style scoped>
+<style>
 @media print {
   body {
     background: #fff !important;

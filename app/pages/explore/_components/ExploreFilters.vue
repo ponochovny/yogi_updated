@@ -12,7 +12,7 @@
       <button
         type="button"
         class="inline-flex items-center gap-1 text-xs text-muted-foreground hover:text-primary transition-colors"
-        @click="$emit('reset')"
+        @click="onReset"
       >
         <RotateCcwIcon class="size-3" />
         {{ $t('explore.reset') }}
@@ -133,7 +133,7 @@
           v-if="filters.city"
           type="button"
           class="absolute right-2.5 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
-          @click="onFieldChange('city', '')"
+          @click="onClearCity"
         >
           <XIcon class="size-3.5" />
         </button>
@@ -203,7 +203,7 @@ const timeOptions = computed(() => [
 ])
 
 const pricingOptions = computed(() => [
-  { value: '', label: t('explore.allCategories', 'All Pricing Types') },
+  { value: '', label: t('explore.allPricingTypes', 'All Pricing Types') },
   { value: 'DROP_IN', label: t('home.dropIn', 'Single Drop-In') },
   { value: 'PACK', label: t('home.classPack', '10-Class Pack') },
   { value: 'MEMBERSHIP', label: t('home.membership', 'Monthly Membership') }
@@ -236,11 +236,25 @@ function onOnlineToggle(checked: boolean) {
   onFieldChange('online', checked)
 }
 
-let cityTimer: ReturnType<typeof setTimeout>
+let cityTimer: ReturnType<typeof setTimeout> | undefined
 function onCityInput(val: string) {
   clearTimeout(cityTimer)
   cityTimer = setTimeout(() => {
     onFieldChange('city', val)
   }, 350)
 }
+
+function onClearCity() {
+  clearTimeout(cityTimer)
+  onFieldChange('city', '')
+}
+
+function onReset() {
+  clearTimeout(cityTimer)
+  emit('reset')
+}
+
+onBeforeUnmount(() => {
+  clearTimeout(cityTimer)
+})
 </script>

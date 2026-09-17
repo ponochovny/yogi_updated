@@ -246,6 +246,7 @@
     "reset": "I-reset",
     "noResults": "Walang nahanap na resulta",
     "noResultsDesc": "Subukang i-adjust ang iyong mga filter o search terms.",
+    "fetchError": "Hindi ma-load ang mga resulta. Pakisubukang muli.",
     "loadMore": "Mag-load Pa",
     "results": "{n} resulta | {n} mga resulta",
     "sortBy": "I-sort ayon sa",

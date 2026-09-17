@@ -246,6 +246,7 @@
     "reset": "Reset",
     "noResults": "No results found",
     "noResultsDesc": "Try adjusting your filters or search terms.",
+    "fetchError": "Unable to load results. Please try again.",
     "loadMore": "Load More",
     "results": "{n} result | {n} results",
     "sortBy": "Sort by",
