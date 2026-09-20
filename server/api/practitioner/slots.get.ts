@@ -65,7 +65,7 @@ export default defineEventHandler(async event => {
     // 3. Binding a studio to an offering
     .innerJoin(studios, eq(offerings.studioId, studios.id))
     // We apply all our conditions
-    .where(and(...conditions, gte(offeringSlots.startTime, new Date())))
+    .where(and(...conditions, gte(offeringSlots.endTime, new Date())))
     .orderBy(offeringSlots.startTime) // Sort by time
 
   return slots

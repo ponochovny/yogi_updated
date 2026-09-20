@@ -1,6 +1,6 @@
 CREATE TABLE "studio_waiver_consents" (
 	"id" text PRIMARY KEY NOT NULL,
-	"studio_id" text NOT NULL,
+	"studio_id" uuid NOT NULL,
 	"user_id" text NOT NULL,
 	"waiver_version" integer NOT NULL,
 	"ip_address" text,
