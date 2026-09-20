@@ -12,6 +12,8 @@ import {
 import { eq, and, sql, inArray } from 'drizzle-orm'
 import { BookingStatus, createBookingSchema } from '~/entities/booking/schema'
 import { priceOptionsType } from '~/entities/membership/schema'
+import { studios } from '~~/server/db/schema/studio'
+import { studioWaiverConsents } from '~~/server/db/schema/waiver'
 
 export default defineEventHandler(async event => {
   const userData = await requireAuthenticatedUser(event)
@@ -20,6 +22,40 @@ export default defineEventHandler(async event => {
   const db = useDb()
 
   const { pricingOptionId, userPassId } = body
+
+  const [waiver] = await db
+    .select({
+      studioId: offerings.studioId,
+      waiver: studios.liabilityWaiver,
+      version: studios.liabilityWaiverVersion
+    })
+    .from(offeringSlots)
+    .innerJoin(offerings, eq(offeringSlots.offeringId, offerings.id))
+    .innerJoin(studios, eq(offerings.studioId, studios.id))
+    .where(eq(offeringSlots.id, slotId))
+    .limit(1)
+
+  if (!waiver)
+    throw createError({ statusCode: 404, message: 'Time slot not found' })
+  if (waiver.waiver) {
+    const [consent] = await db
+      .select({ id: studioWaiverConsents.id })
+      .from(studioWaiverConsents)
+      .where(
+        and(
+          eq(studioWaiverConsents.studioId, waiver.studioId),
+          eq(studioWaiverConsents.userId, userData.id),
+          eq(studioWaiverConsents.waiverVersion, waiver.version)
+        )
+      )
+      .limit(1)
+    if (!consent) {
+      throw createError({
+        statusCode: 428,
+        message: 'Studio waiver consent is required'
+      })
+    }
+  }
 
   type BookingResult = {
     booking: typeof bookings.$inferSelect

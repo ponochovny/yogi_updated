@@ -32,7 +32,7 @@ const handleLogin = async (values: FormValues) => {
     })
     return
   }
-  await navigateTo('/profile/settings')
+  await navigateTo('/profile')
 }
 const submit = handleSubmit(handleLogin)
 </script>

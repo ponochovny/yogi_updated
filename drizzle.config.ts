@@ -9,6 +9,7 @@ export default defineConfig({
     './server/db/schema/offering.ts',
     './server/db/schema/booking.ts',
     './server/db/schema/payment.ts',
+    './server/db/schema/waiver.ts',
     './server/db/schema/_other.ts',
     './server/db/schema/global.ts'
   ],

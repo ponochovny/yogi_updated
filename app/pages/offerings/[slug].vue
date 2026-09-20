@@ -12,7 +12,7 @@ import {
 } from '@lucide/vue'
 import { format } from 'date-fns'
 import { toast } from 'vue-sonner'
-import BookWithPricingOptions from './_components/BookWithPricingOptions.vue'
+import CheckoutModal from './_components/CheckoutModal.vue'
 import { placeholderImageUrl } from '~/config/constants'
 
 const route = useRoute()
@@ -147,6 +147,24 @@ usePageSeo({
               <h1 class="text-3xl font-bold tracking-tight sm:text-4xl">
                 {{ offering.name }}
               </h1>
+              <NuxtLink
+                :to="`/studios/${offering.studio.slug}`"
+                class="mt-4 inline-flex items-center gap-3 rounded-xl border border-border px-3 py-2 transition-colors hover:bg-muted"
+              >
+                <NuxtImg
+                  :src="offering.studio.logo || placeholderImageUrl"
+                  :alt="offering.studio.name"
+                  class="size-10 rounded-full object-cover"
+                />
+                <span class="text-left">
+                  <span class="block text-xs text-muted-foreground"
+                    >Hosted by</span
+                  >
+                  <span class="font-semibold text-foreground">{{
+                    offering.studio.name
+                  }}</span>
+                </span>
+              </NuxtLink>
               <p
                 class="mt-4 max-w-3xl text-base leading-7 text-muted-foreground"
               >
@@ -433,7 +451,7 @@ usePageSeo({
                       with {{ slot.practitioner.name }}.</DialogDescription
                     >
                   </DialogHeader>
-                  <BookWithPricingOptions
+                  <CheckoutModal
                     :slug="offeringSlug"
                     :slot-id="slot.id"
                     @success="
@@ -504,7 +522,7 @@ usePageSeo({
                             {{ slot.practitioner.name }}.</DialogDescription
                           >
                         </DialogHeader>
-                        <BookWithPricingOptions
+                        <CheckoutModal
                           :slug="offeringSlug"
                           :slot-id="slot.id"
                           @success="

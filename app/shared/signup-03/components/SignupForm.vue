@@ -38,7 +38,7 @@ const handleRegister = async (values: FormValues) => {
     name: values.name,
     email: values.email,
     password: values.password,
-    callbackURL: '/profile/settings'
+    callbackURL: '/profile'
   })
   if (error) {
     toast.error('Failed to sign up', {
@@ -48,14 +48,14 @@ const handleRegister = async (values: FormValues) => {
     })
     return
   }
-  await navigateTo('/profile/settings')
+  await navigateTo('/profile')
 }
 const submit = handleSubmit(handleRegister)
 const loginWithGoogle = async () => {
   try {
     await authClient.signIn.social({
       provider: 'google',
-      callbackURL: '/profile/settings'
+      callbackURL: '/profile'
     })
   } catch (error) {
     toast.error('Failed to login', {

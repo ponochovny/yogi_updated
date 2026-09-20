@@ -11,7 +11,7 @@ import { format } from 'date-fns'
 import { toast } from 'vue-sonner'
 import { Button } from '~/shared/ui/button'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '~/shared/ui/tabs'
-import { placeholderImageUrl } from '~/config/constants'
+import StudioGallery from '~/widgets/Studio/studio-gallery.vue'
 
 const route = useRoute()
 const slug = computed(() => String(route.params.slug || ''))
@@ -117,154 +117,101 @@ usePageSeo({
     <div
       class="overflow-hidden rounded-[32px] border border-border bg-card shadow-sm"
     >
-      <div class="grid gap-0 lg:grid-cols-[1.4fr_0.6fr]">
-        <div class="space-y-0">
-          <NuxtImg
-            :src="studio.gallery?.[0]?.url || placeholderImageUrl"
-            :alt="studio.name"
-            class="h-80 w-full object-cover sm:h-96"
-          />
+      <div class="space-y-0">
+        <StudioGallery :gallery="studio.gallery" :alt="studio.name" />
 
-          <div class="space-y-6 p-6 sm:p-8">
-            <div
-              class="flex flex-wrap items-center gap-2 text-xs font-semibold uppercase tracking-[0.12em] text-muted-foreground"
+        <div class="space-y-6 p-6 sm:p-8">
+          <div
+            class="flex flex-wrap items-center gap-2 text-xs font-semibold uppercase tracking-[0.12em] text-muted-foreground"
+          >
+            <span
+              v-for="type in studio.types || []"
+              :key="type"
+              class="text-primary"
             >
-              <span
-                v-for="type in studio.types || []"
-                :key="type"
-                class="text-primary"
-              >
-                {{ type }}
-              </span>
-              <span v-if="studio.types?.length && studio.categories?.length"
-                >•</span
-              >
-              <span v-for="category in studio.categories || []" :key="category">
-                {{ category }}
-              </span>
-            </div>
+              {{ type }}
+            </span>
+            <span v-if="studio.types?.length && studio.categories?.length"
+              >•</span
+            >
+            <span v-for="category in studio.categories || []" :key="category">
+              {{ category }}
+            </span>
+          </div>
 
-            <div class="space-y-4">
-              <div class="flex items-center gap-4">
-                <NuxtImg
-                  v-if="studio.logo?.url"
-                  :src="
-                    studio.logo.url.replace(
-                      '/upload/',
-                      '/upload/w_160,h_160,c_thumb,g_custom/'
-                    )
-                  "
-                  :alt="studio.name"
-                  class="h-16 w-16 rounded-full border border-border bg-background object-cover"
-                />
-                <div>
-                  <h1 class="text-3xl font-bold tracking-tight sm:text-4xl">
-                    {{ studio.name }}
-                  </h1>
-                  <div
-                    class="mt-2 flex items-center gap-2 text-sm text-muted-foreground"
-                  >
-                    <MapPinIcon class="size-4 text-primary" />
-                    <span>{{
-                      firstLocation?.address || 'Studio location'
-                    }}</span>
-                  </div>
-                </div>
-              </div>
-
-              <p class="max-w-3xl text-base leading-7 text-muted-foreground">
-                {{ studio.bio }}
-              </p>
-            </div>
-
-            <div class="grid gap-3 sm:grid-cols-3">
-              <div class="rounded-2xl border border-border bg-muted/40 p-4">
-                <p
-                  class="text-xs uppercase tracking-[0.12em] text-muted-foreground"
-                >
-                  Address
-                </p>
-                <p class="mt-2 text-sm font-medium text-foreground">
-                  {{ firstLocation?.address || 'Address to be confirmed' }}
-                </p>
-              </div>
-              <div class="rounded-2xl border border-border bg-muted/40 p-4">
-                <p
-                  class="text-xs uppercase tracking-[0.12em] text-muted-foreground"
-                >
-                  Contact
-                </p>
+          <div class="space-y-4">
+            <div class="flex items-center gap-4">
+              <NuxtImg
+                v-if="studio.logo?.url"
+                :src="
+                  studio.logo.url.replace(
+                    '/upload/',
+                    '/upload/w_160,h_160,c_thumb,g_custom/'
+                  )
+                "
+                :alt="studio.name"
+                class="h-16 w-16 rounded-full border border-border bg-background object-cover"
+              />
+              <div>
+                <h1 class="text-3xl font-bold tracking-tight sm:text-4xl">
+                  {{ studio.name }}
+                </h1>
                 <div
-                  class="mt-2 flex items-center gap-2 text-sm text-foreground"
+                  class="mt-2 flex items-center gap-2 text-sm text-muted-foreground"
                 >
-                  <PhoneIcon class="size-4 text-primary" />
-                  <span>Book a class</span>
+                  <MapPinIcon class="size-4 text-primary" />
+                  <span>{{ firstLocation?.address || 'Studio location' }}</span>
                 </div>
               </div>
-              <div class="rounded-2xl border border-border bg-muted/40 p-4">
-                <p
-                  class="text-xs uppercase tracking-[0.12em] text-muted-foreground"
-                >
-                  Atmosphere
-                </p>
-                <p class="mt-2 text-sm font-medium text-foreground">
-                  {{
-                    studio.mission ||
-                    'A welcoming practice space for movement and recovery.'
-                  }}
-                </p>
-              </div>
+            </div>
+
+            <p class="max-w-3xl text-base leading-7 text-muted-foreground">
+              {{ studio.bio }}
+            </p>
+          </div>
+
+          <p class="text-xs uppercase tracking-[0.12em] text-muted-foreground">
+            Address
+          </p>
+          <p class="mt-2 text-sm font-medium text-foreground">
+            {{ firstLocation?.address || 'Address to be confirmed' }}
+          </p>
+
+          <p class="text-xs uppercase tracking-[0.12em] text-muted-foreground">
+            Contact
+          </p>
+          <div class="mt-2 flex items-center gap-2 text-sm text-foreground">
+            <PhoneIcon class="size-4 text-primary" />
+            <span>Book a class</span>
+          </div>
+
+          <p class="text-xs uppercase tracking-[0.12em] text-muted-foreground">
+            Atmosphere
+          </p>
+          <p class="mt-2 text-sm font-medium text-foreground">
+            {{
+              studio.mission ||
+              'A welcoming practice space for movement and recovery.'
+            }}
+          </p>
+
+          <p class="text-xs uppercase tracking-[0.12em] text-muted-foreground">
+            Contact the team
+          </p>
+          <div class="mt-3 space-y-3 text-sm text-foreground">
+            <div class="flex items-center gap-2">
+              <MapPinIcon class="size-4 text-primary" />
+              <span>{{ firstLocation?.address || 'Studio address' }}</span>
+            </div>
+            <div class="flex items-center gap-2">
+              <MessageCircleMoreIcon class="size-4 text-primary" />
+              <span
+                >Questions before booking? Reach out via the studio contact
+                flow.</span
+              >
             </div>
           </div>
         </div>
-
-        <aside
-          class="border-t border-border bg-muted/30 p-6 lg:border-l lg:border-t-0"
-        >
-          <div class="space-y-5">
-            <div
-              class="rounded-3xl border border-border bg-background p-4 shadow-sm"
-            >
-              <p
-                class="text-xs uppercase tracking-[0.12em] text-muted-foreground"
-              >
-                Contact the team
-              </p>
-              <div class="mt-3 space-y-3 text-sm text-foreground">
-                <div class="flex items-center gap-2">
-                  <MapPinIcon class="size-4 text-primary" />
-                  <span>{{ firstLocation?.address || 'Studio address' }}</span>
-                </div>
-                <div class="flex items-center gap-2">
-                  <MessageCircleMoreIcon class="size-4 text-primary" />
-                  <span
-                    >Questions before booking? Reach out via the studio contact
-                    flow.</span
-                  >
-                </div>
-              </div>
-            </div>
-
-            <div
-              class="rounded-3xl border border-border bg-background p-4 shadow-sm"
-            >
-              <p
-                class="text-xs uppercase tracking-[0.12em] text-muted-foreground"
-              >
-                Studio gallery
-              </p>
-              <div class="mt-3 grid grid-cols-2 gap-2">
-                <NuxtImg
-                  v-for="(image, index) in (studio.gallery || []).slice(0, 4)"
-                  :key="`${image.url}-${index}`"
-                  :src="image.url || placeholderImageUrl"
-                  :alt="`${studio.name} gallery ${index + 1}`"
-                  class="h-20 w-full rounded-xl object-cover"
-                />
-              </div>
-            </div>
-          </div>
-        </aside>
       </div>
     </div>
 

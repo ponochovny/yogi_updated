@@ -60,9 +60,20 @@ export default defineNuxtConfig({
 
   i18n: {
     defaultLocale: 'en',
+    baseUrl: process.env.NUXT_PUBLIC_BASE_URL ?? 'http://localhost:3000',
     locales: [
-      { code: 'en', name: 'English', file: 'en.json' },
-      { code: 'fil', name: 'Filipino', file: 'fil.json' }
+      {
+        code: 'en',
+        language: 'en-US',
+        name: 'English',
+        file: 'en.json'
+      },
+      {
+        code: 'fil',
+        language: 'fil-PH',
+        name: 'Filipino',
+        file: 'fil.json'
+      }
     ]
   },
 
@@ -123,7 +134,7 @@ export default defineNuxtConfig({
   runtimeConfig: {
     databaseUrl: process.env.DATABASE_URL,
     public: {
-      baseUrl: '',
+      baseUrl: process.env.NUXT_PUBLIC_BASE_URL ?? 'http://localhost:3000',
       // cloudinary
       cloudinaryName: process.env.CLOUDINARY_CLOUD_NAME ?? '',
       cloudinaryUploadPreset: process.env.CLOUDINARY_UPLOAD_PRESET ?? '',

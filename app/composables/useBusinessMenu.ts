@@ -83,6 +83,18 @@ export const useBusinessMenu = () => {
         url: `${PagesConfig.BUSINESS}/calendar`,
         icon: CalendarClockIcon,
         roles: [userRoles.MANAGER, userRoles.PRACTITIONER]
+      },
+      {
+        name: 'Practitioner Calendar',
+        url: PagesConfig.PRACTITIONER_CALENDAR,
+        icon: CalendarClockIcon,
+        roles: [userRoles.PRACTITIONER]
+      },
+      {
+        name: 'My Earnings',
+        url: PagesConfig.PRACTITIONER_EARNINGS,
+        icon: ChartNoAxesCombinedIcon,
+        roles: [userRoles.PRACTITIONER]
       }
     ]
   })

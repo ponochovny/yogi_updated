@@ -82,7 +82,7 @@ const signOutHandler = async () => {
               <DropdownMenuItem
                 v-if="!$route.path.startsWith('/profile')"
                 class="flex items-center gap-2"
-                @click="navigateTo('/profile/settings')"
+                @click="navigateTo('/profile')"
               >
                 <UserIcon />
                 User dashboard

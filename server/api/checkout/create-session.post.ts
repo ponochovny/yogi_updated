@@ -41,6 +41,7 @@ import {
   revertPendingCheckoutState
 } from '~~/server/utils/checkout'
 import { globalCurrencies } from '~~/server/db/schema/global'
+import { studioWaiverConsents } from '~~/server/db/schema/waiver'
 
 // Initialize Stripe with the private key (normally fetched from runtime config)
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY || '', {
@@ -55,6 +56,35 @@ export default defineEventHandler(async event => {
   await cleanupExpiredPendingCheckoutState(db)
 
   const { pricingOptionId, slotId } = body
+
+  if (slotId) {
+    const [slotWaiver] = await db
+      .select({
+        studioId: offerings.studioId,
+        waiver: studios.liabilityWaiver,
+        version: studios.liabilityWaiverVersion
+      })
+      .from(offeringSlots)
+      .innerJoin(offerings, eq(offeringSlots.offeringId, offerings.id))
+      .innerJoin(studios, eq(offerings.studioId, studios.id))
+      .where(eq(offeringSlots.id, slotId))
+      .limit(1)
+    if (!slotWaiver) throwApiError(404, 'Selected class slot not found')
+    if (slotWaiver.waiver) {
+      const [consent] = await db
+        .select({ id: studioWaiverConsents.id })
+        .from(studioWaiverConsents)
+        .where(
+          and(
+            eq(studioWaiverConsents.studioId, slotWaiver.studioId),
+            eq(studioWaiverConsents.userId, userData.id),
+            eq(studioWaiverConsents.waiverVersion, slotWaiver.version)
+          )
+        )
+        .limit(1)
+      if (!consent) throwApiError(428, 'Studio waiver consent is required')
+    }
+  }
 
   const { pricing, transactionId, bookingId, lineItemName, checkoutCurrency } =
     await db.transaction(async tx => {

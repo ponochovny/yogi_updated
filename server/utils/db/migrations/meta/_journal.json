@@ -36,6 +36,20 @@
       "when": 1789503756340,
       "tag": "0004_mysterious_goliath",
       "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "7",
+      "when": 1789831915194,
+      "tag": "0005_sudden_scream",
+      "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "7",
+      "when": 1789880234864,
+      "tag": "0006_majestic_ser_duncan",
+      "breakpoints": true
     }
   ]
 }

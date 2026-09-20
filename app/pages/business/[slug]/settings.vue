@@ -11,6 +11,7 @@ const form = reactive({
   cancellationPolicy: '',
   liabilityWaiver: ''
 })
+const isSaving = ref(false)
 watch(
   studio,
   value => {
@@ -25,16 +26,21 @@ watch(
   { immediate: true }
 )
 const save = async () => {
-  await $fetch(`/api/business/studios/${slug.value}/settings`, {
-    method: 'PATCH',
-    body: {
-      ...form,
-      cancellationPolicy: form.cancellationPolicy || null,
-      liabilityWaiver: form.liabilityWaiver || null
-    }
-  })
-  await refresh()
-  toast.success('Studio settings saved')
+  isSaving.value = true
+  try {
+    await $fetch(`/api/business/studios/${slug.value}/settings`, {
+      method: 'PATCH',
+      body: {
+        ...form,
+        cancellationPolicy: form.cancellationPolicy || null,
+        liabilityWaiver: form.liabilityWaiver || null
+      }
+    })
+    await refresh()
+    toast.success('Studio settings saved')
+  } finally {
+    isSaving.value = false
+  }
 }
 useHead({ title: 'Studio Settings' })
 </script>
@@ -103,7 +109,10 @@ useHead({ title: 'Studio Settings' })
           placeholder="Enter the safety agreement text"
         />
       </div>
-      <Button type="submit">Save settings</Button>
+      <Button type="submit" :disabled="isSaving">
+        <Spinner v-if="isSaving" class="animate-spin" />
+        Save settings
+      </Button>
     </form>
   </div>
 </template>

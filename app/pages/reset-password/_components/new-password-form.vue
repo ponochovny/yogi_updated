@@ -6,6 +6,7 @@ import * as z from 'zod'
 
 const props = defineProps<{
   token: string
+  invite?: boolean
 }>()
 
 const confirmNewPasswordSchema = z
@@ -53,7 +54,9 @@ const submitReset = newPasswordForm.handleSubmit(async values => {
     }
 
     toast.success(
-      'Password reset successful! You can now log in with your new password.'
+      props.invite
+        ? 'Your practitioner account is ready. You can now log in.'
+        : 'Password reset successful! You can now log in with your new password.'
     )
     newPasswordForm.handleReset()
     await navigateTo('/login')
@@ -97,7 +100,9 @@ const submitReset = newPasswordForm.handleSubmit(async values => {
           <FormMessage />
         </FormItem>
       </FormField>
-      <Button type="submit" class="w-full"> Reset Password </Button>
+      <Button type="submit" class="w-full">
+        {{ props.invite ? 'Activate account' : 'Reset Password' }}
+      </Button>
     </form>
     <p class="text-red-500 text-sm py-2">{{ errorMsg }}</p>
   </div>

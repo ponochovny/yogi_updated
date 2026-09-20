@@ -1,6 +1,6 @@
 import { offeringSlots, offerings } from '~~/server/db/schema/offering'
 import { studios, studioPractitioners } from '~~/server/db/schema/studio'
-import { eq, and, sql } from 'drizzle-orm'
+import { eq, and, sql, gte } from 'drizzle-orm'
 import { bookings } from '~~/server/db/schema/booking'
 import { BookingStatus } from '~/entities/booking/schema'
 
@@ -65,7 +65,7 @@ export default defineEventHandler(async event => {
     // 3. Binding a studio to an offering
     .innerJoin(studios, eq(offerings.studioId, studios.id))
     // We apply all our conditions
-    .where(and(...conditions))
+    .where(and(...conditions, gte(offeringSlots.startTime, new Date())))
     .orderBy(offeringSlots.startTime) // Sort by time
 
   return slots

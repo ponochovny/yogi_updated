@@ -7,7 +7,7 @@ export const PagesConfig = {
 
   EXPLORE: '/explore',
 
-  PROFILE_SETTINGS: '/profile/settings',
+  PROFILE_SETTINGS: '/profile',
   PROFILE_BOOKINGS: '/profile/bookings',
   PROFILE: '/profile',
   PROFILE_AGREEMENTS: '/profile/agreements',
@@ -17,6 +17,8 @@ export const PagesConfig = {
 
   BUSINESS: '/business',
   BUSINESS_CALENDAR: '/business/calendar',
+  PRACTITIONER_CALENDAR: '/practitioner/calendar',
+  PRACTITIONER_EARNINGS: '/practitioner/earnings',
   FOR_BUSINESS: '/for-business',
 
   CAUSES: '/causes',

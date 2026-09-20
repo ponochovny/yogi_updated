@@ -112,6 +112,7 @@ export default defineEventHandler(async event => {
   return {
     success: true,
     options: {
+      studioId: slot.studioId,
       dropInTickets,
       userPasses: availableUserPasses
     }

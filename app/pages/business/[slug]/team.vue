@@ -1,5 +1,6 @@
 <script lang="ts" setup>
 import { toast } from 'vue-sonner'
+import InviteTeamMember from './_components/InviteTeamMember.vue'
 
 type Member = {
   linkId: string
@@ -64,11 +65,14 @@ const formatRate = (member: Member) =>
 
 <template>
   <div class="space-y-8">
-    <div>
-      <h1 class="text-2xl font-semibold">Team and payroll</h1>
-      <p class="text-sm text-muted-foreground">
-        Manage trainer compensation and monthly payouts.
-      </p>
+    <div class="flex flex-col justify-between gap-4 sm:flex-row sm:items-start">
+      <div>
+        <h1 class="text-2xl font-semibold">Team and payroll</h1>
+        <p class="text-sm text-muted-foreground">
+          Manage trainer compensation and monthly payouts.
+        </p>
+      </div>
+      <InviteTeamMember :slug="slug" @invited="refresh" />
     </div>
     <section class="space-y-3">
       <h2 class="text-lg font-semibold">Team</h2>

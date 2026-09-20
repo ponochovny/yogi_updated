@@ -124,17 +124,19 @@ export default defineEventHandler(async event => {
       }
     })
 
-    // SENDING AN INVITATION EMAIL TO SET THE PASSWORD OF THEIR NEW ACCOUNT
-    if (isNewUser) {
+    // Send an activation link for new or not-yet-verified accounts.
+    // Verified users already have a usable account and should not receive a reset link.
+    const shouldSendInvite = isNewUser || !result?.user.emailVerified
+    let invitationSent = !shouldSendInvite
+    if (shouldSendInvite) {
       try {
         await auth.api.requestPasswordReset({
           body: {
             email: body.email,
-            redirectTo:
-              '/reset-password?flow=invite&studioName=' +
-              encodeURIComponent(studio?.name || '') // Pass studio name and invite flow for email context
+            redirectTo: `/reset-password?flow=invite&studioName=${encodeURIComponent(studio?.name || '')}`
           }
         })
+        invitationSent = true
       } catch (error) {
         console.error('Failed to request password reset for new practitioner', {
           studioSlug: slug,
@@ -143,11 +145,10 @@ export default defineEventHandler(async event => {
               ? { name: error.name, message: error.message }
               : { message: 'Unknown error' }
         })
-        // TODO: Queue retry or alert for manual follow-up
       }
     }
 
-    return { success: true, data: result }
+    return { success: true, invitationSent, data: result }
   } catch (error: unknown) {
     if (isApiError(error)) throw error
     const code =

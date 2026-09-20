@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { CreditCardIcon, BanknoteIcon, Loader2Icon } from '@lucide/vue'
 import { toast } from 'vue-sonner'
+import WaiverConsentModal from './WaiverConsentModal.vue'
 
 // TS Interface for response mapping from /api/bookings/options
 interface PricingOption {
@@ -18,6 +19,12 @@ interface UserPass {
   validUntil: string
 }
 
+interface BookingOptions {
+  studioId: string
+  dropInTickets: PricingOption[]
+  userPasses: UserPass[]
+}
+
 const props = defineProps<{
   slotId: string
   slug: string // Studio slug for contextual redirects if needed
@@ -28,12 +35,13 @@ const emit = defineEmits(['success', 'close'])
 // Component State
 const pending = ref(true)
 const isSubmitting = ref(false)
-const options = ref<{ dropInTickets: PricingOption[]; userPasses: UserPass[] }>(
-  {
-    dropInTickets: [],
-    userPasses: []
-  }
-)
+const options = ref<BookingOptions>({
+  studioId: '',
+  dropInTickets: [],
+  userPasses: []
+})
+const waiverOpen = ref(false)
+const waiverAccepted = ref(false)
 
 // UI Selections
 const selectedPassId = ref<string | null>(null)
@@ -45,7 +53,7 @@ onMounted(async () => {
   try {
     const data = await $fetch<{
       success: boolean
-      options: { dropInTickets: PricingOption[]; userPasses: UserPass[] }
+      options: BookingOptions
     }>(`/api/bookings/${props.slotId}/options`)
 
     if (data.success) {
@@ -77,7 +85,7 @@ watch(options, newVal => {
 })
 
 // Handle execution of booking or checkout redirect
-async function handleConfirmBooking() {
+async function continueBooking() {
   isSubmitting.value = true
   try {
     // 1. SCENARIO A: Booking using existing Membership/Pack Credit
@@ -139,10 +147,34 @@ async function handleConfirmBooking() {
     isSubmitting.value = false
   }
 }
+
+async function handleConfirmBooking() {
+  if (!waiverAccepted.value && options.value.studioId) {
+    const waiverStatus = await $fetch<{ required: boolean }>(
+      `/api/waivers/${options.value.studioId}`
+    )
+    if (waiverStatus.required) {
+      waiverOpen.value = true
+      return
+    }
+  }
+  await continueBooking()
+}
+
+async function handleWaiverAccepted() {
+  waiverAccepted.value = true
+  await continueBooking()
+}
 </script>
 
 <template>
-  <Card class="border-0 bg-transparent p-0">
+  <Card class="border-0 bg-transparent p-0 shadow-none">
+    <WaiverConsentModal
+      v-if="options.studioId"
+      v-model:open="waiverOpen"
+      :studio-id="options.studioId"
+      @accepted="handleWaiverAccepted"
+    />
     <CardContent class="px-0">
       <!-- Loading State -->
       <div
