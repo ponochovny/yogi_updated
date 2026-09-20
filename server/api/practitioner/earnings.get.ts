@@ -1,16 +1,25 @@
-import { and, eq, gte, lt, sql } from 'drizzle-orm'
+import { and, eq, gte, inArray, lt, sql } from 'drizzle-orm'
 import { bookings } from '~~/server/db/schema/booking'
 import { offeringSlots, offerings } from '~~/server/db/schema/offering'
 import { transactions } from '~~/server/db/schema/payment'
 import { studios, studioPractitioners } from '~~/server/db/schema/studio'
 import { BookingStatus } from '~/entities/booking/schema'
 import { calculateClassPayout } from '~~/server/utils/practitioner-earnings'
+import { z } from 'zod'
+
+const monthSchema = z.string().regex(/^\d{4}-(0[1-9]|1[0-2])$/)
 
 export default defineEventHandler(async event => {
   const userData = await requireAuthenticatedUser(event)
   const db = useDb()
   const query = getQuery(event)
-  const month = String(query.month || new Date().toISOString().slice(0, 7))
+  const requestedMonth =
+    query.month === undefined
+      ? new Date().toISOString().slice(0, 7)
+      : query.month
+  const parsedMonth = monthSchema.safeParse(requestedMonth)
+  if (!parsedMonth.success) throwApiError(400, 'Invalid month')
+  const month = parsedMonth.data
 
   const start = new Date(`${month}-01T00:00:00.000Z`)
   const end = new Date(start)
@@ -25,7 +34,6 @@ export default defineEventHandler(async event => {
     })
     .from(studioPractitioners)
     .where(eq(studioPractitioners.userId, userData.id))
-    .limit(1)
 
   if (!practitioner.length) {
     return {
@@ -39,6 +47,7 @@ export default defineEventHandler(async event => {
   const rows = await db
     .select({
       id: offeringSlots.id,
+      practitionerId: offeringSlots.practitionerId,
       startTime: offeringSlots.startTime,
       endTime: offeringSlots.endTime,
       studio: {
@@ -53,7 +62,7 @@ export default defineEventHandler(async event => {
       },
       attendedCount: sql<number>`count(${bookings.id}) filter (where ${bookings.status} = ${BookingStatus.ATTENDED})`,
       noShowCount: sql<number>`count(${bookings.id}) filter (where ${bookings.status} = ${BookingStatus.NO_SHOW})`,
-      revenueCents: sql<number>`coalesce(sum(${transactions.amount}) filter (where ${transactions.status} = 'SUCCESS'), 0)`,
+      revenueCents: sql<number>`coalesce(sum(${transactions.amount}) filter (where ${transactions.status} = 'SUCCESS' and ${inArray(bookings.status, [BookingStatus.ATTENDED, BookingStatus.CONFIRMED])}), 0)`,
       payoutCents: sql<number>`0`
     })
     .from(offeringSlots)
@@ -63,24 +72,38 @@ export default defineEventHandler(async event => {
     .leftJoin(transactions, eq(transactions.id, bookings.transactionId))
     .where(
       and(
-        eq(offeringSlots.practitionerId, practitioner[0]?.id || ''),
+        inArray(
+          offeringSlots.practitionerId,
+          practitioner.map(record => record.id)
+        ),
         gte(offeringSlots.startTime, start),
         lt(offeringSlots.startTime, end)
       )
     )
-    .groupBy(offeringSlots.id, offerings.id, studios.id)
+    .groupBy(
+      offeringSlots.id,
+      offeringSlots.practitionerId,
+      offerings.id,
+      studios.id
+    )
     .orderBy(offeringSlots.startTime)
 
+  const practitionersById = new Map(
+    practitioner.map(record => [record.id, record])
+  )
+
   const withPayout = rows.map(row => {
+    const practitionerRecord = practitionersById.get(row.practitionerId)
+    const { practitionerId, ...rowData } = row
     const payoutCents = calculateClassPayout({
-      compensationType: practitioner[0]?.compensationType || '',
-      compensationRate: practitioner[0]?.compensationRate || '',
+      compensationType: practitionerRecord?.compensationType || '',
+      compensationRate: practitionerRecord?.compensationRate || '',
       attendedCount: Number(row.attendedCount || 0),
       revenueCents: Number(row.revenueCents || 0)
     })
 
     return {
-      ...row,
+      ...rowData,
       payoutCents,
       payout: payoutCents / 100,
       attendedCount: Number(row.attendedCount || 0),
