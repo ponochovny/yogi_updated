@@ -336,7 +336,6 @@ export async function handleStripeWebhook(db: Database, event: Stripe.Event) {
           status: TransactionStatus.FAILED,
           failureReason:
             'The payment provider reported that the payment failed.',
-          providerTransactionId: payment.id,
           updatedAt: new Date()
         })
         .where(
