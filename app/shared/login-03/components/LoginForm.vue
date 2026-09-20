@@ -5,7 +5,7 @@ import { useForm } from 'vee-validate'
 import { toTypedSchema } from '@vee-validate/zod'
 import * as z from 'zod'
 import { toast } from 'vue-sonner'
-import GoogleAuthButton from '~/shared/components/GoogleAuthButton.vue'
+import GoogleAuthButton from '~/features/auth/GoogleAuthButton.vue'
 
 const props = defineProps<{
   class?: HTMLAttributes['class']
@@ -50,7 +50,10 @@ const submit = handleSubmit(handleLogin)
         <form @submit.prevent="submit">
           <FieldGroup>
             <Field>
-              <GoogleAuthButton title="Login with Google" />
+              <GoogleAuthButton
+                title="Login with Google"
+                :callback-url="props.callbackURL ?? '/profile'"
+              />
             </Field>
             <FieldSeparator
               class="*:data-[slot=field-separator-content]:bg-card"

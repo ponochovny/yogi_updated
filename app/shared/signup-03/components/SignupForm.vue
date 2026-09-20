@@ -5,7 +5,7 @@ import { useForm } from 'vee-validate'
 import { toTypedSchema } from '@vee-validate/zod'
 import * as z from 'zod'
 import { toast } from 'vue-sonner'
-import GoogleAuthButton from '~/shared/components/GoogleAuthButton.vue'
+import GoogleAuthButton from '~/features/auth/GoogleAuthButton.vue'
 
 const props = defineProps<{
   class?: HTMLAttributes['class']
@@ -52,18 +52,6 @@ const handleRegister = async (values: FormValues) => {
   await navigateTo(props.callbackURL ?? '/profile')
 }
 const submit = handleSubmit(handleRegister)
-const loginWithGoogle = async () => {
-  try {
-    await authClient.signIn.social({
-      provider: 'google',
-      callbackURL: props.callbackURL ?? '/profile'
-    })
-  } catch (error) {
-    toast.error('Failed to login', {
-      description: `${(error as { data: { message: string } }).data.message}`
-    })
-  }
-}
 </script>
 
 <template>
@@ -79,7 +67,7 @@ const loginWithGoogle = async () => {
             <Field>
               <GoogleAuthButton
                 title="Sign up with Google"
-                @click="loginWithGoogle"
+                :callback-url="props.callbackURL ?? '/profile'"
               />
             </Field>
             <FieldSeparator

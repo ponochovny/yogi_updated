@@ -1,13 +1,16 @@
 <script lang="ts" setup>
-defineProps<{
+import { toast } from 'vue-sonner'
+
+const props = defineProps<{
   title: string
+  callbackUrl: string
 }>()
 
 const loginWithGoogle = async () => {
   try {
     await authClient.signIn.social({
       provider: 'google',
-      callbackURL: '/profile'
+      callbackURL: props.callbackUrl
     })
   } catch (error) {
     const message =
