@@ -2,12 +2,19 @@
 import { ArrowLeftIcon } from '@lucide/vue'
 import { placeholderImageUrl } from '~/config/constants'
 
-defineProps<{
+const props = defineProps<{
   gallery: { url: string }[] | null
   alt: string
 }>()
 
 const activeIdx = ref(0)
+
+watch(
+  () => props.gallery?.length ?? 0,
+  length => {
+    activeIdx.value = length ? Math.min(activeIdx.value, length - 1) : 0
+  }
+)
 </script>
 
 <template>

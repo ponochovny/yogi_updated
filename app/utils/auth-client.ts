@@ -39,7 +39,8 @@ export function getSafeCallbackURL(
 ) {
   return typeof callbackURL === 'string' &&
     callbackURL.startsWith('/') &&
-    !callbackURL.startsWith('//')
+    !callbackURL.startsWith('//') &&
+    !callbackURL.includes('\\')
     ? callbackURL
     : fallback
 }
