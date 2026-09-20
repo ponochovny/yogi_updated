@@ -29,21 +29,26 @@ const reset = () => {
 const invite = async () => {
   isSubmitting.value = true
   try {
-    const response = await $fetch<{ invitationSent: boolean }>(
-      `/api/business/studios/${props.slug}/members`,
-      {
-        method: 'POST',
-        body: form.value
-      }
-    )
-    toast[response.invitationSent ? 'success' : 'warning'](
-      response.invitationSent ? 'Invitation sent' : 'Member added',
-      {
-        description: response.invitationSent
-          ? `${form.value.name} will receive a link to activate their account.`
-          : 'The member was added, but the activation email could not be sent. Use Resend invite from the table.'
-      }
-    )
+    const response = await $fetch<{
+      invitationStatus: 'sent' | 'not-required' | 'failed'
+    }>(`/api/business/studios/${props.slug}/members`, {
+      method: 'POST',
+      body: form.value
+    })
+    if (response.invitationStatus === 'sent') {
+      toast.success('Invitation sent', {
+        description: `${form.value.name} will receive a link to activate their account.`
+      })
+    } else if (response.invitationStatus === 'not-required') {
+      toast.warning('Member added', {
+        description: `${form.value.name} already has a verified account, so no activation invitation was needed.`
+      })
+    } else {
+      toast.error('Member added, but invitation failed', {
+        description:
+          'The activation email could not be sent. Use Resend invite from the table.'
+      })
+    }
     isOpen.value = false
     reset()
     emit('invited')

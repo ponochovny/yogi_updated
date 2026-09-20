@@ -127,7 +127,9 @@ export default defineEventHandler(async event => {
     // Send an activation link for new or not-yet-verified accounts.
     // Verified users already have a usable account and should not receive a reset link.
     const shouldSendInvite = isNewUser || !result?.user.emailVerified
-    let invitationSent = !shouldSendInvite
+    let invitationStatus: 'sent' | 'not-required' | 'failed' = shouldSendInvite
+      ? 'failed'
+      : 'not-required'
     if (shouldSendInvite) {
       try {
         await auth.api.requestPasswordReset({
@@ -136,7 +138,7 @@ export default defineEventHandler(async event => {
             redirectTo: `/reset-password?flow=invite&studioName=${encodeURIComponent(studio?.name || '')}`
           }
         })
-        invitationSent = true
+        invitationStatus = 'sent'
       } catch (error) {
         console.error('Failed to request password reset for new practitioner', {
           studioSlug: slug,
@@ -148,7 +150,7 @@ export default defineEventHandler(async event => {
       }
     }
 
-    return { success: true, invitationSent, data: result }
+    return { success: true, invitationStatus, data: result }
   } catch (error: unknown) {
     if (isApiError(error)) throw error
     const code =
