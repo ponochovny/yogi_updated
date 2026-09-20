@@ -1,4 +1,4 @@
-import { and, eq } from 'drizzle-orm'
+import { and, eq, inArray, lte } from 'drizzle-orm'
 import { bookings } from '~~/server/db/schema/booking'
 import { offeringSlots } from '~~/server/db/schema/offering'
 import { studioPractitioners } from '~~/server/db/schema/studio'
@@ -27,7 +27,8 @@ export default defineEventHandler(async event => {
     .where(
       and(
         eq(offeringSlots.id, slotId),
-        eq(studioPractitioners.userId, userData.id)
+        eq(studioPractitioners.userId, userData.id),
+        lte(offeringSlots.startTime, new Date())
       )
     )
     .limit(1)
@@ -60,10 +61,24 @@ export default defineEventHandler(async event => {
     })
   }
 
-  await db
+  const [updatedBooking] = await db
     .update(bookings)
     .set({ status, updatedAt: new Date() })
-    .where(eq(bookings.id, bookingId))
+    .where(
+      and(
+        eq(bookings.id, bookingId),
+        eq(bookings.slotId, slotId),
+        inArray(bookings.status, ['ACTIVE', 'CONFIRMED', 'ATTENDED', 'NO_SHOW'])
+      )
+    )
+    .returning({ id: bookings.id })
+
+  if (!updatedBooking) {
+    throw createError({
+      statusCode: 400,
+      message: 'Cannot change the status of this booking'
+    })
+  }
 
   return { success: true, status }
 })
