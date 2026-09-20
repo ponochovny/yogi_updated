@@ -24,5 +24,22 @@ export const authClient = createAuthClient({
   }
 })
 
-export const { signIn, signUp, signOut, useSession, getAccessToken } =
-  authClient
+export const {
+  signIn,
+  signUp,
+  signOut,
+  useSession,
+  getSession,
+  getAccessToken
+} = authClient
+
+export function getSafeCallbackURL(
+  callbackURL: unknown,
+  fallback = '/profile'
+) {
+  return typeof callbackURL === 'string' &&
+    callbackURL.startsWith('/') &&
+    !callbackURL.startsWith('//')
+    ? callbackURL
+    : fallback
+}

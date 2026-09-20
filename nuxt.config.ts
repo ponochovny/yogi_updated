@@ -128,6 +128,11 @@ export default defineNuxtConfig({
       appMiddleware: 'auth',
       ssr: false,
       isr: false
+    },
+    '/practitioner/**': {
+      appMiddleware: 'auth',
+      ssr: false,
+      isr: false
     }
   },
 

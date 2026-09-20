@@ -11,8 +11,7 @@ import { bookings } from '~~/server/db/schema/booking'
 import { BookingStatus } from '~/entities/booking/schema'
 
 export default defineEventHandler(async event => {
-  const session = await auth.api.getSession({ headers: event.headers })
-  if (!session) throw createError({ statusCode: 401, message: 'Unauthorized' })
+  const currentUser = await requireAuthenticatedUser(event)
 
   const query = getQuery(event)
   const slug = query.studioSlug as string | undefined
@@ -21,7 +20,7 @@ export default defineEventHandler(async event => {
 
   // Basic conditions: current user must be a Manager or Owner in the studio
   const conditions = [
-    eq(studioMembers.userId, session.user.id),
+    eq(studioMembers.userId, currentUser.id),
     inArray(studioMembers.role, [userRoles.MANAGER, userRoles.BUSINESS])
   ]
 

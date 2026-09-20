@@ -1,5 +1,7 @@
 import { createError, type H3Event } from 'h3'
 import { auth } from '~~/server/utils/auth'
+import { checkStudioAccess } from '~~/server/utils/permission'
+import type { UserRole } from '~~/server/auth/config'
 
 export function throwApiError(
   statusCode: number,
@@ -32,6 +34,15 @@ export async function requireAuthenticatedUser(event: H3Event) {
     throwApiError(401, 'Unauthorized access')
   }
   return session.user
+}
+
+export async function requireStudioAccess(
+  event: H3Event,
+  studio: string,
+  allowedRoles: UserRole[]
+) {
+  const user = await requireAuthenticatedUser(event)
+  return checkStudioAccess(user.id, studio, allowedRoles)
 }
 
 export function requireRouteParam(event: H3Event, name: string) {

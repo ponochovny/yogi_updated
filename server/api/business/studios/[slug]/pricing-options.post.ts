@@ -1,15 +1,13 @@
 import { userRoles } from '~~/server/auth/config'
 import { pricingOptions } from '~~/server/db/schema/offering'
+import { requireStudioAccess } from '~~/server/utils/api-helpers'
 
 export default defineEventHandler(async event => {
-  const session = await auth.api.getSession({ headers: event.headers })
-  if (!session) throw createError({ statusCode: 401, message: 'Unauthorized' })
-
   const slug = requireRouteParam(event, 'slug')
   const { name, description, type, price, credits, durationDays } =
     await readBody(event)
 
-  const { studioId } = await checkStudioAccess(session.user.id, slug, [
+  const { studioId } = await requireStudioAccess(event, slug, [
     userRoles.BUSINESS,
     userRoles.MANAGER
   ])

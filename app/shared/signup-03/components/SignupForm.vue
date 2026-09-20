@@ -9,6 +9,7 @@ import GoogleAuthButton from '~/shared/components/GoogleAuthButton.vue'
 
 const props = defineProps<{
   class?: HTMLAttributes['class']
+  callbackURL?: string
 }>()
 
 const signupSchema = z
@@ -38,7 +39,7 @@ const handleRegister = async (values: FormValues) => {
     name: values.name,
     email: values.email,
     password: values.password,
-    callbackURL: '/profile'
+    callbackURL: props.callbackURL ?? '/profile'
   })
   if (error) {
     toast.error('Failed to sign up', {
@@ -48,14 +49,14 @@ const handleRegister = async (values: FormValues) => {
     })
     return
   }
-  await navigateTo('/profile')
+  await navigateTo(props.callbackURL ?? '/profile')
 }
 const submit = handleSubmit(handleRegister)
 const loginWithGoogle = async () => {
   try {
     await authClient.signIn.social({
       provider: 'google',
-      callbackURL: '/profile'
+      callbackURL: props.callbackURL ?? '/profile'
     })
   } catch (error) {
     toast.error('Failed to login', {

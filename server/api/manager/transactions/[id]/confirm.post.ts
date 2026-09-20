@@ -3,8 +3,7 @@ import { userRoles } from '~~/server/auth/config'
 import { transactions, TransactionStatus } from '~~/server/db/schema/payment'
 
 export default defineEventHandler(async event => {
-  const session = await auth.api.getSession({ headers: event.headers })
-  if (!session) throw createError({ statusCode: 401, message: 'Unauthorized' })
+  const user = await requireAuthenticatedUser(event)
 
   const db = useDb()
   const transactionId = requireRouteParam(event, 'id')
@@ -25,7 +24,7 @@ export default defineEventHandler(async event => {
 
   if (!transaction) throwApiError(400, 'Transaction not found')
 
-  await checkStudioAccess(session.user.id, transaction.studioId, [
+  await checkStudioAccess(user.id, transaction.studioId, [
     userRoles.BUSINESS,
     userRoles.MANAGER,
     userRoles.PRACTITIONER

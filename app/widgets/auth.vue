@@ -4,6 +4,7 @@ import SignupForm from '~/shared/signup-03/components/SignupForm.vue'
 
 const props = defineProps<{
   mode?: 'sign-up' | 'login'
+  callbackURL?: string
 }>()
 
 const resolvedMode = computed(() => props.mode ?? 'login')
@@ -11,7 +12,13 @@ const resolvedMode = computed(() => props.mode ?? 'login')
 
 <template>
   <div class="space-y-6">
-    <LoginForm v-if="resolvedMode === 'login'" />
-    <SignupForm v-else-if="resolvedMode === 'sign-up'" />
+    <LoginForm
+      v-if="resolvedMode === 'login'"
+      :callback-url="props.callbackURL"
+    />
+    <SignupForm
+      v-else-if="resolvedMode === 'sign-up'"
+      :callback-url="props.callbackURL"
+    />
   </div>
 </template>

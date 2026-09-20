@@ -3,13 +3,13 @@ import {
   studioPractitioners,
   studios
 } from '~~/server/db/schema/studio'
-import { eq, and } from 'drizzle-orm'
-import { userRoles } from '../auth/config'
+import { eq, and, or } from 'drizzle-orm'
+import { userRoles, type UserRole } from '../auth/config'
 
 export const checkStudioAccess = async (
   userId: string,
   slug: string,
-  allowedRoles: string[]
+  allowedRoles: UserRole[]
 ) => {
   const db = useDb()
 
@@ -17,7 +17,12 @@ export const checkStudioAccess = async (
     .select({ role: studioMembers.role, studioId: studios.id })
     .from(studioMembers)
     .innerJoin(studios, eq(studioMembers.studioId, studios.id))
-    .where(and(eq(studioMembers.userId, userId), eq(studios.slug, slug)))
+    .where(
+      and(
+        eq(studioMembers.userId, userId),
+        or(eq(studios.slug, slug), eq(studios.id, slug))
+      )
+    )
 
   const memberRoles = membership.map(member => member.role)
   const grantedRoles = memberRoles.filter(role => allowedRoles.includes(role))

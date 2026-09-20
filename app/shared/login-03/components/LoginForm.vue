@@ -9,6 +9,7 @@ import GoogleAuthButton from '~/shared/components/GoogleAuthButton.vue'
 
 const props = defineProps<{
   class?: HTMLAttributes['class']
+  callbackURL?: string
 }>()
 
 const loginSchema = z.object({
@@ -24,7 +25,8 @@ const { handleSubmit, isSubmitting } = useForm<FormValues>({
 const handleLogin = async (values: FormValues) => {
   const { error } = await signIn.email({
     email: values.email,
-    password: values.password
+    password: values.password,
+    callbackURL: props.callbackURL ?? '/profile'
   })
   if (error) {
     toast.error('Failed to login', {
@@ -32,7 +34,7 @@ const handleLogin = async (values: FormValues) => {
     })
     return
   }
-  await navigateTo('/profile')
+  await navigateTo(props.callbackURL ?? '/profile')
 }
 const submit = handleSubmit(handleLogin)
 </script>
