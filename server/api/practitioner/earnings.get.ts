@@ -5,9 +5,11 @@ import { transactions } from '~~/server/db/schema/payment'
 import { studios, studioPractitioners } from '~~/server/db/schema/studio'
 import { BookingStatus } from '~/entities/booking/schema'
 import { calculateClassPayout } from '~~/server/utils/practitioner-earnings'
+import { fromZonedTime } from 'date-fns-tz'
 import { z } from 'zod'
 
 const monthSchema = z.string().regex(/^\d{4}-(0[1-9]|1[0-2])$/)
+const ACCOUNTING_TIMEZONE = process.env.ACCOUNTING_TIMEZONE || 'UTC'
 
 export default defineEventHandler(async event => {
   const userData = await requireAuthenticatedUser(event)
@@ -21,9 +23,16 @@ export default defineEventHandler(async event => {
   if (!parsedMonth.success) throwApiError(400, 'Invalid month')
   const month = parsedMonth.data
 
-  const start = new Date(`${month}-01T00:00:00.000Z`)
-  const end = new Date(start)
-  end.setUTCMonth(end.getUTCMonth() + 1)
+  const year = Number(month.slice(0, 4))
+  const monthNumber = Number(month.slice(5, 7))
+  const nextMonth =
+    monthNumber === 12
+      ? `${year + 1}-01`
+      : `${year}-${String(monthNumber + 1).padStart(2, '0')}`
+  const start = fromZonedTime(`${month}-01T00:00:00`, ACCOUNTING_TIMEZONE)
+  const end = fromZonedTime(`${nextMonth}-01T00:00:00`, ACCOUNTING_TIMEZONE)
+  const rangeStart = new Date(start.getTime() - 2 * 24 * 60 * 60 * 1000)
+  const rangeEnd = new Date(end.getTime() + 2 * 24 * 60 * 60 * 1000)
 
   const practitioner = await db
     .select({
@@ -76,8 +85,9 @@ export default defineEventHandler(async event => {
           offeringSlots.practitionerId,
           practitioner.map(record => record.id)
         ),
-        gte(offeringSlots.startTime, start),
-        lt(offeringSlots.startTime, end)
+        gte(offeringSlots.startTime, rangeStart),
+        lt(offeringSlots.startTime, rangeEnd),
+        sql`to_char(${offeringSlots.startTime} AT TIME ZONE ${offerings.timezone}, 'YYYY-MM') = ${month}`
       )
     )
     .groupBy(
