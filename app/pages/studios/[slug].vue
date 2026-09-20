@@ -3,7 +3,6 @@ import {
   CalendarDaysIcon,
   Clock3Icon,
   MapPinIcon,
-  MessageCircleMoreIcon,
   PhoneIcon,
   UsersIcon
 } from '@lucide/vue'
@@ -180,10 +179,14 @@ usePageSeo({
           <p class="text-xs uppercase tracking-[0.12em] text-muted-foreground">
             Contact
           </p>
-          <div class="mt-2 flex items-center gap-2 text-sm text-foreground">
+          <button
+            type="button"
+            class="mt-2 flex items-center gap-2 text-sm text-foreground hover:text-primary"
+            @click="activeTab = 'schedule'"
+          >
             <PhoneIcon class="size-4 text-primary" />
             <span>Book a class</span>
-          </div>
+          </button>
 
           <p class="text-xs uppercase tracking-[0.12em] text-muted-foreground">
             Atmosphere
@@ -194,23 +197,6 @@ usePageSeo({
               'A welcoming practice space for movement and recovery.'
             }}
           </p>
-
-          <p class="text-xs uppercase tracking-[0.12em] text-muted-foreground">
-            Contact the team
-          </p>
-          <div class="mt-3 space-y-3 text-sm text-foreground">
-            <div class="flex items-center gap-2">
-              <MapPinIcon class="size-4 text-primary" />
-              <span>{{ firstLocation?.address || 'Studio address' }}</span>
-            </div>
-            <div class="flex items-center gap-2">
-              <MessageCircleMoreIcon class="size-4 text-primary" />
-              <span
-                >Questions before booking? Reach out via the studio contact
-                flow.</span
-              >
-            </div>
-          </div>
         </div>
       </div>
     </div>
