@@ -5,7 +5,7 @@ import { toast } from 'vue-sonner'
 const route = useRoute()
 const slotId = computed(() => String(route.params.id))
 
-const { data, refresh } = await useFetch(
+const { data, pending, error, refresh } = await useFetch(
   `/api/practitioner/slots/${slotId.value}/bookings`
 )
 const bookings = computed(() => data.value?.bookings ?? [])
@@ -39,7 +39,21 @@ const updateStatus = async (
     </div>
 
     <div
-      v-if="!bookings.length"
+      v-if="pending"
+      class="rounded-lg border border-dashed p-6 text-sm text-muted-foreground"
+    >
+      Loading attendees...
+    </div>
+
+    <div
+      v-else-if="error"
+      class="rounded-lg border border-dashed p-6 text-sm text-destructive"
+    >
+      Failed to load attendees for this class.
+    </div>
+
+    <div
+      v-else-if="!bookings.length"
       class="rounded-lg border border-dashed p-6 text-sm text-muted-foreground"
     >
       No attendees for this class yet.
