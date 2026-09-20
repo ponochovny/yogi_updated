@@ -1,4 +1,5 @@
 import {
+  check,
   integer,
   index,
   pgEnum,
@@ -8,6 +9,7 @@ import {
   uniqueIndex,
   uuid
 } from 'drizzle-orm/pg-core'
+import { sql } from 'drizzle-orm'
 import { studios } from './studio'
 import { pricingOptions } from './offering'
 import { user } from './auth-schema'
@@ -90,35 +92,51 @@ export const transactions = pgTable(
     ).on(table.userId, table.idempotencyKey),
     providerTransactionIdUnique: uniqueIndex(
       'transactions_provider_transaction_id_unique'
-    ).on(table.providerTransactionId),
+    )
+      .on(table.providerTransactionId)
+      .where(sql`provider_transaction_id is not null`),
     userIdStatusIndex: index('transactions_user_id_status_idx').on(
       table.userId,
       table.status
+    ),
+    statusIndex: index('transactions_status_idx').on(table.status),
+    amountNonNegative: check(
+      'transactions_amount_non_negative',
+      sql`${table.amount} >= 0`
     )
   })
 )
 
-export const userPasses = pgTable('user_passes', {
-  id: uuid('id').defaultRandom().primaryKey(),
-  userId: text('user_id')
-    .notNull()
-    .references(() => user.id, { onDelete: 'cascade' }),
-  studioId: uuid('studio_id')
-    .notNull()
-    .references(() => studios.id, { onDelete: 'cascade' }),
+export const userPasses = pgTable(
+  'user_passes',
+  {
+    id: uuid('id').defaultRandom().primaryKey(),
+    userId: text('user_id')
+      .notNull()
+      .references(() => user.id, { onDelete: 'cascade' }),
+    studioId: uuid('studio_id')
+      .notNull()
+      .references(() => studios.id, { onDelete: 'cascade' }),
 
-  pricingOptionId: uuid('pricing_option_id')
-    .notNull()
-    .references(() => pricingOptions.id),
+    pricingOptionId: uuid('pricing_option_id')
+      .notNull()
+      .references(() => pricingOptions.id),
 
-  transactionId: uuid('transaction_id').references(() => transactions.id), // Link to the transaction that paid for this pass
+    transactionId: uuid('transaction_id').references(() => transactions.id), // Link to the transaction that paid for this pass
 
-  status: passStatusEnum('status').default(UserPassStatus.ACTIVE).notNull(),
+    status: passStatusEnum('status').default(UserPassStatus.ACTIVE).notNull(),
 
-  remainingCredits: integer('remaining_credits'), // Null = unlimited, number = remaining sessions
-  validFrom: timestamp('valid_from', { withTimezone: true }).notNull(),
-  validUntil: timestamp('valid_until', { withTimezone: true }).notNull(),
+    remainingCredits: integer('remaining_credits'), // Null = unlimited, number = remaining sessions
+    validFrom: timestamp('valid_from', { withTimezone: true }).notNull(),
+    validUntil: timestamp('valid_until', { withTimezone: true }).notNull(),
 
-  createdAt: timestamp('created_at').defaultNow().notNull(),
-  updatedAt: timestamp('updated_at').defaultNow().notNull()
-})
+    createdAt: timestamp('created_at').defaultNow().notNull(),
+    updatedAt: timestamp('updated_at').defaultNow().notNull()
+  },
+  table => ({
+    remainingCreditsNonNegative: check(
+      'user_passes_remaining_credits_non_negative',
+      sql`${table.remainingCredits} is null or ${table.remainingCredits} >= 0`
+    )
+  })
+)

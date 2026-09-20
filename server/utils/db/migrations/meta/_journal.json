@@ -57,6 +57,13 @@
       "when": 1789944190716,
       "tag": "0007_sharp_the_call",
       "breakpoints": true
+    },
+    {
+      "idx": 8,
+      "version": "7",
+      "when": 1789945662787,
+      "tag": "0008_soft_chamber",
+      "breakpoints": true
     }
   ]
 }
