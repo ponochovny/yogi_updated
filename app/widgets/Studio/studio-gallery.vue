@@ -31,6 +31,7 @@ const activeIdx = ref(0)
     <button
       v-if="gallery && gallery.length > 1"
       type="button"
+      aria-label="Previous image"
       class="absolute top-1/2 left-4 -translate-y-1/2 h-8 w-8 rounded-full bg-white/80 p-1 text-black shadow-md hover:bg-white flex items-center justify-center"
       @click="
         activeIdx =
@@ -42,6 +43,7 @@ const activeIdx = ref(0)
     <button
       v-if="gallery && gallery.length > 1"
       type="button"
+      aria-label="Next image"
       class="absolute top-1/2 right-4 -translate-y-1/2 rotate-180 h-8 w-8 rounded-full bg-white/80 p-1 text-black shadow-md hover:bg-white flex items-center justify-center"
       @click="activeIdx = (activeIdx + 1) % (gallery?.length || 1)"
     >
