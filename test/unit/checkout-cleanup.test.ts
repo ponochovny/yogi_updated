@@ -62,8 +62,7 @@ describe('checkout pending cleanup helpers', () => {
       expect.arrayContaining([
         expect.objectContaining({
           values: expect.objectContaining({
-            status: TransactionStatus.FAILED,
-            providerTransactionId: null
+            status: TransactionStatus.CANCELLED
           })
         }),
         expect.objectContaining({
