@@ -14,6 +14,7 @@ import {
 } from '../../db/schema/payment'
 import { globalCurrencies } from '../../db/schema/global'
 import { PaymentMetadataSchema } from '../../../app/entities/payment/schema'
+import { priceOptionsType } from '../../../app/entities/membership/schema'
 
 export const PENDING_CHECKOUT_TTL_MS = 15 * 60 * 1000
 type Database = ReturnType<typeof useDb>
@@ -69,6 +70,7 @@ export async function createCheckoutSession(
             name: pricingOptions.name,
             description: pricingOptions.description,
             price: pricingOptions.price,
+            type: pricingOptions.type,
             isActive: pricingOptions.isActive,
             currency: studios.currency
           })
@@ -76,7 +78,11 @@ export async function createCheckoutSession(
           .innerJoin(studios, eq(pricingOptions.studioId, studios.id))
           .where(eq(pricingOptions.id, input.pricingOptionId))
           .limit(1)
-        if (!pricing || !pricing.isActive)
+        if (
+          !pricing ||
+          !pricing.isActive ||
+          pricing.type === priceOptionsType.DROP_IN
+        )
           throw createError({
             statusCode: 404,
             message: 'Pricing option not found or inactive'
@@ -230,7 +236,7 @@ export async function fulfillCheckoutPayment(
 
 export async function cancelCheckout(db: Database, transactionId: string) {
   const cancelled = await db.transaction(async tx => {
-    await tx
+    const [cancelledTransaction] = await tx
       .update(transactions)
       .set({ status: TransactionStatus.CANCELLED, updatedAt: new Date() })
       .where(
@@ -239,6 +245,10 @@ export async function cancelCheckout(db: Database, transactionId: string) {
           eq(transactions.status, TransactionStatus.PENDING)
         )
       )
+      .returning({ id: transactions.id })
+
+    if (!cancelledTransaction) return false
+
     await tx
       .update(bookings)
       .set({ status: 'CANCELLED', updatedAt: new Date() })
@@ -319,20 +329,36 @@ export async function handleStripeWebhook(db: Database, event: Stripe.Event) {
       | Stripe.PaymentIntent
     const transactionId = payment.metadata?.transactionId
     if (!transactionId) return
-    await db
-      .update(transactions)
-      .set({
-        status: TransactionStatus.FAILED,
-        failureReason: 'The payment provider reported that the payment failed.',
-        providerTransactionId: payment.id,
-        updatedAt: new Date()
-      })
-      .where(
-        and(
-          eq(transactions.id, transactionId),
-          eq(transactions.status, TransactionStatus.PENDING)
+    await db.transaction(async tx => {
+      const [failedTransaction] = await tx
+        .update(transactions)
+        .set({
+          status: TransactionStatus.FAILED,
+          failureReason:
+            'The payment provider reported that the payment failed.',
+          providerTransactionId: payment.id,
+          updatedAt: new Date()
+        })
+        .where(
+          and(
+            eq(transactions.id, transactionId),
+            eq(transactions.status, TransactionStatus.PENDING)
+          )
         )
-      )
+        .returning({ id: transactions.id })
+
+      if (!failedTransaction) return
+
+      await tx
+        .update(bookings)
+        .set({ status: 'CANCELLED', updatedAt: new Date() })
+        .where(
+          and(
+            eq(bookings.transactionId, transactionId),
+            eq(bookings.status, 'PENDING')
+          )
+        )
+    })
     return
   }
 
