@@ -1,6 +1,5 @@
 import { and, eq } from 'drizzle-orm'
-import { studioPractitioners } from '~~/server/db/schema/studio'
-import { studios } from '~~/server/db/schema/studio'
+import { studioPractitioners, studios } from '~~/server/db/schema/studio'
 import { user } from '~~/server/db/schema/auth-schema'
 import { userRoles } from '~~/server/auth/config'
 

@@ -1,6 +1,5 @@
 import { and, eq, ilike, or } from 'drizzle-orm'
 import { user } from '~~/server/db/schema/auth-schema'
-import { studios } from '~~/server/db/schema/studio'
 import { userRoles } from '~~/server/auth/config'
 import { transactions } from '~~/server/db/schema/payment'
 

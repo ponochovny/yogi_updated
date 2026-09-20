@@ -1,7 +1,7 @@
 import { and, eq, sql } from 'drizzle-orm'
 import { bookings } from '~~/server/db/schema/booking'
 import { offeringSlots, offerings } from '~~/server/db/schema/offering'
-import { studios, studioPractitioners } from '~~/server/db/schema/studio'
+import { studioPractitioners } from '~~/server/db/schema/studio'
 import { user } from '~~/server/db/schema/auth-schema'
 import { userRoles } from '~~/server/auth/config'
 
