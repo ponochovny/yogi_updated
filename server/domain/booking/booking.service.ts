@@ -1,4 +1,4 @@
-import { and, eq, inArray, sql } from 'drizzle-orm'
+import { and, eq, gte, inArray, isNull, lte, or, sql } from 'drizzle-orm'
 import { BookingStatus } from '../../../app/entities/booking/schema'
 import { priceOptionsType } from '../../../app/entities/membership/schema'
 import {
@@ -75,14 +75,48 @@ export async function createBooking(db: Database, input: CreateBookingInput) {
         )
         .limit(1)
 
-      if (existingTransaction) {
+      if (
+        existingTransaction &&
+        (existingTransaction.status === TransactionStatus.PENDING ||
+          existingTransaction.status === TransactionStatus.SUCCESS)
+      ) {
         const [existingBooking] = await tx
           .select()
           .from(bookings)
-          .where(eq(bookings.transactionId, existingTransaction.id))
+          .where(
+            and(
+              eq(bookings.transactionId, existingTransaction.id),
+              eq(bookings.slotId, input.slotId),
+              inArray(bookings.status, [
+                BookingStatus.PENDING,
+                BookingStatus.CONFIRMED,
+                BookingStatus.ATTENDED,
+                BookingStatus.NO_SHOW
+              ])
+            )
+          )
           .limit(1)
-        if (existingBooking) {
-          return { booking: existingBooking, transaction: existingTransaction }
+
+        if (existingBooking && input.pricingOptionId) {
+          const [pricing] = await tx
+            .select({
+              studioId: pricingOptions.studioId,
+              price: pricingOptions.price
+            })
+            .from(pricingOptions)
+            .where(eq(pricingOptions.id, input.pricingOptionId))
+            .limit(1)
+
+          if (
+            pricing &&
+            pricing.studioId === existingTransaction.studioId &&
+            pricing.price === existingTransaction.amount
+          ) {
+            return {
+              booking: existingBooking,
+              transaction: existingTransaction
+            }
+          }
         }
       }
     }
@@ -109,8 +143,14 @@ export async function createBooking(db: Database, input: CreateBookingInput) {
     }
 
     const [offering] = await tx
-      .select({ capacity: offerings.capacity, studioId: offerings.studioId })
+      .select({
+        capacity: offerings.capacity,
+        studioId: offerings.studioId,
+        categories: offerings.categories,
+        currency: studios.currency
+      })
       .from(offerings)
+      .innerJoin(studios, eq(offerings.studioId, studios.id))
       .where(eq(offerings.id, slot.offeringId))
       .limit(1)
     if (!offering)
@@ -165,20 +205,50 @@ export async function createBooking(db: Database, input: CreateBookingInput) {
       })
 
     if (input.userPassId) {
+      const now = new Date()
       const [pass] = await tx
-        .select()
+        .select({
+          id: userPasses.id,
+          status: userPasses.status,
+          remainingCredits: userPasses.remainingCredits,
+          validUntil: userPasses.validUntil
+        })
         .from(userPasses)
+        .innerJoin(
+          pricingOptions,
+          eq(userPasses.pricingOptionId, pricingOptions.id)
+        )
+        .innerJoin(offerings, eq(pricingOptions.studioId, offerings.studioId))
         .where(
           and(
             eq(userPasses.id, input.userPassId),
-            eq(userPasses.userId, input.userId)
+            eq(userPasses.userId, input.userId),
+            eq(userPasses.studioId, offering.studioId),
+            eq(pricingOptions.studioId, offering.studioId),
+            eq(offerings.id, slot.offeringId),
+            or(
+              isNull(pricingOptions.offeringId),
+              eq(pricingOptions.offeringId, slot.offeringId)
+            ),
+            or(
+              isNull(pricingOptions.applicableCategoryIds),
+              sql`cardinality(${pricingOptions.applicableCategoryIds}) = 0`,
+              sql`${offerings.categories} && ${pricingOptions.applicableCategoryIds}`
+            ),
+            eq(userPasses.status, UserPassStatus.ACTIVE),
+            lte(userPasses.validFrom, now),
+            gte(userPasses.validUntil, now),
+            or(
+              sql`${userPasses.remainingCredits} > 0`,
+              isNull(userPasses.remainingCredits)
+            )
           )
         )
         .for('update')
       if (
         !pass ||
         pass.status !== UserPassStatus.ACTIVE ||
-        pass.validUntil <= new Date()
+        pass.validUntil <= now
       ) {
         throw createError({
           statusCode: 400,
@@ -262,7 +332,7 @@ export async function createBooking(db: Database, input: CreateBookingInput) {
         userId: input.userId,
         studioId: pricing.studioId,
         amount: pricing.price,
-        currency: 'USD',
+        currency: offering.currency,
         provider: isFree
           ? TransactionProvider.FREE
           : mode === 'STRIPE'
